@@ -1,0 +1,12 @@
+--- configure.in.orig	2011-05-21 04:15:51.000000000 +0000
++++ configure.in	2011-05-21 04:17:11.000000000 +0000
+@@ -4656,6 +4656,9 @@
+ 
+ dnl Setup default CPU arch for arm target
+ case "$target_cpu" in
++  armv5*)
++    MOZ_ARM_ARCH=armv5
++  ;;
+   arm*)
+     MOZ_ARM_ARCH=armv7
+   ;;
