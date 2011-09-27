@@ -1,0 +1,5 @@
+refuge (0.3.0-1) unstable; urgency=low
+
+  * Initial release of Refuge  in binary form for deb based systems
+
+ -- benoitc <benoitc@refuge.io>  Tue, 27 Sept 2009 14:47:00 +0200

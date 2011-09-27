@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# create refuge group only if it doesn't already exist
+getent group refuge >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+        groupadd refuge
+fi
+
+# create refuge user only if it doesn't already exist
+getent passwd refuge >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+        useradd -g refuge -d /opt/refuge refuge
+        usermod -c "refuge server" refuge
+fi
+

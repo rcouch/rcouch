@@ -1,0 +1,10 @@
+etc/init.d
+etc/refuge
+etc/logrotate.d
+usr/lib/refuge
+usr/sbin
+usr/share/refuge
+var/run/refuge
+var/lib/refuge
+var/log/refuge
+var/log/refuge/sasl

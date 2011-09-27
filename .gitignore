@@ -17,6 +17,7 @@ build-aux
 .DS_Store
 *.dSYM
 *.sw*
+*.gz
 
 # relase
 rel/refuge
@@ -35,3 +36,5 @@ apps/couch/share/server/main-coffee.js
 # other
 deps
 ebin
+distdir
+package/osxbuild
