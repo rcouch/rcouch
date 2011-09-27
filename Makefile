@@ -1,5 +1,5 @@
 REPO=refuge
-REFUGE_TAG=	$(shell git describe --tags)
+REFUGE_TAG=	$(shell git describe --tags --always)
 REVISION?=	$(shell echo $(REFUGE_TAG) | sed -e 's/^$(REPO)-//')
 PKG_VERSION?=	$(shell echo $(REVISION) | tr - .)
 

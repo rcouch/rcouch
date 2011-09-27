@@ -129,9 +129,7 @@ stop() ->
 
 config_change("daemons", _) ->
     supervisor:terminate_child(couch_server_sup, couch_secondary_services),
-    supervisor:restart_child(couch_server_sup, couch_secondary_services);
-config_change("couchdb", "util_driver_dir") ->
-    init:restart().
+    supervisor:restart_child(couch_server_sup, couch_secondary_services).
 
 init(ChildSpecs) ->
     {ok, ChildSpecs}.

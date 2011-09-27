@@ -40,14 +40,10 @@ ifeq ($(USE_STATIC_ICU), 1)
 			 $(STATICLIBS)/icu/lib/libicudata.a
 endif
 
-COUCH_EJSON_COMPARE_FILES= \
-		c_src/couch_ejson_compare/erl_nif_compat.h \
-		c_src/couch_ejson_compare/couch_ejson_compare.c
-
 all: compile 
 	@install couchspawnkillable/couchspawnkillable.sh priv/couchspawnkillable
 
-compile: couchjs js icu
+compile: couchjs js collate
 
 clean:
 	@rm -f c_src/obj/*.o couchjs
@@ -76,15 +72,7 @@ $(COFFEE_FILE): $(JS_FILE_COMPONENTS) $(COFFEE_FILE_COMPONENTS_LAST)
 	@echo >> $@
 	@cat $(JS_FILE_COMPONENTS) $(COFFEE_FILE_COMPONENTS_LAST) >> $@
 
-icu: priv/couch_icu_driver.so
+collate: priv/couch_collate.so
 
-priv/couch_icu_driver.so: c_src/icu_driver/couch_icu_driver.c
-	@$(GCC) $(ICU_CFLAGS) $^ $(ICU_LIBS) -o $@ 
-	
-nifs: couch_ejson_compare
-
-couch_ejson_compare: priv/couch_ejson_compare.so
-
-priv/couch_ejson_compare.so: $(COUCH_EJSON_COMPARE_FILES)
-	@$(GCC) $(ICU_CFLAGS) $(ICU_LIBS) -o priv/couch_ejson_compare.so -fPIC c_src/couch_ejson_compare/couch_ejson_compare.c
-
+priv/couch_collate.so: c_src/couch_collate/couch_collate.c
+	@$(GCC) $(ICU_CFLAGS) $^ $(ICU_LIBS) -o $@

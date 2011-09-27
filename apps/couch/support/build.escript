@@ -37,10 +37,10 @@ build_darwin() ->
     
     %% make couchjs, icu driver and nifs
     MakeArgs = case is_arch("R14") of
-        true -> " all nifs";
+        true -> " all";
         false -> ""
     end,
-    io:format("==> couchjs, icu driver and nifs (compile)~n", []),
+    io:format("==> couchjs, couch_collate (compile)~n", []),
     sh("make -f c_src/Makefile.osx" ++ MakeArgs, Env),
     erlang:halt(0).
 
@@ -54,10 +54,10 @@ build_unix() ->
     
     %% make couchjs, icu driver and nifs
     MakeArgs = case is_arch("R14") of
-        true -> " all nifs";
+        true -> " all";
         false -> ""
     end,
-    io:format("==> couchjs, icu driver and nifs (compile)~n", []),
+    io:format("==> couchjs, couch_collate (compile)~n", []),
     sh("make -f c_src/Makefile.unix" ++ MakeArgs, Env),
     erlang:halt(0).
 
@@ -65,7 +65,7 @@ clean_darwin() ->
     Env = setup_env(),
 
     %% clean couchjs, icu driver and nifs
-    io:format("==> couchjs, icu driver and nifs (clean)~n", []),
+    io:format("==> couchjs, couch_collate (clean)~n", []),
     io:format("[INFO] To clean static libs run the command" ++
         " './contrib/build_libs.sh clean' .~n", []),
 
@@ -77,7 +77,7 @@ clean_unix() ->
     Env = setup_env(),
 
     %% clean couchjs, icu driver and nifs
-    io:format("==> couchjs, icu driver and nifs (clean)~n", []),
+    io:format("==> couchjs, couch_collate (clean)~n", []),
     io:format("[INFO] To clean static libs run the command" ++
         " './support/build_libs.sh clean' .~n", []),
 

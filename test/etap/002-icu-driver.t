@@ -14,12 +14,7 @@
 main(_) ->
     test_util:init_code_path(),
     couch_config:start_link(test_util:config_files()),
-    etap:plan(3),
-    etap:is(
-        element(1, couch_drv:start_link()),
-        ok,
-        "Started couch_icu_driver."
-    ),
+    etap:plan(2),
     etap:is(
         couch_util:collate(<<"foo">>, <<"bar">>),
         1,

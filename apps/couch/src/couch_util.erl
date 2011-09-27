@@ -277,33 +277,16 @@ implode([H], Sep, Acc) ->
 implode([H|T], Sep, Acc) ->
     implode(T, Sep, [Sep,H|Acc]).
 
-
-drv_port() ->
-    case get(couch_drv_port) of
-    undefined ->
-        Port = open_port({spawn, "couch_icu_driver"}, []),
-        put(couch_drv_port, Port),
-        Port;
-    Port ->
-        Port
-    end.
-
+%% @doc compare 2 string, result is -1 for lt, 0 for eq and 1 for gt.
 collate(A, B) ->
     collate(A, B, []).
 
 collate(A, B, Options) when is_binary(A), is_binary(B) ->
-    Operation =
-    case lists:member(nocase, Options) of
+    HasNoCase = case lists:member(nocase, Options) of
         true -> 1; % Case insensitive
         false -> 0 % Case sensitive
     end,
-    SizeA = byte_size(A),
-    SizeB = byte_size(B),
-    Bin = <<SizeA:32/native, A/binary, SizeB:32/native, B/binary>>,
-    [Result] = erlang:port_control(drv_port(), Operation, Bin),
-    % Result is 0 for lt, 1 for eq and 2 for gt. Subtract 1 to return the
-    % expected typical -1, 0, 1
-    Result - 1.
+    couch_collate:collate(A, B, HasNoCase).
 
 should_flush() ->
     should_flush(?FLUSH_MAX_MEM).

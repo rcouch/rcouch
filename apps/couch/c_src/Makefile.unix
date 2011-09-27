@@ -31,11 +31,6 @@ COFFEE_FILE= share/server/main-coffee.js
 COFFEE_FILE_COMPONENTS_LAST = share/server/coffee-script.js \
 							  share/server/loop.js
 
-COUCH_EJSON_COMPARE_FILES= \
-		c_src/couch_ejson_compare/erl_nif_compat.h \
-		c_src/couch_ejson_compare/couch_ejson_compare.c
-
-
 ICU_CFLAGS=$(shell icu-config --cflags 2>/dev/null) $(DRV_CFLAGS) 
 ICU_LIBS=$(shell icu-config --ldflags 2>/dev/null) $(DRV_LDFLAGS) 
 
@@ -50,7 +45,7 @@ endif
 all: compile 
 	@install couchspawnkillable/couchspawnkillable.sh priv/couchspawnkillable
 
-compile: couchjs js icu
+compile: couchjs js collate
 
 clean:
 	@rm -f c_src/obj/*.o couchjs
@@ -79,14 +74,7 @@ $(COFFEE_FILE): $(JS_FILE_COMPONENTS) $(COFFEE_FILE_COMPONENTS_LAST)
 	@echo >> $@
 	@cat $(JS_FILE_COMPONENTS) $(COFFEE_FILE_COMPONENTS_LAST) >> $@
 
-icu: priv/couch_icu_driver.so
+collate: priv/couch_collate.so
 
-priv/couch_icu_driver.so: c_src/icu_driver/couch_icu_driver.c
+priv/couch_collate.so: c_src/couch_collate/couch_collate.c
 	@$(CC) $(ICU_CFLAGS) -D_BSD_SOURCE $^ $(ICU_LIBS) -o $@
-
-nifs: couch_ejson_compare
-
-couch_ejson_compare: priv/couch_ejson_compare.so
-
-priv/couch_ejson_compare.so: $(COUCH_EJSON_COMPARE_FILES)
-	@$(CC) $(ICU_CFLAGS)  c_src/couch_ejson_compare/couch_ejson_compare.c $(ICU_LIBS) -o priv/couch_ejson_compare.so
