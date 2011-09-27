@@ -1,0 +1,11 @@
+{application, refuge,
+ [
+  {description, "Bogus refuge application"},
+  {vsn, git},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
