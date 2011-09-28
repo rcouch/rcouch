@@ -35,7 +35,7 @@ ICU_CFLAGS=$(shell icu-config --cflags 2>/dev/null) $(DRV_CFLAGS)
 ICU_LIBS=$(shell icu-config --ldflags 2>/dev/null) $(DRV_LDFLAGS) 
 
 ifeq ($(USE_STATIC_ICU), 1)
-	ICU_CFLAGS=$(DRV_CFLAGS) -I$(STATICLIBS)
+	ICU_CFLAGS=$(DRV_CFLAGS) -I$(STATICLIBS)/icu/include
 	ICU_LIBS=-lstdc++ -fPIC $(DRV_LDFLAGS) \
 			 $(STATICLIBS)/icu/lib/libicui18n.a \
 			 $(STATICLIBS)/icu/lib/libicuuc.a \
