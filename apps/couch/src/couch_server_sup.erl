@@ -55,13 +55,15 @@ start_server(IniFiles) ->
 
     LogLevel = couch_config:get("log", "level", "info"),
     % announce startup
-    io:format("Apache CouchDB ~s (LogLevel=~s) is starting.~n", [
-        couch:version(),
+
+    io:format("couch core ~s is starting ~n", [couch:version()]),
+    io:format("refuge ~s (LogLevel=~s) is starting.~n", [
+        refuge_common:get_version(),
         LogLevel
     ]),
     case LogLevel of
     "debug" ->
-        io:format("Configuration Settings ~p:~n", [IniFiles]),
+        io:format("configuration settings ~p:~n", [IniFiles]),
         [io:format("  [~s] ~s=~p~n", [Module, Variable, Value])
             || {{Module, Variable}, Value} <- couch_config:all()];
     _ -> ok
@@ -103,12 +105,12 @@ start_server(IniFiles) ->
     unlink(ConfigPid),
 
     Ip = couch_config:get("httpd", "bind_address"),
-    io:format("Apache CouchDB has started. Time to relax.~n"),
+    io:format("Refuge has started. Time to relax.~n"),
     Uris = [get_uri(Name, Ip) || Name <- [couch_httpd, https]],
     [begin
         case Uri of
             undefined -> ok;
-            Uri -> ?LOG_INFO("Apache CouchDB has started on ~s", [Uri])
+            Uri -> ?LOG_INFO("couch_core has started on ~s", [Uri])
         end
     end
     || Uri <- Uris],
