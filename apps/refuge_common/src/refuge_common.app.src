@@ -1,7 +1,7 @@
-{application, refuge,
+{application, refuge_common,
  [
-  {description, "dummy refuge application"},
-  {vsn, git},
+  {description, "common refuge modules"},
+  {vsn, "0.1"},
   {registered, []},
   {applications, [
                   kernel,
