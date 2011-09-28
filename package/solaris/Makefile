@@ -1,5 +1,5 @@
 # requires GNU make
-PKG		 = $(APP)
+PKG		 = REFUGEIO$(APP)
 # possible ARCH values are i386, sparc, all
 ARCH		 = $(shell uname -p)
 SOLARIS_VER	?= $(shell echo "$(KERNEL)" | sed -e 's/^5\.//')
