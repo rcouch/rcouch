@@ -84,7 +84,35 @@ case "$1" in
         echo "WAIT_FOR_ERLANG to the number of seconds to wait."
         exit 1
         ;;
+    start_front)
+        # Make sure there is not already a node running
+        RES=`$NODETOOL ping`
+        if [ "$RES" = "pong" ]; then
+            echo "Node is already running!"
+            exit 1
+        fi
 
+
+        # Setup beam-required vars
+        ROOTDIR=$RUNNER_BASE_DIR
+        BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
+        EMU=beam
+        PROGNAME=`echo $0 | sed 's/.*\\///'`
+        CMD="$BINDIR/erlexec -boot
+        $RUNNER_BASE_DIR/releases/$APP_VSN/$SCRIPT -Bd -noinput \
+            -embedded -config $RUNNER_ETC_DIR/app.config \
+            -args_file $RUNNER_ETC_DIR/vm.args -- ${1+"$@"}"
+        export EMU
+        export ROOTDIR
+        export BINDIR
+        export PROGNAME
+
+        # Log the startup
+        logger -t "$SCRIPT[$$]" "Starting up"
+
+        # Start the VM
+        exec $CMD
+        ;;
     stop)
         # Wait for the node to completely stop...
         case `uname -s` in
@@ -195,7 +223,7 @@ case "$1" in
         ;;
 
     *)
-        echo "Usage: $SCRIPT {start|stop|restart|reboot|ping|console|console_clean|attach}"
+        echo "Usage: $SCRIPT {start|start_front|stop|restart|reboot|ping|console|console_clean|attach}"
         exit 1
         ;;
 esac
