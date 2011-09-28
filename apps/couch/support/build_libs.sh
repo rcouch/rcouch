@@ -39,7 +39,7 @@ JS_INCDIR=$STATICLIBS/js/include
 # icu sources
 ICU_VER=4.4.2
 ICU_DISTNAME=icu4c-4_4_2-src.tgz
-ICU_SITE=http://download.icu-project.org/files/icu4c/$ICU_VER
+ICU_SITE=http://rcouch.refuge.io/dl/libs
 ICUDIR=$STATICLIBS/icu_src/icu
 
 
