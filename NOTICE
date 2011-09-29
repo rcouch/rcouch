@@ -1,0 +1,17 @@
+refuge
+------
+
+2011 (c) Benoît Chesneau <benoitc@e-engura.org>
+2011 (c) Nicolas R Dufour <nrdufour@gmail.com>
+
+refuge is released under the Apache 2 license. See the LICENSE file for
+the complete license.
+
+third parties attributions
+--------------------------
+
+- packages/*
+    under Apache 2 license
+    2010 (c) Basho Technologies
+
+
