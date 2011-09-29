@@ -6,7 +6,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: A distributed key value store
-# Description:       Basho Technologies's refuge distributed key value store
+# Description:       refuge decentralized data platform 
 ### END INIT INFO
 
 # Original Author: Vladimir Osintsev <osintsev@gmail.com>
