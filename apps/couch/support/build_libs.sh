@@ -25,13 +25,13 @@ DISTDIR=$STATICLIBS/dists
 # nspr sources
 NSPR_VER=4.8.8
 NSPR_DISTNAME=nspr-$NSPR_VER.tar.gz
-NSPR_SITE=ftp://ftp.mozilla.org/pub/nspr/releases/v$NSPR_VER/src
+NSPR_SITE=http://dl.refuge.io
 
 # spidermonkey js sources
 JS_VER=185-1.0.0
 JS_REALVER=1.8.5
 JS_DISTNAME=js$JS_VER.tar.gz
-JS_SITE=ftp://ftp.mozilla.org/pub/js
+JS_SITE=http://dl.refuge.io
 JSDIR=$STATICLIBS/js-$JS_REALVER
 JS_LIBDIR=$STATICLIBS/js/lib
 JS_INCDIR=$STATICLIBS/js/include
@@ -39,7 +39,7 @@ JS_INCDIR=$STATICLIBS/js/include
 # icu sources
 ICU_VER=4.4.2
 ICU_DISTNAME=icu4c-4_4_2-src.tgz
-ICU_SITE=http://rcouch.refuge.io/dl/libs
+ICU_SITE=http://dl.refuge.io
 ICUDIR=$STATICLIBS/icu_src/icu
 
 
@@ -80,7 +80,7 @@ fetch()
     TARGET=$DISTDIR/$1
     if ! test -f $TARGET; then
         echo "==> Fetch $1 to $TARGET"
-        $CURLBIN $2/$1 -o $TARGET
+        $CURLBIN --progress-bar -L $2/$1 -o $TARGET
     fi
 }
 
