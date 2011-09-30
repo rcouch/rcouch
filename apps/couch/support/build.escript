@@ -67,7 +67,7 @@ clean_darwin() ->
     %% clean couchjs, icu driver and nifs
     io:format("==> couchjs, couch_collate (clean)~n", []),
     io:format("[INFO] To clean static libs run the command" ++
-        " './contrib/build_libs.sh clean' .~n", []),
+        "'cd " ++ rootdir() ++ " && ./support/build_libs.sh clean' .~n", []),
 
     sh("make -f c_src/Makefile.osx clean", Env),
     erlang:halt(0).
@@ -79,7 +79,7 @@ clean_unix() ->
     %% clean couchjs, icu driver and nifs
     io:format("==> couchjs, couch_collate (clean)~n", []),
     io:format("[INFO] To clean static libs run the command" ++
-        " './support/build_libs.sh clean' .~n", []),
+        "'cd " ++ rootdir() ++ " && ./support/build_libs.sh clean' .~n", []),
 
     sh("make -f c_src/Makefile.unix clean", Env),
     erlang:halt(0).
