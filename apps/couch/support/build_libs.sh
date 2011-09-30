@@ -174,7 +174,6 @@ clean_icu()
 {
     rm -rf $STATICLIBS/icu*
     rm -f $DISTDIR/$ICU_DISTNAME
-    rm -f $DISTDIR/$ICUDATA_DISTNAME
 }
 
 build_icu()
