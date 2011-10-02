@@ -29,8 +29,8 @@ COFFEE_FILE_COMPONENTS_LAST = share/server/coffee-script.js \
 							  share/server/loop.js
 
 
-ICU_CFLAGS=$(DRV_CFLAGS) -Icontrib/osx/icu -I/usr/include -fPIC -gstabs
-ICU_LIBS= -lpthread -lm  -licui18n -licuuc -licudata -lstdc++ -L/usr/lib $(DRV_LDFLAGS) -fPIC
+ICU_CFLAGS=$(DRV_CFLAGS) -Isupport/osx/icu -I/usr/include -fPIC -gstabs
+ICU_LIBS= -lpthread -lm  -licucore -lstdc++ -L/usr/lib $(DRV_LDFLAGS) -fPIC
 
 ifeq ($(USE_STATIC_ICU), 1)
 	ICU_CFLAGS=$(DRV_CFLAGS) -I$(STATICLIBS)/icu/include -gstabs
