@@ -146,7 +146,7 @@ start_link(Name, Options) ->
             {ip, BindAddress}]]),
 
     % launch mochiweb
-    {ok, Pid} = case mochiweb_http:start(FinalOptions) of
+    {ok, Pid} = case mochiweb_http:start_link(FinalOptions) of
         {ok, MochiPid} -> 
             {ok, MochiPid};
         {error, Reason} ->
