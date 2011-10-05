@@ -306,9 +306,11 @@ do_init(#rep{options = Options, id = {BaseId, Ext}} = Rep) ->
         "~ca worker batch size of ~p~n"
         "~c~p HTTP connections~n"
         "~ca connection timeout of ~p milliseconds~n"
+        "~c~p retries per request~n"
         "~csocket options are: ~s~s",
         [BaseId ++ Ext, $\t, NumWorkers, $\t, BatchSize, $\t,
             MaxConns, $\t, get_value(connection_timeout, Options),
+            $\t, get_value(retries, Options),
             $\t, io_lib:format("~p", [get_value(socket_options, Options)]),
             case StartSeq of
             ?LOWEST_SEQ ->
@@ -385,6 +387,11 @@ handle_info({'EXIT', Pid, Reason}, #rep_state{workers = Workers} = State) ->
 handle_call(get_details, _From, #rep_state{rep_details = Rep} = State) ->
     {reply, {ok, Rep}, State};
 
+handle_call({add_stats, Stats}, From, State) ->
+    gen_server:reply(From, ok),
+    NewStats = couch_replicator_utils:sum_stats(State#rep_state.stats, Stats),
+    {noreply, State#rep_state{stats = NewStats}};
+
 handle_call({report_seq_done, Seq, StatsInc}, From,
     #rep_state{seqs_in_progress = SeqsInProgress, highest_seq_done = HighestDone,
         current_through_seq = ThroughSeq, stats = Stats} = State) ->
@@ -410,7 +417,7 @@ handle_call({report_seq_done, Seq, StatsInc}, From,
             NewHighestDone, SeqsInProgress, NewSeqsInProgress]),
     SourceCurSeq = source_cur_seq(State),
     NewState = State#rep_state{
-        stats = sum_stats([Stats, StatsInc]),
+        stats = couch_replicator_utils:sum_stats(Stats, StatsInc),
         current_through_seq = NewThroughSeq,
         seqs_in_progress = NewSeqsInProgress,
         highest_seq_done = NewHighestDone,
@@ -886,24 +893,6 @@ has_session_id(SessionId, [{Props} | Rest]) ->
     _Else ->
         has_session_id(SessionId, Rest)
     end.
-
-
-sum_stats([Stats1 | RestStats]) ->
-    lists:foldl(
-        fun(Stats, Acc) ->
-            #rep_stats{
-                missing_checked = Stats#rep_stats.missing_checked +
-                    Acc#rep_stats.missing_checked,
-                missing_found = Stats#rep_stats.missing_found +
-                    Acc#rep_stats.missing_found,
-                docs_read = Stats#rep_stats.docs_read + Acc#rep_stats.docs_read,
-                docs_written = Stats#rep_stats.docs_written +
-                    Acc#rep_stats.docs_written,
-                doc_write_failures = Stats#rep_stats.doc_write_failures +
-                    Acc#rep_stats.doc_write_failures
-            }
-        end,
-        Stats1, RestStats).
 
 
 db_monitor(#db{} = Db) ->

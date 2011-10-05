@@ -223,9 +223,12 @@ code_change(_OldVsn, State, _Extra) ->
 
 changes_feed_loop() ->
     {ok, RepDb} = ensure_rep_db_exists(),
+    RepDbName = couch_db:name(RepDb),
+    couch_db:close(RepDb),
     Server = self(),
     Pid = spawn_link(
         fun() ->
+            {ok, Db} = couch_db:open_int(RepDbName, [sys_db]),
             ChangesFeedFun = couch_changes:handle_changes(
                 #changes_args{
                     include_docs = true,
@@ -234,7 +237,7 @@ changes_feed_loop() ->
                     db_open_options = [sys_db]
                 },
                 {json_req, null},
-                RepDb
+                Db
             ),
             ChangesFeedFun(
                 fun({change, Change, _}, _) ->
@@ -248,11 +251,11 @@ changes_feed_loop() ->
                 (_, _) ->
                     ok
                 end
-            )
+            ),
+            couch_db:close(Db)
         end
     ),
-    couch_db:close(RepDb),
-    {Pid, couch_db:name(RepDb)}.
+    {Pid, RepDbName}.
 
 
 has_valid_rep_id({Change}) ->
@@ -363,8 +366,7 @@ maybe_start_replication(State, DocId, RepDoc) ->
         true = ets:insert(?DOC_TO_REP, {DocId, RepId}),
         ?LOG_INFO("Attempting to start replication `~s` (document `~s`).",
             [pp_rep_id(RepId), DocId]),
-        Server = self(),
-        Pid = spawn_link(fun() -> start_replication(Server, Rep, 0) end),
+        Pid = spawn_link(fun() -> start_replication(Rep, 0) end),
         State#state{rep_start_pids = [Pid | State#state.rep_start_pids]};
     #rep_state{rep = #rep{doc_id = DocId}} ->
         State;
@@ -402,11 +404,11 @@ maybe_tag_rep_doc(DocId, {RepProps}, RepId) ->
     end.
 
 
-start_replication(Server, #rep{id = RepId} = Rep, Wait) ->
+start_replication(Rep, Wait) ->
     ok = timer:sleep(Wait * 1000),
     case (catch couch_replicator:async_replicate(Rep)) of
     {ok, _} ->
-        ok = gen_server:call(Server, {rep_started, RepId}, infinity);
+        ok;
     Error ->
         replication_error(Rep, Error)
     end.
@@ -470,8 +472,7 @@ maybe_retry_replication(RepState, Error, State) ->
     ?LOG_ERROR("Error in replication `~s` (triggered by document `~s`): ~s"
         "~nRestarting replication in ~p seconds.",
         [pp_rep_id(RepId), DocId, to_binary(error_reason(Error)), Wait]),
-    Server = self(),
-    Pid = spawn_link(fun() -> start_replication(Server, Rep, Wait) end),
+    Pid = spawn_link(fun() -> start_replication(Rep, Wait) end),
     State#state{rep_start_pids = [Pid | State#state.rep_start_pids]}.
 
 
