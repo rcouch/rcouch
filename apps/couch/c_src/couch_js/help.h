@@ -15,7 +15,6 @@
 
 #include <libgen.h>
 
-#include "config.h"
 
 static const char VERSION_TEMPLATE[] =
     "%s - %s\n"
@@ -48,8 +47,6 @@ static const char USAGE_TEMPLATE[] =
     "\n"
     "  -h          display a short help message and exit\n"
     "  -V          display version information and exit\n"
-    "  -H          enable %s cURL bindings (only avaiable\n"
-    "              if package was built with cURL available)\n"
     "  -S SIZE     specify that the interpreter should set the\n"
     "              the stack quota for JS contexts to SIZE bytes\n"
     "\n"
@@ -62,7 +59,7 @@ static const char USAGE_TEMPLATE[] =
             stdout,              \
             VERSION_TEMPLATE,    \
             basename,            \
-            PACKAGE_STRING)
+            "1.3.0")
 
 #define DISPLAY_VERSION couch_version(BASENAME)
 
@@ -73,9 +70,8 @@ static const char USAGE_TEMPLATE[] =
             USAGE_TEMPLATE,                     \
             basename,                           \
             basename,                           \
-            PACKAGE_NAME,                       \
-            basename,                           \
-            PACKAGE_BUGREPORT)
+            "refuge",                           \
+            "https://github.com/refuge/refuge/issues")
 
 #define DISPLAY_USAGE couch_usage(BASENAME)
 
