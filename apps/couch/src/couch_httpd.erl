@@ -928,7 +928,8 @@ negotiate_content_type1(#httpd{mochi_req=MochiReq}) ->
 
 server_header() ->
     [{"Server", "CouchDB/" ++ couch:version() ++
-                " (Erlang OTP/" ++ erlang:system_info(otp_release) ++ ")"}].
+            " Refuge/" ++ ?b2l(refuge_common:get_version()) ++
+            " (Erlang OTP/" ++ erlang:system_info(otp_release) ++ ")"}].
 
 
 -record(mp, {boundary, buffer, data_fun, callback}).
