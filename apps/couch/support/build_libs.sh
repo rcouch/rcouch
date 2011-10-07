@@ -18,7 +18,7 @@ UNZIP=`which unzip`
 TAR=`which tar`
 GNUMAKE=`which gmake`
 
-PATCHES=$CORE_TOP/contrib/patches
+PATCHES=$CORE_TOP/support/patches
 STATICLIBS=$CORE_TOP/libs
 DISTDIR=$STATICLIBS/dists
 
