@@ -79,7 +79,7 @@ case "$1" in
                 exit 0
             fi
         done
-        echo "refuge failed to start within ${WAIT_FOR_ERLANG:-15} seconds."
+        echo "rcouch failed to start within ${WAIT_FOR_ERLANG:-15} seconds."
         echo "If you want to wait longer, set the environment variable"
         echo "WAIT_FOR_ERLANG to the number of seconds to wait."
         exit 1

@@ -1,19 +1,20 @@
-refuge - Data should be yours
------------------------------
+rcouch
+------
 
-Refuge main goal is to design an opensource, free, decentralized and
-secured and eventually anonymous platform. This platform will allow to
-share, render information and exchange messages offline or online.
-Information is on each nodes.
+rcouch is a static distribution of couchdb using rebar. It is an
+extraction of the refuge code to ease the distribution of couchdb. 
+
+Based on the couchdb code it is tagged from time to time for stability
+purpose. At some point some supported branch may appear.
+
 
 
 ## Features:
 
-- Apache CouchDB 1.2x based (current trunk right now)
+- Apache CouchDB based
 - Geocouch integrated
-- dnssd support
-- upnp support (coming)
-- P2P layer (coming)
+- rebar
+- relocatable 
 - Fully opensource. All the sources are on refuge GIT repository
   (http://github.com/refuge) under Apache License 2.
 
@@ -30,14 +31,8 @@ Installation is pretty simple. Just run the command line:
 
     $ make rel
 
-and it will generate a refuge folder in rel/refuge. This release is
+and it will generate a couch folder in rel/couch. This release is
 fully relocatable, so you can put it where you want on your system.
-
-When developping on top of refuge, you could also run the command line:
-
-    $ make dev
-
-Then ./dev/dev[1,2,3]/bin/refuge
 
 
 To create package for your system run `make package` . For now we build

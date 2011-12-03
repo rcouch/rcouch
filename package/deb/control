@@ -1,14 +1,13 @@
-Source: refuge
+Source: rcouch
 Section: net
 Priority: extra
 Maintainer: Benoit Chesneau <benoitc@refuge.io>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.3
-Homepage: http://refuge.io/
+Homepage: http://refuge.io/rcouch
 
-Package: refuge
+Package: rcouch
 Architecture: any
 Depends: adduser, logrotate, ${shlibs:Depends}, ${misc:Depends}
-Description: Decentralized data platform
-    The Refuge Project aims to provide a  fully decentralized and opensource
-platform based on apacje CouchDB to share, collect and render data.  
+Description: static distribution of couchdb
+      

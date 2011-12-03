@@ -1,10 +1,10 @@
 etc/init.d
-etc/refuge
+etc/rcouch
 etc/logrotate.d
-usr/lib/refuge
+usr/lib/rcouch
 usr/sbin
-usr/share/refuge
-var/run/refuge
-var/lib/refuge
-var/log/refuge
-var/log/refuge/sasl
+usr/share/rcouch
+var/run/rcouch
+var/lib/rcouch
+var/log/rcouch
+var/log/rcouch/sasl

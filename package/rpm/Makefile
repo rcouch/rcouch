@@ -4,7 +4,7 @@ DISTRO = $(shell head -1 /etc/redhat-release| awk \
 
 build: $(PKGERDIR)/SOURCES/$(APP)-$(REVISION).tar.gz rpmbuild
 	@echo "DISTRO = $(DISTRO)"
-	@echo "RIAK_TAG = $(RIAK_TAG)"
+	@echo "RCOUCH_TAG = $(RCOUCH_TAG)"
 	@echo "REVISION = $(REVISION)"
 	@echo "RELEASE  = $(RELEASE)"
 	rpmbuild --define "_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}$(DISTRO)%%{ARCH}.rpm" \

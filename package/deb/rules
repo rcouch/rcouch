@@ -9,7 +9,7 @@
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
-package=refuge
+package=rcouch
 
 CFLAGS=
 LDFLAGS=
@@ -31,18 +31,18 @@ install: build
 	dh_testroot
 	dh_prep   --exclude ./deps/erlang_js/Makefile.orig
 	dh_installdirs
-	cp -R rel/refuge/lib debian/$(package)/usr/lib/refuge
-	cp -R rel/refuge/releases debian/$(package)/usr/lib/refuge
-	cp -R rel/refuge/erts* debian/$(package)/usr/lib/refuge
-	cp -R rel/refuge/share debian/$(package)/usr/lib/share
-	chmod 0755 debian/$(package)/usr/lib/refuge/erts*/bin/*
-	install -p -D -m 0755 rel/refuge/bin/refuge \
-		debian/$(package)/usr/sbin/refuge	
+	cp -R rel/rcouch/lib debian/$(package)/usr/lib/rcouch
+	cp -R rel/rcouch/releases debian/$(package)/usr/lib/rcouch
+	cp -R rel/rcouch/erts* debian/$(package)/usr/lib/rcouch
+	cp -R rel/rcouch/share debian/$(package)/usr/lib/share
+	chmod 0755 debian/$(package)/usr/lib/rcouch/erts*/bin/*
+	install -p -D -m 0755 rel/rcouch/bin/rcouch \
+		debian/$(package)/usr/sbin/rcouch	
 	install -m644 rel/$(package)/etc/app.config \
-		debian/$(package)/etc/refuge/app.config
+		debian/$(package)/etc/rcouch/app.config
 	install -m644 rel/$(package)/etc/vm.args \
-		debian/$(package)/etc/refuge/vm.args
-	install -m755 debian/debian_refuge_init debian/$(package)/etc/init.d/refuge
+		debian/$(package)/etc/rcouch/vm.args
+	install -m755 debian/debian_rcouch_init debian/$(package)/etc/init.d/rcouch
 
 binary-indep: install
 # We have nothing to do by default.

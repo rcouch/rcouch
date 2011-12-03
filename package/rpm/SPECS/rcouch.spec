@@ -4,13 +4,13 @@
 # --define "_version 0.9.1" --define "_release 7" \
 # --define "_revision 0.9.1-19-abcdef"
 
-Name: refuge
+Name: rcouch
 Version: %{_version}
 Release: %{_release}%{?dist}
 License: Apache License
 Group: Development/Libraries
-Source: http://github.org/downloads/refuge/refuge/%{name}-%{_revision}.tar.gz
-Source1: refuge_init
+Source: http://github.org/downloads/refuge/rcouch/%{name}-%{_revision}.tar.gz
+Source1: rcouch_init
 URL: http://refuge.io
 Vendor: The Refuge project 
 Packager: Refuge <refuge@lists.refuge.io>>
@@ -20,7 +20,7 @@ Summary: Refuge, The decentralized data platform
 %description
 Riak is a distributed data store.
 
-%define refuge_lib %{_libdir}/%{name}
+%define rcouch_lib %{_libdir}/%{name}
 %define init_script %{_sysconfdir}/init.d/%{name}
 
 %define __prelink_undo_cmd /bin/cat prelink library
@@ -29,7 +29,7 @@ Riak is a distributed data store.
 %define platform_bin_dir %{_sbindir}
 %define platform_data_dir %{_localstatedir}/lib/%{name}
 %define platform_etc_dir %{_sysconfdir}/%{name}
-%define platform_lib_dir %{refuge_lib}
+%define platform_lib_dir %{rcouch_lib}
 %define platform_log_dir %{_localstatedir}/log/%{name}
 
 %prep
@@ -53,10 +53,10 @@ cat > rel/vars.config <<EOF
 {sasl_log_dir,          ""%{platform_log_dir}/sasl"}.
 
 % vm.args
-{node,         "refuge@127.0.0.1"}.
+{node,         "rcouch@127.0.0.1"}.
 {crash_dump,   ""%{platform_log_dir}/erl_crash.dump"}.
 
-% bin/refuge*
+% bin/rcouch*
 {runner_script_dir,  "%{platform_bin_dir}"}.
 {runner_base_dir,    "%{platform_lib_dir}"}.
 {runner_etc_dir,     "%{platform_etc_dir}"}.
@@ -103,15 +103,15 @@ export QA_RPATHS=3
 
 
 %pre
-# create refuge group only if it doesn't already exist
-if ! getent group refuge >/dev/null 2>&1; then
-        groupadd -r refuge
+# create rcouch group only if it doesn't already exist
+if ! getent group rcouch >/dev/null 2>&1; then
+        groupadd -r rcocuh
 fi
 
-# create refuge user only if it doesn't already exist
-if ! getent passwd refuge >/dev/null 2>&1; then
-        useradd -r -g refuge --home %{platform_data_dir} refuge
-        usermod -c "Refuge" 
+# create rcouch user only if it doesn't already exist
+if ! getent passwd rcouch >/dev/null 2>&1; then
+        useradd -r -g rcouch --home %{platform_data_dir} rcouch
+        usermod -c "RCouch" 
 fi
 
 %post
@@ -119,7 +119,7 @@ fi
 find %{platform_lib_dir} -name "*.so" -exec chcon -t textrel_shlib_t {} \;
 
 %files
-%defattr(-,refuge,refuge)
+%defattr(-,rcouch,rcouch)
 %attr(-,root,root) %{_libdir}/*
 %dir %{platform_etc_dir}
 %config(noreplace) %{platform_etc_dir}/*

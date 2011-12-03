@@ -1,5 +1,5 @@
 #!/bin/sh
-# postrm script for refuge
+# postrm script for rcouch
 #
 # see: dh_installdeb(1)
 
@@ -20,30 +20,30 @@
 
 case "$1" in
     purge)
-        rm -f /etc/default/refuge
-        if [ -d /var/lib/refuge ]; then
-                rm -r /var/lib/refuge
+        rm -f /etc/default/rcouch
+        if [ -d /var/lib/rcouch ]; then
+                rm -r /var/lib/rcouch
         fi
-        if [ -d /var/log/refuge ]; then
-                rm -r /var/log/refuge
+        if [ -d /var/log/rcouch ]; then
+                rm -r /var/log/rcouch
         fi
-        if [ -d /var/run/refuge ]; then
-                rm -r /var/run/refuge
+        if [ -d /var/run/rcouch ]; then
+                rm -r /var/run/rcouch
         fi
-        if [ -d /etc/refuge ]; then
-                rm -r /etc/refuge
+        if [ -d /etc/rcouch ]; then
+                rm -r /etc/rcouch
         fi
-        if [ -e /usr/sbin/refuge ]; then
-                rm /usr/sbin/refuge
+        if [ -e /usr/sbin/rcouch ]; then
+                rm /usr/sbin/rcouch
         fi
-        if [ -e /etc/init.d/refuge ]; then
-                rm  /etc/init.d/refuge
+        if [ -e /etc/init.d/rcouch ]; then
+                rm  /etc/init.d/rcouch
         fi
-        if getent passwd refuge >/dev/null; then
-                deluser refuge
+        if getent passwd rcouch >/dev/null; then
+                deluser rcouch
         fi
-        if getent group refuge >/dev/null; then
-                delgroup refuge
+        if getent group rcouch >/dev/null; then
+                delgroup rcouch
         fi
     ;;
 

@@ -4,15 +4,15 @@
 %%% See the NOTICE for more information.
 
 
--module(refuge_common).
+-module(rcouch_common).
 
 -export([get_version/0]).
 
 get_version() ->
     Releases = release_handler:which_releases(),
-    Version = case [V || {"refuge", V, _, current} <- Releases] of
+    Version = case [V || {"rcouch", V, _, current} <- Releases] of
     [] ->
-        case [V || {"refuge", V, _, permanent} <- Releases] of
+        case [V || {"rcouch", V, _, permanent} <- Releases] of
         [] ->
             "dev";
         [Permanent] ->

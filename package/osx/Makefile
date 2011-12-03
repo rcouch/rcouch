@@ -6,7 +6,7 @@ build: buildrel
 	@echo "Building package $(PKGNAME)"
 	mkdir -p packages
 	cd $(BUILDDIR)/$(APP)-$(REVISION) && \
-		cp -R rel/refuge $(APP)-$(REVISION) && \
+		cp -R rel/rcouch $(APP)-$(REVISION) && \
 		tar -czf ../../packages/$(PKGNAME) $(APP)-$(REVISION)
 	cd packages && \
 		for tarfile in `ls *.gz`; do \

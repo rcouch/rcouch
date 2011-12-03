@@ -1,39 +1,39 @@
 #!/bin/bash
 #
-# refuge Distributed Data Store
+# rcouch Distributed Data Store
 #
 # chkconfig: 2345 80 30
-# description: refuge is a distrubuted data store.
+# description: rcouch is a distrubuted data store.
 # processname: beam 
-# config: /etc/refuge/app.config
-# config: /etc/refuge/vm.args
+# config: /etc/rcouch/app.config
+# config: /etc/rcouch/vm.args
 #
 
 # Source function library.
 . /etc/rc.d/init.d/functions
 
 #check for script,config, and data dirs
-[ -x /usr/sbin/refuge ] || exit 0
-[ -d /etc/refuge ] || exit 0
-[ -d /var/lib/refuge ] || exit 0
-[ -d /var/run/refuge ] || exit 0
+[ -x /usr/sbin/rcouch ] || exit 0
+[ -d /etc/rcouch ] || exit 0
+[ -d /var/lib/rcouch ] || exit 0
+[ -d /var/run/rcouch ] || exit 0
 
 RETVAL=0
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="a decentralized data platform"
-NAME=refuge
+NAME=rcouch
 DAEMON=/usr/sbin/$NAME
 
 
 start() {
-        #Check if refuge is running
+        #Check if rcouch is running
         RETVAL=`$DAEMON ping`
-        [ "$RETVAL" = "pong" ] && echo "refuge is already running" && return 1
+        [ "$RETVAL" = "pong" ] && echo "rcouch is already running" && return 1
 
 	# Start daemons.
-	echo -n $"Starting refuge: "
-	su - refuge -c "$DAEMON start" && success || failure $"$NAME start"
+	echo -n $"Starting rcouch: "
+	su - rcouch -c "$DAEMON start" && success || failure $"$NAME start"
 	RETVAL=$?
 	[ $RETVAL -eq 0 ]
         echo
@@ -42,9 +42,9 @@ start() {
 
 stop() {
         # Stop daemon.
-	echo -n $"Stopping refuge: "
-  	RETVAL=`su - refuge -c "$DAEMON ping"`
-  	[ "$RETVAL" = "pong" ] && su - refuge -c "$DAEMON stop 2>/dev/null 1>&2" 
+	echo -n $"Stopping rcouch: "
+  	RETVAL=`su - rcouch -c "$DAEMON ping"`
+  	[ "$RETVAL" = "pong" ] && su - rcouch -c "$DAEMON stop 2>/dev/null 1>&2" 
         sleep 2
         RETVAL=`pidof beam.smp`
         [ "$RETVAL" = "" ] && success && echo && return 0 || failure $"$NAME stop"
@@ -58,9 +58,9 @@ stop() {
 
 reload() {
         # Restart the VM without exiting the process
-	echo -n $"Reloading refuge: "
-  	RETVAL=`su - refuge -c "$DAEMON ping"`
-  	[ "$RETVAL" = "pong" ] && su - refuge -c "$DAEMON restart 2>/dev/null 1>&2" \
+	echo -n $"Reloading rcouch: "
+  	RETVAL=`su - rcouch -c "$DAEMON ping"`
+  	[ "$RETVAL" = "pong" ] && su - rcouch -c "$DAEMON restart 2>/dev/null 1>&2" \
         && success && echo && return 0 || failure $"$NAME restart" 
         echo
 	return $RETVAL
@@ -83,7 +83,7 @@ case "$1" in
 	reload
 	;;
   ping)
-	su - refuge -c "$DAEMON ping" || exit $?
+	su - rcouch -c "$DAEMON ping" || exit $?
         ;;
   *)
 	echo $"Usage: $0 {start|stop|reload|restart|ping}"

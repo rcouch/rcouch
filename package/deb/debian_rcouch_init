@@ -1,22 +1,22 @@
 #! /bin/bash
 ### BEGIN INIT INFO
-# Provides:          refuge
+# Provides:          rcouch
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: A distributed key value store
-# Description:       refuge decentralized data platform 
+# Description:       rcouch decentralized data platform 
 ### END INIT INFO
 
 # Original Author: Vladimir Osintsev <osintsev@gmail.com>
 # Modified for Ubuntu by: Matt Heitzenroder <mheitzenroder@gmail.com>
-# Modified for refuge by: Grant Schofield <grant@basho.com>
+# Modified for rcouch by: Grant Schofield <grant@basho.com>
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="a decentralized data platform"
-NAME=refuge
-ERTS_PATH=/usr/lib/refuge/erts-5.7.5/bin
+NAME=rcouch
+ERTS_PATH=/usr/lib/rcouch/erts-5.7.5/bin
 DAEMON=/usr/sbin/$NAME
 RUNNER_LOG_DIR=/var/log/$NAME
 RUNNER_USR_DIR=/usr
@@ -56,14 +56,14 @@ do_start()
 #	--chuid just doesn't seem to work at all
 #
 #	start-stop-daemon --start \
-#		--name refuge \
-#		--chdir /var/lib/refuge \
-#		--chuid refuge \
-#		--user refuge \
+#		--name rcouch \
+#		--chdir /var/lib/rcouch \
+#		--chuid rcouch \
+#		--user rcouch \
 #		--exec $DAEMON -- $DAEMON_ARGS \
 #		|| return 2
 
-	su - refuge -c "$DAEMON $DAEMON_ARGS" || return 2
+	su - rcouch -c "$DAEMON $DAEMON_ARGS" || return 2
 }
 
 #
@@ -71,9 +71,9 @@ do_start()
 #
 do_stop()
 {
-	# Try to stop via "refuge stop" first
-	RETVAL=`su - refuge -c "$DAEMON ping"`
-	[ "$RETVAL" = "pong" ] && su - refuge -c "$DAEMON stop"
+	# Try to stop via "rcouch stop" first
+	RETVAL=`su - rcouch -c "$DAEMON ping"`
+	[ "$RETVAL" = "pong" ] && su - rcouch -c "$DAEMON stop"
 	sleep 2
 	RETVAL=`pidof $ERTS_PATH/beam.smp`
 	[ "$RETVAL" = "" ] && return 0
@@ -88,7 +88,7 @@ do_stop()
 	start-stop-daemon --stop \
 		--quiet \
 		--retry=TERM/30/KILL/5 \
-		--user refuge \
+		--user rcouch \
 		--exec $ERTS_PATH/beam.smp
 	return $?
 }
@@ -98,7 +98,7 @@ do_stop()
 #
 do_reload() {
         # Restart the VM without exiting the process
-        su - refuge -c "$DAEMON restart" && return $? || return 2
+        su - rcouch -c "$DAEMON restart" && return $? || return 2
 }
 
 

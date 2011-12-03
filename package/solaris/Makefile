@@ -22,13 +22,13 @@ build: buildrel depend pkginfo prototype
 # Build the release we need to package
 buildrel:
 	@# Make sure we set our EUID properly
-	echo "" >> $(REFUGE_PATH)/rel/vars.config
-	echo '{runner_user, "refuge"}.' >> $(REFUGE_PATH)/rel/refuge.config
+	echo "" >> $(RCOUCH_PATH)/rel/vars.config
+	echo '{runner_user, "rcouch"}.' >> $(RCOUCH_PATH)/rel/rcouch.config
 	@# Ye Olde Bourne Shell on Solaris means we have to do it old school
 	echo "Using `which erl` to build"; \
-	$(MAKE) -C $(REFUGE_PATH) deps rel
-	chmod 0755 $(REFUGE_PATH)/rel/refuge/bin/* \
-		$(REFUGE_PATH)/rel/refuge/erts-*/bin/*
+	$(MAKE) -C $(RCOUCH_PATH) deps rel
+	chmod 0755 $(RCOUCH_PATH)/rel/rcouch/bin/* \
+		$(RCOUCH_PATH)/rel/rcouch/erts-*/bin/*
 
 depend:
 	cp $(PKGERDIR)/depend .
@@ -42,7 +42,7 @@ pkginfo:
 		-e 's/@@PKGNAME@@/$(APP)/g' \
 		< $(PKGERDIR)/pkginfo.tmpl > pkginfo
 
-# NOTE!  The instances of refuge below shouldn't change
+# NOTE!  The instances of rcouch below shouldn't change
 prototype:
 	echo "i pkginfo" > prototype
 	echo "i copyright" >> prototype
@@ -51,9 +51,9 @@ prototype:
 	echo "i i.preserve" >> prototype
 	echo "i r.preserve" >> prototype
 	echo '' >> prototype
-	pkgproto $(REFUGE_PATH)/rel/refuge=refuge >> prototype
-	sed -e "s/ $(LOGNAME) .*$$/ refuge refuge/" \
-	    -e 's/f none refuge\/etc/e preserve refuge\/etc/' prototype > prototype.tmp && mv prototype.tmp prototype
+	pkgproto $(RCOUCH_PATH)/rel/rcouch=rcouch >> prototype
+	sed -e "s/ $(LOGNAME) .*$$/ rcouch rcouch/" \
+	    -e 's/f none rcouch\/etc/e preserve rcouch\/etc/' prototype > prototype.tmp && mv prototype.tmp prototype
 
 $(PKGERDIR)/pkgclean:
 	rm -rf copyright depend pkgbuild pkginfo prototype

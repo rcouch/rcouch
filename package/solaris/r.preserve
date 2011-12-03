@@ -1,7 +1,7 @@
 #!/bin/sh
 
-PKGBASE=/var/sadm/pkg/refuge
-RELOC=$PKGBASE/save/pspool/refuge/reloc
+PKGBASE=/var/sadm/pkg/rcouch
+RELOC=$PKGBASE/save/pspool/rcouch/reloc
 
 while read dest
 do

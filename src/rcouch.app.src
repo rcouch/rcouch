@@ -1,7 +1,7 @@
-{application, refuge_common,
+{application, rcouch,
  [
-  {description, "common refuge modules"},
-  {vsn, "0.1"},
+  {description, "rcouch application"},
+  {vsn, git},
   {registered, []},
   {applications, [
                   kernel,
