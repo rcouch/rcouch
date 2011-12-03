@@ -7,7 +7,10 @@ extraction of the refuge code to ease the distribution of couchdb.
 Based on the couchdb code it is tagged from time to time for stability
 purpose. At some point some supported branch may appear.
 
-
+RCouch differs from refuge by only focusing on Apache CouchDB. It won't
+contain any of the refuge features like P2P nodes handling, ... .
+Internally we are using it to test couchdb and as an example on how to
+embed couchdb in your own applications.
 
 ## Features:
 
