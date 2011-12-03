@@ -20,7 +20,7 @@ build-aux
 *.gz
 
 # relase
-rel/refuge
+rel/rcouch
 dev
 
 # couch
