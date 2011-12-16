@@ -18,9 +18,13 @@
 -include_lib("couch/include/couch_db.hrl").
 
 
+-record(random_query, {
+            options = [],
+            prefix = <<>>}).
+
 handle_req(#httpd{method='GET'}=Req, Db) ->
-    Opts = parse_query(Req),
-    JsonObj = case couch_randomdoc:random_doc(Db) of
+    #random_query{options = Opts, prefix=Prefix} =parse_query(Req),
+    JsonObj = case couch_randomdoc:random_doc(Db, Prefix) of
         {ok, Doc} ->
             couch_doc:to_json_obj(Doc, Opts);
         _Else ->
@@ -34,27 +38,38 @@ handle_req(Req, _Db) ->
 
 %% internal
 parse_query(Req) ->
-    lists:foldl(fun({Key,Value}, Options) ->
-                case {Key, Value} of
-                    {"attachments", "true"} ->
-                        [attachments | Options];
-                    {"meta", "true"} ->
-                        [revs_info, conflicts, deleted_conflicts | Options];
-                    {"revs", "true"} ->
-                        [revs | Options];
-                    {"local_seq", "true"} ->
-                        [local_seq | Options];
-                    {"revs_info", "true"} ->
-                        [revs_info | Options];
-                    {"conflicts", "true"} ->
-                        [conflicts | Options];
-                    {"deleted_conflicts", "true"} ->
-                        [deleted_conflicts | Options];
-                    {"latest", "true"} ->
-                        [latest | Options];
-                    {"att_encoding_info", "true"} ->
-                        [att_encoding_info | Options];
-                _Else -> % unknown key value pair, ignore.
-                    Options
-            end
-    end, [], couch_httpd:qs(Req)).
+    lists:foldl(fun({Key,Value}, Args) ->
+        case {Key, Value} of
+        {"attachments", "true"} ->
+            Options = [attachments | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"meta", "true"} ->
+            Options = [revs_info, conflicts, deleted_conflicts | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"revs", "true"} ->
+            Options = [revs | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"local_seq", "true"} ->
+            Options = [local_seq | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"revs_info", "true"} ->
+            Options = [revs_info | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"conflicts", "true"} ->
+            Options = [conflicts | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"deleted_conflicts", "true"} ->
+            Options = [deleted_conflicts | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"latest", "true"} ->
+            Options = [latest | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"att_encoding_info", "true"} ->
+            Options = [att_encoding_info | Args#random_query.options],
+            Args#random_query{options=Options};
+        {"prefix", Prefix} ->
+            Args#random_query{prefix=?l2b(Prefix)};
+        _Else -> % unknown key value pair, ignore.
+            Args
+        end
+    end, #random_query{}, couch_httpd:qs(Req)).

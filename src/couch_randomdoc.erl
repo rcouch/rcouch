@@ -15,20 +15,31 @@
 
 -include_lib("couch/include/couch_db.hrl").
 
--export([random_doc/1, random_doc/2]).
+-export([random_doc/1, random_doc/2, random_doc/3]).
 
 random_doc(Db) ->
-    random_doc(Db, []).
+    random_doc(Db, <<>>, []).
 
-random_doc(Db, Opts) ->
+random_doc(Db, Prefix) ->
+    random_doc(Db, Prefix, []).
+
+
+random_doc(Db, Prefix, Opts) ->
     {ok, Info} = couch_db:get_db_info(Db),
     Offset = case couch_util:get_value(doc_count, Info) of
         T when T < 1 -> T;
         T -> crypto:rand_uniform(0, T)
     end,
+    S = size(Prefix),
+
     Fun = fun
-        (#doc_info{} = DocInfo, _O, _Acc) ->
-            {stop, DocInfo};
+        (#doc_info{id = DocId} = DocInfo, _O, Acc) ->
+            case DocId of
+                <<Prefix:S/binary, _/binary>> ->
+                    {stop, DocInfo};
+                _ ->
+                    {ok, Acc}
+            end;
         (_, _, Acc) ->
             {stop, Acc}
     end,
@@ -42,6 +53,7 @@ random_doc(Db, Opts) ->
         #doc_info{} ->
             {ok, couch_index_util:load_doc(Db, Result, Opts)}
     end.
+
 
 skip_deleted(FoldFun) ->
     fun
