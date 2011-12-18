@@ -13,14 +13,10 @@
 
 -module(couch_randomdoc_httpd).
 
--export([handle_req/2]).
+-export([handle_req/2, parse_query/1]).
 
 -include_lib("couch/include/couch_db.hrl").
-
-
--record(random_query, {
-            options = [],
-            prefix = <<>>}).
+-include("include/couch_randomdoc.hrl").
 
 handle_req(#httpd{method='GET'}=Req, Db) ->
     #random_query{options = Opts, prefix=Prefix} =parse_query(Req),
