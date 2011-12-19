@@ -15,7 +15,7 @@ It's actually **supported by all the [refugre](http://refuge.io) projects**:
 
 ## HTTP API
 
-To get a random doc do a GET to '/<db>/_random_doc' .
+To get a random doc do a GET to `/<db>/_random_doc` .
 
 All options od the couchdb DOC APII can be applied.
 
