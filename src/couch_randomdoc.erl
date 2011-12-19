@@ -14,8 +14,10 @@
 -module(couch_randomdoc).
 
 -include_lib("couch/include/couch_db.hrl").
+-include_lib("couch_mrview/include/couch_mrview.hrl").
 
--export([random_doc/1, random_doc/2, random_doc/3]).
+-export([random_doc/1, random_doc/2, random_doc/3,
+         random_view_doc/3]).
 
 random_doc(Db) ->
     DefaultFun = fun(_Doc) -> true end,
@@ -26,8 +28,8 @@ random_doc(Db, FilterFun) ->
 
 
 random_doc(Db, FilterFun, Opts) ->
-    {ok, Info} = couch_db:get_db_info(Db),
-    N = case couch_util:get_value(doc_count, Info) of
+    N = {ok, Info} = couch_db:get_db_info(Db),
+    case couch_util:get_value(doc_count, Info) of
         C when C < 1 -> C;
         C -> crypto:rand_uniform(0, C)
     end,
@@ -53,10 +55,35 @@ random_doc(Db, FilterFun, Opts) ->
             {stop, Acc}
     end,
     {ok, _, Result} = couch_db:enum_docs(Db, Fun, N, []),
+    finish_random(Result).
 
+
+
+random_view_doc(Db, DDoc, ViewName) ->
+    %% get number of docs in the view
+    {ok, [{meta, Meta}]} = couch_mrview:query_view(Db, DDoc, ViewName,
+        [{limit, 0}]),
+    %% generate random value
+    N = case couch_util:get_value(total, Meta) of
+        C when C < 1 -> C;
+        C -> crypto:rand_uniform(0, C)
+    end,
+
+    Args = #mrargs{skip=N, limit=1, include_docs=true},
+    {ok, Acc} = couch_mrview:query_view(Db, DDoc, ViewName,
+        Args, fun view_cb/2, nil),
+    finish_random(Acc).
+
+view_cb({row, Row}, _Acc) ->
+    Doc = couch_util:get_value(doc, Row),
+    {ok, couch_doc:from_json_obj(Doc)};
+view_cb(_Other, Acc) ->
+    {ok, Acc}.
+
+finish_random(Result) ->
     case Result of
         #doc{} ->
             {ok, Result};
         _ ->
-           null
+           nil
     end.

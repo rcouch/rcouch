@@ -22,12 +22,27 @@ handle_req(#httpd{method='GET'}=Req, Db) ->
     #random_query{options = Opts,
                   filter = FilterName} =parse_query(Req),
 
-    FilterFun = make_filter(FilterName, Req, Db),
-    JsonObj = case couch_randomdoc:random_doc(Db, FilterFun) of
+    Result = case FilterName of
+        <<"_view">> ->
+            ViewSpec = ?l2b(couch_httpd:qs_value(Req, "view", "")),
+            case binary:split(ViewSpec, <<"/">>) of
+            [DName, VName] ->
+                DesignId = <<"_design/", DName/binary>>,
+                DDoc = couch_httpd_db:couch_doc_open(Db, DesignId, nil, [ejson_body]),
+                couch_randomdoc:random_view_doc(Db, DDoc, VName);
+            _ ->
+                 throw({bad_request, "view name should be on the form DName/FName"})
+            end;
+        _ ->
+            FilterFun = make_filter(FilterName, Req, Db),
+            couch_randomdoc:random_doc(Db, FilterFun)
+    end,
+
+    JsonObj = case Result of
         {ok, Doc} ->
             couch_doc:to_json_obj(Doc, Opts);
-        _Else ->
-            {[]}
+        nil ->
+            null
     end,
     couch_httpd:send_json(Req, 200, JsonObj);
 
