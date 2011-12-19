@@ -13,7 +13,7 @@
 
 -module(couch_randomdoc_httpd).
 
--export([handle_req/2, parse_query/1, make_filter/3]).
+-export([handle_req/2, parse_query/1, make_filter/3, get_random_doc/3]).
 
 -include_lib("couch/include/couch_db.hrl").
 -include("include/couch_randomdoc.hrl").
@@ -22,7 +22,20 @@ handle_req(#httpd{method='GET'}=Req, Db) ->
     #random_query{options = Opts,
                   filter = FilterName} =parse_query(Req),
 
-    Result = case FilterName of
+    JsonObj = case get_random_doc(Req, Db, FilterName) of
+        {ok, Doc} ->
+            couch_doc:to_json_obj(Doc, Opts);
+        nil ->
+            null
+    end,
+    couch_httpd:send_json(Req, 200, JsonObj);
+
+handle_req(Req, _Db) ->
+    couch_httpd:send_method_not_allowed(Req, "GET").
+
+
+get_random_doc(Req, Db, FilterName) ->
+    case FilterName of
         <<"_view">> ->
             ViewSpec = ?l2b(couch_httpd:qs_value(Req, "view", "")),
             case binary:split(ViewSpec, <<"/">>) of
@@ -36,18 +49,7 @@ handle_req(#httpd{method='GET'}=Req, Db) ->
         _ ->
             FilterFun = make_filter(FilterName, Req, Db),
             couch_randomdoc:random_doc(Db, FilterFun)
-    end,
-
-    JsonObj = case Result of
-        {ok, Doc} ->
-            couch_doc:to_json_obj(Doc, Opts);
-        nil ->
-            null
-    end,
-    couch_httpd:send_json(Req, 200, JsonObj);
-
-handle_req(Req, _Db) ->
-    couch_httpd:send_method_not_allowed(Req, "GET").
+    end.
 
 
 %% internal

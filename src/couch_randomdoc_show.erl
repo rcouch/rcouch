@@ -26,11 +26,11 @@ handle_randomdoc_show_req(#httpd{
     #random_query{options = Opts,
                   filter=FilterName} = couch_randomdoc_httpd:parse_query(Req),
 
-    FilterFun = couch_randomdoc_httpd:make_filter(FilterName, Req, Db),
-    {JsonDoc, DocId} = case couch_randomdoc:random_doc(Db, FilterFun) of
+    {JsonDoc, DocId} =
+    case couch_randomdoc_httpd:get_random_doc(Req, Db, FilterName) of
         {ok, #doc{id=Id}=Doc} ->
             {couch_doc:to_json_obj(Doc, Opts), Id};
-        _Else ->
+        nil ->
             {null, nil}
     end,
 
