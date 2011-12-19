@@ -68,7 +68,6 @@ random_view_doc(Db, DDoc, ViewName) ->
         C when C < 1 -> C;
         C -> crypto:rand_uniform(0, C)
     end,
-
     Args = #mrargs{skip=N, limit=1, include_docs=true},
     {ok, Acc} = couch_mrview:query_view(Db, DDoc, ViewName,
         Args, fun view_cb/2, nil),

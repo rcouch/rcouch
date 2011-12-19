@@ -29,14 +29,14 @@ There are also builtin filters:
 - `_prefix`: prefix you want to filter, Pass the prefix using the
   `prefix` parameter:
 
-    GET /<db>/_random_doc?filter=_prefix&prefix=someprefix
+        GET /<db>/_random_doc?filter=_prefix&prefix=someprefix
 
 - `_design_doc`: to only return design document
 
 - `_view`: get a random document from a view index. Pass the view name
-  uing the `view` parameter.
+  uing the `view` parameter:
 
-    GET /<db>/_random_doc?filter=_view&view=DesignName/ViewName
+        GET /<db>/_random_doc?filter=_view&view=DesignName/ViewName
 
 
 ## SHOW function
@@ -44,7 +44,7 @@ There are also builtin filters:
 Like show function you may want to render your random documents
 diffently:
 
-    GET /<db>/_design/DesignName/_random/ShowFunction
+        GET /<db>/_design/DesignName/_random/ShowFunction
 
 
 Functions are put in the shows property of the design document like any
