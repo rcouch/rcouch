@@ -75,7 +75,7 @@ parse_query(Req) ->
 
 
 make_filter(nil, _Req, _Db) ->
-    fun(_Db, _Doc) -> true end;
+    fun(_Db1, _Doc) -> true end;
 make_filter(<<"_", _/binary>> = FilterName, Req, _Db) ->
     builtin_filter(FilterName, Req);
 make_filter(FilterName, Req, Db) ->

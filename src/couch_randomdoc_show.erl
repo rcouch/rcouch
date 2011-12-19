@@ -20,11 +20,12 @@
 
 
 handle_randomdoc_show_req(#httpd{
-        path_parts=[_, _, _, _, ShowName]
-    }=Req, Db, DDoc) ->
+            path_parts=[_, _, _, _, ShowName]
+        }=Req, Db, DDoc) ->
 
     #random_query{options = Opts,
                   filter=FilterName} = couch_randomdoc_httpd:parse_query(Req),
+
     FilterFun = couch_randomdoc_httpd:make_filter(FilterName, Req, Db),
     {JsonDoc, DocId} = case couch_randomdoc:random_doc(Db, FilterFun) of
         {ok, #doc{id=Id}=Doc} ->
