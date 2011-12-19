@@ -1,3 +1,3 @@
 -record(random_query, {
             options = [],
-            prefix = <<>>}).
+            filter = nil}).

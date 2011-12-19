@@ -13,14 +13,17 @@
 
 -module(couch_randomdoc_httpd).
 
--export([handle_req/2, parse_query/1]).
+-export([handle_req/2, parse_query/1, make_filter/3]).
 
 -include_lib("couch/include/couch_db.hrl").
 -include("include/couch_randomdoc.hrl").
 
 handle_req(#httpd{method='GET'}=Req, Db) ->
-    #random_query{options = Opts, prefix=Prefix} =parse_query(Req),
-    JsonObj = case couch_randomdoc:random_doc(Db, Prefix) of
+    #random_query{options = Opts,
+                  filter = FilterName} =parse_query(Req),
+
+    FilterFun = make_filter(FilterName, Req, Db),
+    JsonObj = case couch_randomdoc:random_doc(Db, FilterFun) of
         {ok, Doc} ->
             couch_doc:to_json_obj(Doc, Opts);
         _Else ->
@@ -63,9 +66,67 @@ parse_query(Req) ->
         {"att_encoding_info", "true"} ->
             Options = [att_encoding_info | Args#random_query.options],
             Args#random_query{options=Options};
-        {"prefix", Prefix} ->
-            Args#random_query{prefix=?l2b(Prefix)};
+        {"filter", Filter} ->
+            Args#random_query{filter=?l2b(mochiweb_util:unquote(Filter))};
         _Else -> % unknown key value pair, ignore.
             Args
         end
     end, #random_query{}, couch_httpd:qs(Req)).
+
+
+make_filter(nil, _Req, _Db) ->
+    fun(_Db, _Doc) -> true end;
+make_filter(<<"_", _/binary>> = FilterName, Req, _Db) ->
+    builtin_filter(FilterName, Req);
+make_filter(FilterName, Req, Db) ->
+    os_filter_fun(FilterName, Req, Db).
+
+
+builtin_filter(<<"_prefix">>, Req) ->
+    Prefix = ?l2b(couch_httpd:qs_value(Req, "prefix", "")),
+    filter_prefix(Prefix);
+builtin_filter(<<"_design_doc">>, _Req) ->
+    filter_ddoc();
+builtin_filter(_FilterName, _Req) ->
+    throw({bad_request, "unknown builtin filter name"}).
+
+filter_prefix(Prefix) ->
+    S = size(Prefix),
+    fun(_Db, #doc{id = DocId}) ->
+        case DocId of
+            <<Prefix:S/binary, _/binary>> ->
+                true;
+            _ ->
+                false
+        end
+    end.
+
+filter_ddoc() ->
+    fun(_Db, DocInfo) ->
+        case DocInfo of
+        #doc{id = <<"_design/", _/binary>>} ->
+            true;
+        _ ->
+            false
+        end
+    end.
+
+os_filter_fun(FilterName, Req, Db) ->
+    case binary:split(FilterName, <<"/">>) of
+        [DName, FName] ->
+            DesignId = <<"_design/", DName/binary>>,
+            DDoc = couch_httpd_db:couch_doc_open(Db, DesignId, nil, [ejson_body]),
+            % validate that the ddoc has the filter fun
+            #doc{body={Props}} = DDoc,
+            couch_util:get_nested_json_value({Props}, [<<"filters">>, FName]),
+            fun(Db2, Doc) ->
+                {ok, Passes} = couch_query_servers:filter_docs(
+                    Req, Db2, DDoc, FName, [Doc]
+                ),
+                lists:member(true, Passes)
+            end;
+        _ ->
+            throw({bad_request, "filter name should be on the form DName/FName"})
+    end.
+
+

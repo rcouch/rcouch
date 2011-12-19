@@ -18,50 +18,45 @@
 -export([random_doc/1, random_doc/2, random_doc/3]).
 
 random_doc(Db) ->
-    random_doc(Db, <<>>, []).
+    DefaultFun = fun(_Doc) -> true end,
+    random_doc(Db, DefaultFun, []).
 
-random_doc(Db, Prefix) ->
-    random_doc(Db, Prefix, []).
+random_doc(Db, FilterFun) ->
+    random_doc(Db, FilterFun, []).
 
 
-random_doc(Db, Prefix, Opts) ->
+random_doc(Db, FilterFun, Opts) ->
     {ok, Info} = couch_db:get_db_info(Db),
-    Offset = case couch_util:get_value(doc_count, Info) of
-        T when T < 1 -> T;
-        T -> crypto:rand_uniform(0, T)
+    N = case couch_util:get_value(doc_count, Info) of
+        C when C < 1 -> C;
+        C -> crypto:rand_uniform(0, C)
     end,
-    S = size(Prefix),
 
     Fun = fun
-        (#doc_info{id = DocId} = DocInfo, _O, Acc) ->
-            case DocId of
-                <<Prefix:S/binary, _/binary>> ->
-                    {stop, DocInfo};
-                _ ->
-                    {ok, Acc}
+        (#full_doc_info{}, _O, Skip) when Skip > 0 ->
+            {ok, Skip-1};
+        (#full_doc_info{} = FullDocInfo, _O, Acc) ->
+            case couch_doc:to_doc_info(FullDocInfo) of
+                #doc_info{revs=[#rev_info{deleted=true}|_]} ->
+                    {ok, Acc};
+                DocInfo ->
+                    Doc = couch_index_util:load_doc(Db, DocInfo, Opts),
+
+                    case FilterFun(Db, Doc) of
+                        true ->
+                            {stop, Doc};
+                        false ->
+                            {ok, Acc}
+                    end
             end;
-        (_, _, Acc) ->
+        (_Other, _, Acc) ->
             {stop, Acc}
     end,
-    Fun1 = skip_deleted(Fun),
-    {ok, _O, Result} = couch_db:enum_docs_since(Db, Offset, Fun1,
-        nil, []),
+    {ok, _, Result} = couch_db:enum_docs(Db, Fun, N, []),
 
     case Result of
-        nil ->
-           null;
-        #doc_info{} ->
-            {ok, couch_index_util:load_doc(Db, Result, Opts)}
+        #doc{} ->
+            {ok, Result};
+        _ ->
+           null
     end.
-
-
-skip_deleted(FoldFun) ->
-    fun
-        (visit, KV, Reds, Acc) ->
-            FoldFun(KV, Reds, Acc);
-        (traverse, _LK, {Undeleted, _Del, _Size}, Acc) when Undeleted == 0 ->
-            {skip, Acc};
-        (traverse, _, _, Acc) ->
-            {ok, Acc}
-    end.
-

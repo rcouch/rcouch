@@ -24,15 +24,14 @@ handle_randomdoc_show_req(#httpd{
     }=Req, Db, DDoc) ->
 
     #random_query{options = Opts,
-                  prefix=Prefix} = couch_randomdoc_httpd:parse_query(Req),
-    {JsonDoc, DocId} = case couch_randomdoc:random_doc(Db, Prefix) of
+                  filter=FilterName} = couch_randomdoc_httpd:parse_query(Req),
+    FilterFun = couch_randomdoc_httpd:make_filter(FilterName, Req, Db),
+    {JsonDoc, DocId} = case couch_randomdoc:random_doc(Db, FilterFun) of
         {ok, #doc{id=Id}=Doc} ->
             {couch_doc:to_json_obj(Doc, Opts), Id};
         _Else ->
             {null, nil}
     end,
-
-    ?LOG_INFO("docid: ~p, show name: ~p~n", [DocId, ShowName]),
 
     CurrentEtag = couch_uuids:new(),
     couch_httpd:etag_respond(Req, CurrentEtag, fun() ->
