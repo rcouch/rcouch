@@ -5,7 +5,7 @@
 document fetching. It allows you to fetch doc via teh HTTP Api, filter
 them and even render them dirrently using a show function.
 
-It's actually **supported by all the [refugre](http://refuge.io) projects**:
+It's actually **supported by all the [refuge](http://refuge.io) projects**:
 
     - [refuge](https://github.com/refuge/refuge)
     - [rcouch](https://github.com/refuge/rcouch)
