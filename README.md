@@ -7,9 +7,9 @@ them and even render them dirrently using a show function.
 
 It's actually **supported by all the [refuge](http://refuge.io) projects**:
 
-    - [refuge](https://github.com/refuge/refuge)
-    - [rcouch](https://github.com/refuge/rcouch)
-    - [rcouch_template](https://github.com/refuge/rcouch_template)
+- [refuge](https://github.com/refuge/refuge)
+- [rcouch](https://github.com/refuge/rcouch)
+- [rcouch_template](https://github.com/refuge/rcouch_template)
 
 **Note**: A port as an Apache Couchdb plugin is in progress.
 
