@@ -40,3 +40,35 @@ fully relocatable, so you can put it where you want on your system.
 
 To create package for your system run `make package` . For now we build
 packages for OSX, Debian, Redhat & Solaris.
+
+##Notes on building a truly distributable package
+
+The package built above will still depend on some libraries from your
+system, so additional work has to be done to distribute it to
+older/newer systems.
+
+1. CouchDB will depend on the ICU library version that was present in
+   your system at build time. To easily bundle this library with the
+   package, build with:
+
+         $ make rel USE_STATIC_ICU=1
+
+1. Check whether your package depends on Ncurses:
+
+         $ ldd ./rel/myapp/erts-*/bin/erlexec|grep ncurses
+
+    If it does, copy the .so file to ./rel/myapp/lib/ or rebuild Erlang
+    without this dependency.
+
+1. Decide whether you need SSL support in your package and check whether it
+   depends on OpenSSL:
+
+         $ ldd ./rel/myapp/lib/ssl-*/priv/bin/ssl_esock|grep 'libcrypto\|libssl'
+
+    If it does, copy the .so file to ./rel/myapp/lib/ or rebuild Erlang
+    without this dependency.
+
+If you copied any .so files in the last 2 steps, run this command, so
+that your app can find the libraries:
+
+    $ sed -i '/^RUNNER_USER=/a\\nexport LD_LIBRARY_PATH="$RUNNER_BASE_DIR/lib"' ./rel/myapp/bin/myapp
