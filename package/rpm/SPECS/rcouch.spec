@@ -34,7 +34,7 @@ CouchDB is document oriented Database..
 
 %prep
 %setup -q -n %{name}-%{_revision}
-cat > rel/vars.config <<EOF
+cat > rel/rcouch.config <<EOF
 % Platform-specific installation paths
 {platform_bin_dir,  "/usr/bin"}.
 {platform_data_dir, "%{platform_data_dir}"}.
@@ -67,7 +67,7 @@ EOF
 
 %build
 mkdir %{name}
-make rel
+USE_STATIC_ICU=1 make rel
 
 %install
 mkdir -p %{buildroot}%{platform_etc_dir}
