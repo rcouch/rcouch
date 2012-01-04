@@ -18,10 +18,10 @@ LDFLAGS=
 build:
 	cp -f debian/vars.config rel/vars.config
 	unset CC CFLAGS CPPFLAGS LDFLAGS CXX CXXFLAGS \
-		&& make rel
+		&& make rel USE_STATIC_ICU=1
 	touch build
 
-clean: 
+clean:
 	dh_clean
 	rm -f build
 	make clean
@@ -37,7 +37,7 @@ install: build
 	cp -R rel/rcouch/share debian/$(package)/usr/lib/share
 	chmod 0755 debian/$(package)/usr/lib/rcouch/erts*/bin/*
 	install -p -D -m 0755 rel/rcouch/bin/rcouch \
-		debian/$(package)/usr/sbin/rcouch	
+		debian/$(package)/usr/sbin/rcouch
 	install -m644 rel/$(package)/etc/app.config \
 		debian/$(package)/etc/rcouch/app.config
 	install -m644 rel/$(package)/etc/vm.args \
