@@ -4,7 +4,7 @@
 #
 # chkconfig: 2345 80 30
 # description: rcouch is a distrubuted data store.
-# processname: beam 
+# processname: beam
 # config: /etc/rcouch/app.config
 # config: /etc/rcouch/vm.args
 #
@@ -13,7 +13,7 @@
 . /etc/rc.d/init.d/functions
 
 #check for script,config, and data dirs
-[ -x /usr/sbin/rcouch ] || exit 0
+[ -x /usr/bin/rcouch ] || exit 0
 [ -d /etc/rcouch ] || exit 0
 [ -d /var/lib/rcouch ] || exit 0
 [ -d /var/run/rcouch ] || exit 0
@@ -44,7 +44,7 @@ stop() {
         # Stop daemon.
 	echo -n $"Stopping rcouch: "
   	RETVAL=`su - rcouch -c "$DAEMON ping"`
-  	[ "$RETVAL" = "pong" ] && su - rcouch -c "$DAEMON stop 2>/dev/null 1>&2" 
+  	[ "$RETVAL" = "pong" ] && su - rcouch -c "$DAEMON stop 2>/dev/null 1>&2"
         sleep 2
         RETVAL=`pidof beam.smp`
         [ "$RETVAL" = "" ] && success && echo && return 0 || failure $"$NAME stop"
@@ -61,7 +61,7 @@ reload() {
 	echo -n $"Reloading rcouch: "
   	RETVAL=`su - rcouch -c "$DAEMON ping"`
   	[ "$RETVAL" = "pong" ] && su - rcouch -c "$DAEMON restart 2>/dev/null 1>&2" \
-        && success && echo && return 0 || failure $"$NAME restart" 
+        && success && echo && return 0 || failure $"$NAME restart"
         echo
 	return $RETVAL
 }

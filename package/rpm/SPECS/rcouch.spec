@@ -12,13 +12,13 @@ Group: Development/Libraries
 Source: http://github.org/downloads/refuge/rcouch/%{name}-%{_revision}.tar.gz
 Source1: rcouch_init
 URL: http://refuge.io
-Vendor: The Refuge project 
+Vendor: The Refuge project
 Packager: Refuge <refuge@lists.refuge.io>>
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Summary: Refuge, The decentralized data platform
 
 %description
-Riak is a distributed data store.
+CouchDB is document oriented Database..
 
 %define rcouch_lib %{_libdir}/%{name}
 %define init_script %{_sysconfdir}/init.d/%{name}
@@ -36,7 +36,7 @@ Riak is a distributed data store.
 %setup -q -n %{name}-%{_revision}
 cat > rel/vars.config <<EOF
 % Platform-specific installation paths
-{platform_bin_dir,  "/usr/sbin"}.
+{platform_bin_dir,  "/usr/bin"}.
 {platform_data_dir, "%{platform_data_dir}"}.
 {platform_view_dir, "%{platform_data_dir}"}.
 {platform_etc_dir,  "%{platform_etc_dir}"}.
@@ -111,7 +111,7 @@ fi
 # create rcouch user only if it doesn't already exist
 if ! getent passwd rcouch >/dev/null 2>&1; then
         useradd -r -g rcouch --home %{platform_data_dir} rcouch
-        usermod -c "RCouch" 
+        usermod -c "RCouch"
 fi
 
 %post
