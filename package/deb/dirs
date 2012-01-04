@@ -2,7 +2,7 @@ etc/init.d
 etc/rcouch
 etc/logrotate.d
 usr/lib/rcouch
-usr/sbin
+usr/bin
 usr/share/rcouch
 var/run/rcouch
 var/lib/rcouch

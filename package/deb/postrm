@@ -33,8 +33,8 @@ case "$1" in
         if [ -d /etc/rcouch ]; then
                 rm -r /etc/rcouch
         fi
-        if [ -e /usr/sbin/rcouch ]; then
-                rm /usr/sbin/rcouch
+        if [ -e /usr/bin/rcouch ]; then
+                rm /usr/bin/rcouch
         fi
         if [ -e /etc/init.d/rcouch ]; then
                 rm  /etc/init.d/rcouch
