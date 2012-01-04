@@ -14,11 +14,10 @@ package=rcouch
 CFLAGS=
 LDFLAGS=
 
-
 build:
 	cp -f debian/vars.config rel/rcouch.config
 	unset CC CFLAGS CPPFLAGS LDFLAGS CXX CXXFLAGS \
-		&& USE_STATIC_ICU=1 make rel
+		&& make rel USE_STATIC_ICU=1
 	touch build
 
 clean:
