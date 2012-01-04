@@ -16,7 +16,7 @@ LDFLAGS=
 
 
 build:
-	cp -f debian/vars.config rel/vars.config
+	cp -f debian/vars.config rel/rcouch.config
 	unset CC CFLAGS CPPFLAGS LDFLAGS CXX CXXFLAGS \
 		&& USE_STATIC_ICU=1 make rel
 	touch build
