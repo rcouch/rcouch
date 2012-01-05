@@ -87,7 +87,7 @@ cp -r $RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/erts-* \
 		%{buildroot}%{platform_lib_dir}
 cp -r $RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/releases \
 		%{buildroot}%{platform_lib_dir}
-cp -r $RPM_BUILD_DIR/%{name}-%{_revision}/share \
+cp -r $RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/share \
 		%{buildroot}%{_datadir}/%{name}
 install -p -D -m 0644 \
 	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/app.config \
