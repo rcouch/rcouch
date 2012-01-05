@@ -49,12 +49,12 @@ cat > rel/rcouch.config <<EOF
 {couchdb_ip, "0.0.0.0"}.
 {couchdb_port, 15984}.
 {ssl_port, 16986}.
-{sasl_error_log,        ""%{platform_log_dir}/sasl-error.log"}.
-{sasl_log_dir,          ""%{platform_log_dir}/sasl"}.
+{sasl_error_log,        "%{platform_log_dir}/sasl-error.log"}.
+{sasl_log_dir,          "%{platform_log_dir}/sasl"}.
 
 % vm.args
 {node,         "rcouch@127.0.0.1"}.
-{crash_dump,   ""%{platform_log_dir}/erl_crash.dump"}.
+{crash_dump,   "%{platform_log_dir}/erl_crash.dump"}.
 
 % bin/rcouch*
 {runner_script_dir,  "%{platform_bin_dir}"}.
