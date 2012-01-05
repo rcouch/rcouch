@@ -41,7 +41,7 @@ cat > rel/rcouch.config <<EOF
 {platform_view_dir, "%{platform_data_dir}"}.
 {platform_etc_dir,  "%{platform_etc_dir}"}.
 {platform_lib_dir,  "%{platform_lib_dir}"}.
-{platform_log_dir,  "%{platform_log_dir}""}.
+{platform_log_dir,  "%{platform_log_dir}"}.
 {platform_run_dir,  "%{_localstatedir}/run/%{name}/"}.
 {platform_share_dir, "%{_datadir}/%{name}/"}.
 
