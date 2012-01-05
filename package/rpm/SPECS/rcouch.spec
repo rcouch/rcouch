@@ -45,10 +45,13 @@ cat > rel/rcouch.config <<EOF
 {platform_run_dir,  "%{_localstatedir}/run/%{name}/"}.
 {platform_share_dir, "%{_datadir}/%{name}/"}.
 
+%% vendor info
+{vendor_name, "rcouch"}.
+
 %% app config
 {couchdb_ip, "0.0.0.0"}.
-{couchdb_port, 15984}.
-{ssl_port, 16986}.
+{couchdb_port, 5984}.
+{ssl_port, 6986}.
 {sasl_error_log,        "%{platform_log_dir}/sasl-error.log"}.
 {sasl_log_dir,          "%{platform_log_dir}/sasl"}.
 
