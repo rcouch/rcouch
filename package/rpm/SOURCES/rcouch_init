@@ -23,7 +23,7 @@ RETVAL=0
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="a decentralized data platform"
 NAME=rcouch
-DAEMON=/usr/sbin/$NAME
+DAEMON=/usr/bin/$NAME
 
 
 start() {
