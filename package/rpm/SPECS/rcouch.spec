@@ -111,7 +111,7 @@ export QA_RPATHS=3
 %pre
 # create rcouch group only if it doesn't already exist
 if ! getent group rcouch >/dev/null 2>&1; then
-        groupadd -r rcocuh
+        groupadd -r rcouch
 fi
 
 # create rcouch user only if it doesn't already exist
