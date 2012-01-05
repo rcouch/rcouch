@@ -67,7 +67,7 @@ EOF
 
 %build
 mkdir %{name}
-USE_STATIC_ICU=1 make rel
+make rel USE_STATIC_ICU=1
 
 %install
 mkdir -p %{buildroot}%{platform_etc_dir}
