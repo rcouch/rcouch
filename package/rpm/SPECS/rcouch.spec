@@ -117,8 +117,10 @@ fi
 # create rcouch user only if it doesn't already exist
 if ! getent passwd rcouch >/dev/null 2>&1; then
         useradd -r -g rcouch --home %{platform_data_dir} rcouch
-        usermod -c "RCouch"
+        usermod -c "Refuge CouchDB" rcouch
 fi
+
+
 
 %post
 # Fixup perms for SELinux
