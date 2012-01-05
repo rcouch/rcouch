@@ -90,6 +90,12 @@ cp -r $RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/releases \
 cp -r $RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/share/* \
 		%{buildroot}%{_datadir}/%{name}/
 install -p -D -m 0644 \
+	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/default.ini \
+	%{buildroot}%{platform_etc_dir}/
+install -p -D -m 0644 \
+	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/local.ini \
+	%{buildroot}%{platform_etc_dir}/
+install -p -D -m 0644 \
 	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/app.config \
 	%{buildroot}%{platform_etc_dir}/
 install -p -D -m 0644 \
