@@ -89,7 +89,7 @@ cp -R $RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/releases \
 		%{buildroot}%{platform_lib_dir}
 cp -R $RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/share/* \
 		%{buildroot}%{_datadir}/%{name}/
-chmod 0755 	%{buildroot}%{platform_lib_dir}/erts*/bin/*
+chmod 0755 %{buildroot}%{platform_lib_dir}/erts*/bin/*
 install -p -D -m 0644 \
 	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/default.ini \
 	%{buildroot}%{platform_etc_dir}/
@@ -137,7 +137,7 @@ find %{platform_lib_dir} -name "*.so" -exec chcon -t textrel_shlib_t {} \;
 %dir %{platform_etc_dir}
 %config(noreplace) %{platform_etc_dir}/*
 %attr(0755,root,root) %{init_script}
-%attr(0755,root,root) %{platform_lib_dir}/ets*/bin/*
+%attr(0755,root,root) %{platform_lib_dir}/erts*/bin/*
 %attr(0755,root,root) %{platform_bin_dir}/%{name}
 %attr(0755,root,root) %{platform_bin_dir}/couchjs
 %attr(0644,root,root) %{_datadir}/%{name}/www/*
