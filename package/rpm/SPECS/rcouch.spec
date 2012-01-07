@@ -73,7 +73,7 @@ mkdir %{name}
 make rel USE_STATIC_ICU=1
 
 %install
-mkdir -p %{buildroot}{platform_data_dir}
+mkdir -p %{buildroot}%{platform_data_dir}
 mkdir -p %{buildroot}%{platform_etc_dir}
 mkdir -p %{buildroot}%{platform_lib_dir}
 mkdir -p %{buildroot}%{_datadir}/%{name}
