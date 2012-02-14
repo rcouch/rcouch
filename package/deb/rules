@@ -33,7 +33,8 @@ install: build
 	cp -R rel/rcouch/lib debian/$(package)/usr/lib/rcouch
 	cp -R rel/rcouch/releases debian/$(package)/usr/lib/rcouch
 	cp -R rel/rcouch/erts* debian/$(package)/usr/lib/rcouch
-	cp -R rel/rcouch/share debian/$(package)/usr/share/rcouch
+	mkdir -p debian/$(package)/usr/share/rcouch
+	cp -R rel/rcouch/share/* debian/$(package)/usr/share/rcouch/
 	chmod 0755 debian/$(package)/usr/lib/rcouch/erts*/bin/*
 	install -m644 rel/$(package)/etc/default.ini \
                 debian/$(package)/etc/rcouch/default.ini
