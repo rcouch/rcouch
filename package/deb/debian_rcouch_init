@@ -16,7 +16,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="a decentralized data platform"
 NAME=rcouch
-ERTS_PATH=/usr/lib/rcouch/erts-5.7.5/bin
+ERTS_PATH=/usr/lib/rcouch/erts-5.9/bin
 DAEMON=/usr/sbin/$NAME
 RUNNER_LOG_DIR=/var/log/$NAME
 RUNNER_USR_DIR=/usr
