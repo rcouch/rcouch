@@ -23,6 +23,7 @@ chown -R rcouch:rcouch /var/run/rcouch
 chown -R rcouch:rcouch /var/log/rcouch
 chmod 0755 /var/run/rcouch /etc/rcouch 
 chown -R rcouch:rcouch /usr/share/rcouch
+chown rcouch:rcouch /etc/rcouch/local.ini
 
 case "$1" in
     configure)

@@ -1,3 +1,9 @@
+rcouch (0.4.1-1) unstable; urgency=low
+
+  * Initial release of rcouch  in binary form for deb based systems
+
+ -- benoitc <benoitc@refuge.io>  Wed, 14 Feb 2012 01:33:00 +0100
+
 rcouch (0.4.0-1) unstable; urgency=low
 
   * Initial release of rcouch  in binary form for deb based systems

@@ -4,6 +4,8 @@ etc/logrotate.d
 usr/lib/rcouch
 usr/bin
 usr/share/rcouch
+usr/share/rcouch/www
+usr/share/rcouch/server
 var/run/rcouch
 var/lib/rcouch
 var/log/rcouch
