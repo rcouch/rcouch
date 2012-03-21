@@ -17,6 +17,13 @@ Packager: Refuge <refuge@lists.refuge.io>>
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Summary: Refuge Couchdb Distribution
 
+BuildRequires: git
+BuildRequires: make
+BuildRequires: erlang
+BuildRequires: gcc
+BuildRequires: gcc-c++
+BuildRequires: libstdc++-devel
+
 %description
 CouchDB is document oriented Database..
 
@@ -129,7 +136,7 @@ if ! getent passwd rcouch >/dev/null 2>&1; then
 fi
 
 %post
-# Fixup perms for SELinux
+# Fixup perms for SELinux. If SELinux disabled warnings will be emitted
 find %{platform_lib_dir} -name "*.so" -exec chcon -t textrel_shlib_t {} \;
 
 %files
@@ -141,8 +148,8 @@ find %{platform_lib_dir} -name "*.so" -exec chcon -t textrel_shlib_t {} \;
 %attr(0755,root,root) %{platform_lib_dir}/erts*/bin/*
 %attr(0755,root,root) %{platform_bin_dir}/%{name}
 %attr(0755,root,root) %{platform_bin_dir}/couchjs
-%attr(0644,root,root) %{_datadir}/%{name}/www/*
-%attr(0644,root,root) %{_datadir}/%{name}/server/*
+%attr(0755,root,root) %{_datadir}/%{name}/www/*
+%attr(0755,root,root) %{_datadir}/%{name}/server/*
 %{platform_data_dir}
 %{platform_log_dir}
 %{_localstatedir}/run/%{name}
