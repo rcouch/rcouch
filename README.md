@@ -2,7 +2,7 @@ rcouch
 ------
 
 rcouch is a static distribution of couchdb using rebar. It is an
-extraction of the refuge code to ease the distribution of couchdb. 
+extraction of the refuge code to ease the distribution of couchdb.
 
 Based on the couchdb code it is tagged from time to time for stability
 purpose. At some point some supported branch may appear.
@@ -12,12 +12,14 @@ contain any of the refuge features like P2P nodes handling, ... .
 Internally we are using it to test couchdb and as an example on how to
 embed couchdb in your own applications.
 
+RCouch is brought you by the [Refuge project](http://refuge.io).
+
 ## Features:
 
 - Apache CouchDB based
 - Geocouch integrated
 - rebar
-- relocatable 
+- relocatable
 - Fully opensource. All the sources are on refuge GIT repository
   (http://github.com/refuge) under Apache License 2.
 
