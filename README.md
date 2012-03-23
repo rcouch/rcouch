@@ -29,6 +29,8 @@ RCouch is brought you by the [Refuge project](http://refuge.io).
 - Erlang R14
 - Curl
 - ICU (if not built statically)
+- Latest version of [rebar](http://github.com/basho/rebar) installed on
+  your system.
 
 ## Installation
 
