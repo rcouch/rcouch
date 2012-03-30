@@ -19,6 +19,7 @@
 -export([handle_req/2, parse_query/1, make_filter/3, get_random_doc/3]).
 
 -include_lib("couch/include/couch_db.hrl").
+-include_lib("couch_httpd/include/couch_httpd.hrl").
 -include("include/couch_randomdoc.hrl").
 
 handle_req(#httpd{method='GET'}=Req, Db) ->
