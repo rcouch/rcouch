@@ -76,3 +76,21 @@ If you copied any .so files in the last 2 steps, run this command, so
 that your app can find the libraries:
 
     $ sed -i '/^RUNNER_USER=/a\\nexport LD_LIBRARY_PATH="$RUNNER_BASE_DIR/lib"' ./rel/rcouch/bin/rcouch
+
+
+### Binding port 80
+
+On most UNIX systems binding port 80 is a privileged operation (requires
+root). Running Erlang as root is not recommended so some configuration
+will need to be done so that rcouch can bind port 80.
+
+If you run a recent Linux kernel with capabilities you can give Erlang
+the privilege using the setcap command (you may need to install a
+package named lxc or similar to obtain this command).
+
+    $ setcap 'cap_net_bind_service=+ep' /path/to/rel/refuge/erts-5.8.5/bin/beam`
+    $ setcap 'cap_net_bind_service=+ep' /path/to/rel/refuge/erts-5.8.5/bin/beam.smp
+
+On FreeBSD all ports can be made accessible to all users by issuing:
+
+$ sysctl net.inet.ip.portrange.reservedhigh=0
