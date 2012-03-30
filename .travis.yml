@@ -1,0 +1,8 @@
+before_install:
+   - sudo apt-get update
+   - sudo apt-get install libicu-dev curl 
+script: make rel
+language: erlang
+otp_release:
+   - R15B
+   - R14B04
