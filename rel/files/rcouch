@@ -221,9 +221,11 @@ case "$1" in
         # Start the VM
         exec $CMD
         ;;
-
+    uris)
+        $NODETOOL rpc couch_httpd display_uris
+        ;;
     *)
-        echo "Usage: $SCRIPT {start|start_front|stop|restart|reboot|ping|console|console_clean|attach}"
+        echo "Usage: $SCRIPT {start|start_front|stop|restart|reboot|ping|console|console_clean|attach|uris}"
         exit 1
         ;;
 esac
