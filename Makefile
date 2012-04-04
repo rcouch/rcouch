@@ -2,6 +2,7 @@ REPO=rcouch
 RCOUCH_TAG=	$(shell git describe --tags --always)
 REVISION?=	$(shell echo $(RCOUCH_TAG) | sed -e 's/^$(REPO)-//')
 PKG_VERSION?=	$(shell echo $(REVISION) | tr - .)
+WITHOUT_CURL?=1
 
 DESTDIR?=
 DISTDIR=       rel/archive
@@ -11,7 +12,7 @@ DISTDIR=       rel/archive
 all: deps compile
 
 compile:
-	@rebar compile
+	@WITHOUT_CURL=$(WITHOUT_CURL) rebar compile
 
 deps:
 	@rebar get-deps
@@ -23,7 +24,7 @@ distclean: clean relclean
 	@rebar delete-deps
 
 rel: relclean deps
-	@rebar compile generate
+	@WITHOUT_CURL=$(WITHOUT_CURL) rebar compile generate
 
 relclean:
 	@rm -rf rel/rcouch
