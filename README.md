@@ -48,6 +48,21 @@ fully relocatable, so you can put it where you want on your system.
 To create package for your system run `make package` . For now we build
 packages for OSX, Debian, Redhat & Solaris.
 
+## Build rcouchx
+
+rcouchx is a macosx interface for rcouch based on [the excellent
+work](https://github.com/janl/couchdbx-app) of Jan:
+
+![screenshot of rcouchx](http://benoitc.im/vrac/rcouchx/Screen%20Shot%202012-04-20%20at%2011.55.48%20PM_thumb.png)
+
+
+To build it run the command line:
+
+    $ make rcouchx
+
+Then launch the `rcouchx.app` application.
+
+
 ##Notes on building a truly distributable package
 
 The package built above will still depend on some libraries from your
