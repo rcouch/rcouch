@@ -1,5 +1,5 @@
-rcouch
-------
+rcouch [![Build Status](https://secure.travis-ci.org/refuge/rcouch.png)](http://travis-ci.org/refuge/rcouch)
+------------------------------------------------------------------------------------------------------------
 
 rcouch is a static distribution of couchdb using rebar. It is an
 extraction of the refuge code to ease the distribution of couchdb.
@@ -22,9 +22,6 @@ RCouch is brought you by the [Refuge project](http://refuge.io).
 - relocatable
 - Fully opensource. All the sources are on refuge GIT repository
   (http://github.com/refuge) under Apache License 2.
-
-[![Build Status](https://secure.travis-ci.org/refuge/rcouch.png)](http://travis-ci.org/refuge/rcouch)
-
 
 ## Requirements
 
