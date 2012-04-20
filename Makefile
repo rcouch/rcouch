@@ -3,6 +3,8 @@ RCOUCH_TAG=	$(shell git describe --tags --always)
 REVISION?=	$(shell echo $(RCOUCH_TAG) | sed -e 's/^$(REPO)-//')
 PKG_VERSION?=	$(shell echo $(REVISION) | tr - .)
 WITHOUT_CURL?=1
+RCOUCHX_BUILD=contrib/rcouchx/rcouchx.xcodeproj
+
 
 DESTDIR?=
 DISTDIR=       rel/archive
@@ -62,6 +64,17 @@ package: dist
 
 pkgclean:
 	$(MAKE) -C package pkgclean
+
+
+rcouchx: rel rcouchxbuild
+
+rcouchxbuild: rcouchxclean
+	@xcodebuild -project contrib/rcouchx/rcouchx.xcodeproj
+	@cp -R rel/rcouch contrib/rcouchx/build/Release/rcouchx.app/Contents/Resources/ 
+	@cp -R contrib/rcouchx/build/Release/rcouchx.app .
+
+rcouchxclean:
+	@rm -rf contrib/rcouchx/build
 
 .PHONY: package
 

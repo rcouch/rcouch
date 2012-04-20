@@ -22,7 +22,8 @@ build-aux
 # relase
 rel/rcouch
 dev
-
+rcouchx.app
+contrib/rcouchx/build/
 # couch
 apps/couch/couchjs
 
