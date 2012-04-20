@@ -24,6 +24,8 @@ rel/rcouch
 dev
 rcouchx.app
 contrib/rcouchx/build/
+contrib/rcouchx/DerivedData
+
 # couch
 apps/couch/couchjs
 

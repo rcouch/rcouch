@@ -63,7 +63,7 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="NSMenuItem" id="694149608">
 						<reference key="NSMenu" ref="649796088"/>
-						<string key="NSTitle">CouchDBX</string>
+						<string key="NSTitle">rcouchx</string>
 						<string key="NSKeyEquiv"/>
 						<int key="NSKeyEquivModMask">1048576</int>
 						<int key="NSMnemonicLoc">2147483647</int>
@@ -77,12 +77,12 @@
 						</object>
 						<string key="NSAction">submenuAction:</string>
 						<object class="NSMenu" key="NSSubmenu" id="110575045">
-							<string key="NSTitle">CouchDBX</string>
+							<string key="NSTitle">rcouchx</string>
 							<object class="NSMutableArray" key="NSMenuItems">
 								<bool key="EncodedWithXMLCoder">YES</bool>
 								<object class="NSMenuItem" id="238522557">
 									<reference key="NSMenu" ref="110575045"/>
-									<string key="NSTitle">About CouchDBX</string>
+									<string key="NSTitle">About rcouchx</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="148157794"/>
@@ -779,7 +779,7 @@
 				<int key="NSWindowBacking">2</int>
 				<string key="NSWindowRect">{{50, 437}, {1171, 663}}</string>
 				<int key="NSWTFlags">1946157056</int>
-				<string key="NSWindowTitle">CouchDBX — Time to Relax</string>
+				<string key="NSWindowTitle">rcouchx - the rcouch browser</string>
 				<string key="NSWindowClass">NSWindow</string>
 				<object class="NSToolbar" key="NSViewClass" id="757078045">
 					<object class="NSMutableString" key="NSToolbarIdentifier">
@@ -1087,9 +1087,7 @@
 																	<integer value="5"/>
 																	<object class="NSURL">
 																		<nil key="NS.base"/>
-																		<object class="NSMutableString" key="NS.relative">
-																			<characters key="NS.bytes">file://localhost/Applications/Xcode.app/Contents/SharedFrameworks/DVTKit.framework/Resources/DVTIbeamCursor.tiff</characters>
-																		</object>
+																		<string key="NS.relative">file://localhost/Applications/Xcode.app/Contents/SharedFrameworks/DVTKit.framework/Resources/DVTIbeamCursor.tiff</string>
 																	</object>
 																</object>
 															</object>
@@ -1154,7 +1152,7 @@
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="796897087"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1440, 900}}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
