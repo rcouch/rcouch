@@ -3,8 +3,7 @@ RCOUCH_TAG=	$(shell git describe --tags --always)
 REVISION?=	$(shell echo $(RCOUCH_TAG) | sed -e 's/^$(REPO)-//')
 PKG_VERSION?=	$(shell echo $(REVISION) | tr - .)
 WITHOUT_CURL?=1
-RCOUCHX_BUILD=contrib/rcouchx/rcouchx.xcodeproj
-
+REBAR?=./rebar
 
 DESTDIR?=
 DISTDIR=       rel/archive
@@ -14,19 +13,19 @@ DISTDIR=       rel/archive
 all: deps compile
 
 compile:
-	@WITHOUT_CURL=$(WITHOUT_CURL) rebar compile
+	@WITHOUT_CURL=$(WITHOUT_CURL) $(REBAR) compile
 
 deps:
-	@rebar get-deps
+	@$(REBAR) get-deps
 
 clean: rcouchxclean
-	@rebar clean
+	@$(REBAR) clean
 
 distclean: clean relclean
-	@rebar delete-deps
+	@$(REBAR) delete-deps
 
 rel: relclean deps
-	@WITHOUT_CURL=$(WITHOUT_CURL) rebar compile generate
+	@WITHOUT_CURL=$(WITHOUT_CURL) $(REBAR) compile generate
 
 relclean:
 	@rm -rf rel/rcouch
