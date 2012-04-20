@@ -53,7 +53,7 @@ work](https://github.com/janl/couchdbx-app) of Jan:
 ![screenshot of rcouchx](http://benoitc.im/vrac/rcouchx/Screen%20Shot%202012-04-20%20at%2011.55.48%20PM_thumb.png)
 
 
-To build it run the command line:
+To build it, run the command line:
 
     $ make rcouchx
 
@@ -93,7 +93,7 @@ that your app can find the libraries:
     $ sed -i '/^RUNNER_USER=/a\\nexport LD_LIBRARY_PATH="$RUNNER_BASE_DIR/lib"' ./rel/rcouch/bin/rcouch
 
 
-### Binding port 80
+## Binding port 80
 
 On most UNIX systems binding port 80 is a privileged operation (requires
 root). Running Erlang as root is not recommended so some configuration
