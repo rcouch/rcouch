@@ -97,8 +97,9 @@
     [browse setEnabled:NO];
 	
 	NSLayoutManager *lm;
+    
 	lm = [outputView layoutManager];
-	[lm setDelegate:self];
+	[lm setDelegate:(id < NSLayoutManagerDelegate >) self];
 	
 	[webView setUIDelegate:self];
 	
@@ -125,6 +126,21 @@
     [browse setEnabled:NO];
     [start setImage:[NSImage imageNamed:@"start.png"]];
     [start setLabel:@"start"];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:[self uriFile]]) {
+		[[NSFileManager defaultManager] removeItemAtPath:[self uriFile] error:NULL];
+	}
+}
+
+-(void)waitStartup
+{
+    while(1) {
+        if(![[NSFileManager defaultManager] fileExistsAtPath:[self uriFile]]) {
+            sleep(1);
+        } else {
+            break;
+        }
+    }
 }
 
 -(void)setInitParams
@@ -213,7 +229,7 @@
   	[outputView setString:@"Starting rcouch...\n"];
   	[fh readInBackgroundAndNotify];
     
-    sleep(3);
+    [self waitStartup];
 	[self openFuton];
 	
 }
@@ -246,8 +262,6 @@
     [futonUri appendString:uri];
     [futonUri appendString:@"_utils/"];
     
-//	NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
-//	NSString *homePage = [info objectForKey:@"HomePage"];
 	[webView setTextSizeMultiplier:1.3];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:futonUri]]];
     
@@ -256,7 +270,6 @@
 -(IBAction)browse:(id)sender
 {
 	[self openFuton];
-    //[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://127.0.0.1:5984/_utils/"]];
 }
 
 - (void)appendData:(NSData *)d

@@ -74,7 +74,7 @@ rcouchxbuild: rcouchxclean
 	@cp -R contrib/rcouchx/build/Release/rcouchx.app .
 
 rcouchxclean:
-	@rm -rf rcouchx-build
+	@xcodebuild -project contrib/rcouchx/rcouchx.xcodeproj clean
 	@rm -rf contrib/rcouchx/build
 	@rm -rf rcouchx.app
 

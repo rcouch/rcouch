@@ -286,16 +286,6 @@
 				GCC_PREFIX_HEADER = rcouchx_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/rcouch/erts-5.9.1/lib/internal\"",
-					"\"$(SRCROOT)/rcouch/erts-5.9.1/lib\"",
-					"\"$(SRCROOT)/rcouch/lib\"",
-					"\"$(SRCROOT)/rcouch\"",
-					"\"$(SRCROOT)/rcouch/erts-5.9.1/lib/internal\"",
-					"\"$(SRCROOT)/rcouch/erts-5.9.1/lib\"",
-					"\"$(SRCROOT)/rcouch/lib\"",
-				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = rcouchx;
@@ -321,16 +311,6 @@
 				GCC_PREFIX_HEADER = rcouchx_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/rcouch/erts-5.9.1/lib/internal\"",
-					"\"$(SRCROOT)/rcouch/erts-5.9.1/lib\"",
-					"\"$(SRCROOT)/rcouch/lib\"",
-					"\"$(SRCROOT)/rcouch\"",
-					"\"$(SRCROOT)/rcouch/erts-5.9.1/lib/internal\"",
-					"\"$(SRCROOT)/rcouch/erts-5.9.1/lib\"",
-					"\"$(SRCROOT)/rcouch/lib\"",
-				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = rcouchx;

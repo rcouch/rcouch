@@ -5,7 +5,7 @@ ZIPNAME		= rcouchx-$(REVISION).zip
 DMGFOLDER	= packages/$(APP)-$(REVISION)
 
 # simply tar up the rel directory and sha the file
-build: buildrel
+build: clean buildrel
 	@echo "Building package $(PKGNAME)"
 	mkdir -p packages
 	cd $(BUILDDIR)/$(APP)-$(REVISION) && \
@@ -36,12 +36,11 @@ dmg: cleanrcouchx buildrcouchx
 	cd packages && \
 		shasum -a 256 $(ZIPNAME) > $(ZIPNAME).sha
 
+clean:
+	@rm -rf $(BUILDDIR)
 
-cleanrcouchx:
-	@rm -rf packages/$(DMGNAME)
-	@rm -rf packages/$(DMGNAME).sha
-	@rm -rf packages/$(ZIPNAME)
-	@rm -rf packages/$(ZIPNAME).sha
+cleanrcouchx: clean
+	@rm -rf packages
 
 # Build the release we need to package
 buildrel: $(BUILDDIR)/$(APP)-$(REVISION)
