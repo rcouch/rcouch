@@ -44,3 +44,5 @@ deps
 ebin
 distdir
 package/osxbuild
+package/packages
+

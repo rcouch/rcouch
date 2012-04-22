@@ -1,3 +1,4 @@
+ARCH= $(shell uname -m)
 REPO=rcouch
 RCOUCH_TAG=	$(shell git describe --tags --always)
 REVISION?=	$(shell echo $(RCOUCH_TAG) | sed -e 's/^$(REPO)-//')
@@ -71,13 +72,17 @@ rcouchxbuild: rcouchxclean
 	@cp -R contrib/rcouchx rcouchx-build
 	@cp -R rel/rcouch rcouchx-build/
 	@xcodebuild -project rcouchx-build/rcouchx.xcodeproj
-	@cp -R rcouchx-build/rcouch rcouchx-build/build/Release/rcouchx.app/Contents/Resources/ 
+	@cp -R rcouchx-build/rcouch rcouchx-build/build/Release/rcouchx.app/Contents/Resources/
 	@cp -R rcouchx-build/build/Release/rcouchx.app .
 
 rcouchxclean:
 	@rm -rf rcouchx-build
 	@rm -rf contrib/rcouchx/build
 	@rm -rf rcouchx.app
+
+rcouchxdmg: dist
+	$(MAKE) -C package rcouchx
+
 
 .PHONY: package
 

@@ -14,4 +14,7 @@ third parties attributions
     under Apache 2 license
     2010 (c) Basho Technologies
 
+- packages/osx/makedmg.sh
+    under BSD license
+    2011 (c) Coucbase
 

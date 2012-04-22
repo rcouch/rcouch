@@ -1,8 +1,11 @@
 ARCH        = $(shell uname -m)
 PKGNAME     = $(APP)-$(REVISION)-osx-$(ARCH).tar.gz
+DMGNAME		= rcouchx-$(REVISION).dmg
+ZIPNAME		= rcouchx-$(REVISION).zip
+DMGFOLDER	= packages/$(APP)-$(REVISION)
 
 # simply tar up the rel directory and sha the file
-build: buildrel 
+build: buildrel
 	@echo "Building package $(PKGNAME)"
 	mkdir -p packages
 	cd $(BUILDDIR)/$(APP)-$(REVISION) && \
@@ -11,11 +14,42 @@ build: buildrel
 	cd packages && \
 		for tarfile in `ls *.gz`; do \
 			shasum -a 256 $${tarfile} > $${tarfile}.sha \
-		; done
+		; reldone
+
+dmg: cleanrcouchx buildrcouchx
+	@echo "Building package $(PKGNAME)"
+	mkdir -p packages
+	cd $(BUILDDIR)/$(APP)-$(REVISION) && \
+		ditto -ck --keepParent "rcouchx.app" ../../packages/$(ZIPNAME)
+	cp -f osx/README.txt $(BUILDDIR)/$(APP)-$(REVISION)/
+	cp -f ../LICENSE $(BUILDDIR)/$(APP)-$(REVISION)/LICENSE.txt
+	cp -f osx/dmg-background.png $(BUILDDIR)/$(APP)-$(REVISION)
+	cp -f osx/setviewoptions.applescript $(BUILDDIR)/$(APP)-$(REVISION)
+	cp -f osx/makedmg.sh $(BUILDDIR)/$(APP)-$(REVISION)/
+	cp -f "../contrib/rcouchx/rcouch.icns" $(BUILDDIR)/$(APP)-$(REVISION)/
+	(cd $(BUILDDIR)/$(APP)-$(REVISION) &&  \
+		./makedmg.sh "$(DMGNAME)" "rcouchx.app" "rcouchx" dmg-background.png rcouch.icns)
+	cp -f $(BUILDDIR)/$(APP)-$(REVISION)/$(DMGNAME) packages/
+	ditto -ck --keepParent "packages/$(DMGNAME)" packages/$(ZIPNAME)
+	cd packages && \
+		shasum -a 256 $(DMGNAME) > $(DMGNAME).sha
+	cd packages && \
+		shasum -a 256 $(ZIPNAME) > $(ZIPNAME).sha
+
+
+cleanrcouchx:
+	@rm -rf packages/$(DMGNAME)
+	@rm -rf packages/$(DMGNAME).sha
+	@rm -rf packages/$(ZIPNAME)
+	@rm -rf packages/$(ZIPNAME).sha
 
 # Build the release we need to package
 buildrel: $(BUILDDIR)/$(APP)-$(REVISION)
 	cd $^ && $(MAKE) deps compile rel
+
+
+buildrcouchx: $(BUILDDIR)/$(APP)-$(REVISION)
+	cd $^ && $(MAKE) deps rcouchx
 
 $(BUILDDIR)/$(APP)-$(REVISION): $(BUILDDIR) $(APP)-$(REVISION).tar.gz
 	tar xz -C $(BUILDDIR) -f $(APP)-$(REVISION).tar.gz

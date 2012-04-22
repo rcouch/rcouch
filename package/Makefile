@@ -26,7 +26,7 @@ endif
 APP		 = $(shell echo "$(REPO)" | sed -e 's/_/-/g')
 # Assumes CURDIR is .../$(APP)/package/$(APP)/
 RCOUCH_PATH	?= ..
-RELEASE		?= 
+RELEASE		?=
 
 $(APP)-$(REVISION).tar.gz: ../$(RCOUCH_TAG).tar.gz
 	ln -s $< $@
@@ -41,5 +41,7 @@ pkgcheck:
 
 # The heavy lifting is done by the individual packager Makefiles
 package: pkgcheck build
+
+rcouchx: pkgcheck dmg
 
 include $(PKGERDIR)/Makefile
