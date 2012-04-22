@@ -19,8 +19,6 @@ build: clean buildrel
 dmg: cleanrcouchx buildrcouchx
 	@echo "Building package $(PKGNAME)"
 	mkdir -p packages
-	cd $(BUILDDIR)/$(APP)-$(REVISION) && \
-		ditto -ck --keepParent "rcouchx.app" ../../packages/$(ZIPNAME)
 	cp -f osx/README.txt $(BUILDDIR)/$(APP)-$(REVISION)/
 	cp -f ../LICENSE $(BUILDDIR)/$(APP)-$(REVISION)/LICENSE.txt
 	cp -f osx/dmg-background.png $(BUILDDIR)/$(APP)-$(REVISION)
@@ -30,9 +28,8 @@ dmg: cleanrcouchx buildrcouchx
 	(cd $(BUILDDIR)/$(APP)-$(REVISION) &&  \
 		./makedmg.sh "$(DMGNAME)" "rcouchx.app" "rcouchx" dmg-background.png rcouch.icns)
 	cp -f $(BUILDDIR)/$(APP)-$(REVISION)/$(DMGNAME) packages/
-	ditto -ck --keepParent "packages/$(DMGNAME)" packages/$(ZIPNAME)
 	cd packages && \
-		shasum -a 256 $(DMGNAME) > $(DMGNAME).sha
+		zip $(ZIPNAME) $(DMGNAME)
 	cd packages && \
 		shasum -a 256 $(ZIPNAME) > $(ZIPNAME).sha
 

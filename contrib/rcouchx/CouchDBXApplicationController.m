@@ -16,6 +16,7 @@
 -(void)applicationWillTerminate:(NSNotification *)notification
 {
 	[self ensureFullCommit];
+    
 }
 
 - (void)windowWillClose:(NSNotification *)aNotification 
@@ -116,6 +117,11 @@
     [self launchCouchDB];
 }
 
+-(void)deleteUri
+{
+    [[NSFileManager defaultManager] removeItemAtPath:[self uriFile] error:NULL];
+}
+
 -(void)stop
 {
     NSFileHandle *writer;
@@ -127,9 +133,8 @@
     [start setImage:[NSImage imageNamed:@"start.png"]];
     [start setLabel:@"start"];
     
-    if ([[NSFileManager defaultManager] fileExistsAtPath:[self uriFile]]) {
-		[[NSFileManager defaultManager] removeItemAtPath:[self uriFile] error:NULL];
-	}
+    [self deleteUri];
+    
 }
 
 -(void)waitStartup
@@ -149,12 +154,13 @@
 	// determine data dir
 	NSString *dataDir = [self applicationSupportFolder];
     
-    
 	// create if it doesn't exist
 	if(![[NSFileManager defaultManager] fileExistsAtPath:dataDir]) {
 		[[NSFileManager defaultManager] createDirectoryAtPath:dataDir withIntermediateDirectories:YES attributes:nil error:NULL];
 	}
     
+    // delete uri file if needed
+    [self deleteUri];
     
     dictionary* iniDict = iniparser_load([[self finalConfigPath] UTF8String]);
     if (iniDict == NULL) {
@@ -250,6 +256,8 @@
 		out = nil;
 
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    [self deleteUri];
 }
 
 -(void)openFuton
