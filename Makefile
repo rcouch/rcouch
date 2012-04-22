@@ -19,7 +19,7 @@ compile:
 deps:
 	@rebar get-deps
 
-clean:
+clean: rcouchxclean
 	@rebar clean
 
 distclean: clean relclean
@@ -75,6 +75,7 @@ rcouchxbuild: rcouchxclean
 
 rcouchxclean:
 	@rm -rf contrib/rcouchx/build
+	@rm -rf rcouchx.app
 
 .PHONY: package
 
