@@ -28,7 +28,7 @@ contrib/rcouchx/DerivedData
 rcouchx-build
 contrib/DerivedData
 contrib/rcouchx/rcouchx.xcodeproj/xcuserdata
-
+contrib/rcouchx.xcworkspace/xcuserdata
 # couch
 apps/couch/couchjs
 
