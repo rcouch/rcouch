@@ -4,6 +4,8 @@
  */
 #import "CouchDBXApplicationController.h"
 
+#import "iniparser.h"
+
 @implementation CouchDBXApplicationController
 
 -(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)app
@@ -26,17 +28,48 @@
 
 }
 
--(void)ensureFullCommit
-{
-	// determine data dir
-	NSString *dataDir = [self applicationSupportFolder];
-    
+/* found at http://www.cocoadev.com/index.pl?ApplicationSupportFolder */
+- (NSString *)applicationSupportFolder:(NSString*)appName {
+    NSString *applicationSupportFolder = nil;
+    FSRef foundRef;
+    OSErr err = FSFindFolder(kUserDomain, kApplicationSupportFolderType, kDontCreateFolder, &foundRef);
+    if (err == noErr) {
+        unsigned char path[PATH_MAX];
+        OSStatus validPath = FSRefMakePath(&foundRef, path, sizeof(path));
+        if (validPath == noErr) {
+            applicationSupportFolder = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:(const char *)path
+                                                                                                   length:(NSUInteger)strlen((char*)path)];
+        }
+    }
+	applicationSupportFolder = [applicationSupportFolder stringByAppendingPathComponent:appName];
+    return applicationSupportFolder;
+}
+
+- (NSString *)applicationSupportFolder {
+    return [self applicationSupportFolder:@"rcouchx"];
+}
+
+-(NSMutableString *)uriFile
+{    
     NSMutableString *urifile = [[NSMutableString alloc] init];
-	[urifile appendString:dataDir]; // rcouch
-	[urifile appendString:@"/couch.uri"];
     
+    [urifile appendString:[self applicationSupportFolder]];
+    [urifile appendString:@"/couch.uri"];
+    return urifile;
+}
+
+-(NSMutableString *) finalConfigPath
+{
+    NSMutableString *iniFile = [[NSMutableString alloc] init];;
+    [iniFile appendString:[[NSBundle mainBundle] resourcePath]];
+    [iniFile appendString:@"/rcouch/etc/local.ini"];
+    return iniFile;
+}
+
+-(void)ensureFullCommit
+{    
 	// get couch uri
-	NSString *uri = [NSString stringWithContentsOfFile:urifile encoding:NSUTF8StringEncoding error:NULL];
+	NSString *uri = [NSString stringWithContentsOfFile:[self uriFile] encoding:NSUTF8StringEncoding error:NULL];
     uri = [uri substringToIndex:[uri length] - 1];
 
 	// TODO: maybe parse out \n
@@ -57,6 +90,7 @@
 	[commitTask waitUntilExit];
 
 }
+
 
 -(void)awakeFromNib
 {
@@ -93,61 +127,53 @@
     [start setLabel:@"start"];
 }
 
-
-/* found at http://www.cocoadev.com/index.pl?ApplicationSupportFolder */
-- (NSString *)applicationSupportFolder {
-    NSString *applicationSupportFolder = nil;
-    FSRef foundRef;
-    OSErr err = FSFindFolder(kUserDomain, kApplicationSupportFolderType, kDontCreateFolder, &foundRef);
-    if (err == noErr) {
-        unsigned char path[PATH_MAX];
-        OSStatus validPath = FSRefMakePath(&foundRef, path, sizeof(path));
-        if (validPath == noErr)
-        {
-            applicationSupportFolder = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:path length:(NSUInteger)strlen((char*)path)];
-        }
-    }
-	applicationSupportFolder = [applicationSupportFolder stringByAppendingPathComponent:@"rcouchx"];
-    return applicationSupportFolder;
-}
-
--(void)maybeSetDataDirs
+-(void)setInitParams
 {
+    
 	// determine data dir
 	NSString *dataDir = [self applicationSupportFolder];
+    
+    
 	// create if it doesn't exist
 	if(![[NSFileManager defaultManager] fileExistsAtPath:dataDir]) {
 		[[NSFileManager defaultManager] createDirectoryAtPath:dataDir withIntermediateDirectories:YES attributes:nil error:NULL];
 	}
+    
+    
+    dictionary* iniDict = iniparser_load([[self finalConfigPath] UTF8String]);
+    if (iniDict == NULL) {
+        iniDict = dictionary_new(0);
+        assert(iniDict);
+    }
+    
+    dictionary_set(iniDict, "couchdb", NULL);
+    if (iniparser_getstring(iniDict, "couchdb:database_dir", NULL) == NULL) {
+        dictionary_set(iniDict, "couchdb:database_dir", [dataDir UTF8String]);
+    }
+    if (iniparser_getstring(iniDict, "couchdb:view_index_dir", NULL) == NULL) {
+        dictionary_set(iniDict, "couchdb:view_index_dir", [dataDir UTF8String]);
+    }
+    
+    if (iniparser_getstring(iniDict, "couchdb:uri_file", NULL) == NULL) {
+        dictionary_set(iniDict, "couchdb:uri_file", [[self uriFile] UTF8String]);
+    }
 
-	// if data dirs are not set in local.ini
-	NSMutableString *iniFile = [[NSMutableString alloc] init];
-	[iniFile appendString:[[NSBundle mainBundle] resourcePath]];
-	[iniFile appendString:@"/rcouch/etc/local.ini"];
-	NSString *ini = [NSString stringWithContentsOfFile:iniFile encoding:NSUTF8StringEncoding error:NULL];
-	NSRange found = [ini rangeOfString:dataDir];
-	if(found.length == 0) {
-		//   set them
-		NSMutableString *newIni = [[NSMutableString alloc] init];
-		[newIni appendString: ini];
-		[newIni appendString:@"[couchdb]\ndatabase_dir = "];
-		[newIni appendString:dataDir];
-		[newIni appendString:@"\nview_index_dir = "];
-		[newIni appendString:dataDir];
-        [newIni appendString:@"\nuri_file= "];
-		[newIni appendString:dataDir];
-        [newIni appendString:@"/couch.uri"];
-		[newIni appendString:@"\n\n"];
-		[newIni writeToFile:iniFile atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-		[newIni release];
-	}
-	[iniFile release];
-	// done
+    NSString *tmpfile = [NSString stringWithFormat:@"%@.tmp", [self finalConfigPath]];
+    FILE *f = fopen([tmpfile UTF8String], "w");
+    if (f) {
+        iniparser_dump_ini(iniDict, f);
+        fclose(f);
+        rename([tmpfile UTF8String], [[self finalConfigPath] UTF8String]);
+    } else {
+        NSLog(@"Can't write to temporary config file:  %@:  %s\n", tmpfile, strerror(errno));
+    }
+    
+    iniparser_freedict(iniDict);
 }
 
 -(void)launchCouchDB
 {
-	[self maybeSetDataDirs];
+	[self setInitParams];
     [browse setEnabled:YES];
     [start setImage:[NSImage imageNamed:@"stop.png"]];
     [start setLabel:@"stop"];
@@ -186,8 +212,10 @@
   	[task launch];
   	[outputView setString:@"Starting rcouch...\n"];
   	[fh readInBackgroundAndNotify];
-	sleep(1);
+    
+    sleep(3);
 	[self openFuton];
+	
 }
 
 -(void)taskTerminated:(NSNotification *)note
@@ -210,15 +238,8 @@
 
 -(void)openFuton
 {
-    // determine data dir
-	NSString *dataDir = [self applicationSupportFolder];
-    
-    NSMutableString *urifile = [[NSMutableString alloc] init];
-	[urifile appendString:dataDir]; // rcouch
-	[urifile appendString:@"/couch.uri"];
-    
 	// get couch uri
-	NSString *uri = [NSString stringWithContentsOfFile:urifile encoding:NSUTF8StringEncoding error:NULL];
+	NSString *uri = [NSString stringWithContentsOfFile:[self uriFile] encoding:NSUTF8StringEncoding error:NULL];
     uri = [uri substringToIndex:[uri length] - 1];
 
     NSMutableString *futonUri = [[NSMutableString alloc] init];
@@ -229,6 +250,7 @@
 //	NSString *homePage = [info objectForKey:@"HomePage"];
 	[webView setTextSizeMultiplier:1.3];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:futonUri]]];
+    
 }
 
 -(IBAction)browse:(id)sender
@@ -255,6 +277,8 @@
     }
     if (task)
       [[out fileHandleForReading] readInBackgroundAndNotify];
+    
+    
 }
 
 - (void)layoutManager:(NSLayoutManager *)aLayoutManager didCompleteLayoutForTextContainer:(NSTextContainer *)aTextContainer atEnd:(BOOL)flag

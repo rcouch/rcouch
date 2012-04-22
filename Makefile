@@ -68,11 +68,14 @@ pkgclean:
 rcouchx: rel rcouchxbuild
 
 rcouchxbuild: rcouchxclean
-	@xcodebuild -project contrib/rcouchx/rcouchx.xcodeproj
-	@cp -R rel/rcouch contrib/rcouchx/build/Release/rcouchx.app/Contents/Resources/ 
-	@cp -R contrib/rcouchx/build/Release/rcouchx.app .
+	@cp -R contrib/rcouchx rcouchx-build
+	@cp -R rel/rcouch rcouchx-build/
+	@xcodebuild -project rcouchx-build/rcouchx.xcodeproj
+	@cp -R rcouchx-build/rcouch rcouchx-build/build/Release/rcouchx.app/Contents/Resources/ 
+	@cp -R rcouchx-build/build/Release/rcouchx.app .
 
 rcouchxclean:
+	@rm -rf rcouchx-build
 	@rm -rf contrib/rcouchx/build
 	@rm -rf rcouchx.app
 

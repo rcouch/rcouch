@@ -19,7 +19,7 @@
 	<key>CFBundleSignature</key>
 	<string>jlcd</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.0</string>
+	<string>0.5.1</string>
 	<key>HomePage</key>
 	<string>http://127.0.0.1:5984/_utils/</string>
 	<key>LSApplicationCategoryType</key>
