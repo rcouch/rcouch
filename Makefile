@@ -19,7 +19,7 @@ compile:
 deps:
 	@$(REBAR) get-deps
 
-clean: rcouchxclean
+clean: 
 	@$(REBAR) clean
 
 distclean: clean relclean
