@@ -25,7 +25,7 @@ RCouch is brought you by the [Refuge project](http://refuge.io).
 
 ## Requirements
 
-- OS supported: Linux, OSX, BSDs, and Windows
+The following operating systems are supported: Linux, OSX, BSDs, and Windows
 
 Linux/Unix: 
 - Erlang R14|15
@@ -62,6 +62,8 @@ prepare your system.
 Once installed, just run:
 	
 	$ refuge-make rel
+
+### Where to Find Your Release
 
 Building with the rel target will generate a couch folder in rel/couch. This 
 release is fully relocatable, so you can put it where you want on your system.
