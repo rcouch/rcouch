@@ -25,8 +25,8 @@ RCouch is brought you by the [Refuge project](http://refuge.io).
 
 ## Requirements
 
-- OS supported: Linux, OSX, BSDs (windows support is coming)
-- Erlang R14
+- OS supported: Linux, OSX, BSDs, and Windows
+- Erlang R14|15
 - Curl
 - ICU (if not built statically)
 - Latest version of [rebar](http://github.com/basho/rebar) installed on
@@ -36,16 +36,17 @@ RCouch is brought you by the [Refuge project](http://refuge.io).
 
 Installation is pretty simple. Just run the command line:
 
-    $ make rel
+    $ make rel          # Linux, unix
+	$ refuge-make rel   # Windows
 
 and it will generate a couch folder in rel/couch. This release is
 fully relocatable, so you can put it where you want on your system.
 
 
 To create package for your system run `make package` . For now we build
-packages for OSX, Debian, Redhat & Solaris.
+packages for OSX, Debian, Redhat, Solaris and Windows
 
-## Build rcouchx
+## Building rcouchx for MacOSX
 
 rcouchx is a macosx interface for rcouch based on [the excellent
 work](https://github.com/janl/couchdbx-app) of Jan:
