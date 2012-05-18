@@ -51,7 +51,9 @@ Installation is pretty simple. Just run:
 Refuge-Build is our project support for Windows for the tool chains necessary 
 for compilation. Just download and run the refuge-build-setup.exe installer. 
 Refuge-Build will install at c:\refuge-build. Refuge-Build includes Portable
-msysGit. 
+msysGit.
+
+![screenshot of Refuge-Build](https://github.com/refuge/refuge-media/blob/master/screenshots/refuge-build/installer.png)
 
 Refuge-Build also comes complete with automation for installing Windows 7.1 SDK
 (MSVC10),.NET 4 Framework and Erlang 15B01. If you already have these on your 
