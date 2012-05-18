@@ -26,24 +26,47 @@ RCouch is brought you by the [Refuge project](http://refuge.io).
 ## Requirements
 
 - OS supported: Linux, OSX, BSDs, and Windows
+
+Linux/Unix: 
 - Erlang R14|15
+- Git
 - Curl
 - ICU (if not built statically)
-- Latest version of [rebar](http://github.com/basho/rebar) installed on
-  your system.
+
+Windows:
+- Erlang 15B01
+- Windows SDK 7.1 including .NET 4 Framework
+- Refuge-Build
 
 ## Installation
 
-Installation is pretty simple. Just run the command line:
+### Linux/Unix
 
-    $ make rel          # Linux, unix
-	$ refuge-make rel   # Windows
+Installation is pretty simple. Just run:
 
-and it will generate a couch folder in rel/couch. This release is
-fully relocatable, so you can put it where you want on your system.
+    $ make rel
 
+### Windows
 
-To create package for your system run `make package` . For now we build
+Refuge-Build is our project support for Windows for the tool chains necessary 
+for compilation. Just download and run the refuge-build-setup.exe installer. 
+Refuge-Build will install at c:\refuge-build. Refuge-Build includes Portable
+msysGit. 
+
+Refuge-Build also comes complete with automation for installing Windows 7.1 SDK
+(MSVC10),.NET 4 Framework and Erlang 15B01. If you already have these on your 
+system, anticipate approximately 2 minutes to download and install Refuge-Build.
+If you need to install the prerequisite software, anticipate 15 min total to 
+prepare your system.
+
+Once installed, just run:
+	
+	$ refuge-make rel
+
+Building with the rel target will generate a couch folder in rel/couch. This 
+release is fully relocatable, so you can put it where you want on your system.
+
+To create package for your system run `make package`. We build
 packages for OSX, Debian, Redhat, Solaris and Windows
 
 ## Building rcouchx for MacOSX
