@@ -14,7 +14,7 @@ DISTDIR=rel/archive
 
 .PHONY: rebar rel deps
 
-all: rebar deps compile
+all: deps compile
 
 bootstrap = if [ ! -d $(SUPPORT_DIR)/rebar ]; then \
 			mkdir -p $(SUPPORT_DIR)/rebar && \
@@ -29,7 +29,7 @@ rebar:
 	@(cd $(SUPPORT_DIR)/rebar && ./bootstrap)
 	@cp $(SUPPORT_DIR)/rebar/rebar .
 
-compile: rebar
+compile:
 	@WITHOUT_CURL=$(WITHOUT_CURL) $(REBAR) compile
 
 deps: rebar
