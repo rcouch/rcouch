@@ -6,7 +6,7 @@ PKG_VERSION?=	$(shell echo $(REVISION) | tr - .)
 WITHOUT_CURL?=1
 REBAR?=./rebar
 SUPPORT_DIR=support
-REBAR_MASTER=git://github.com/basho/rebar.git
+REBAR_MASTER=git://github.com/refuge/rebar.git
 
 DESTDIR?=
 DISTDIR=rel/archive
