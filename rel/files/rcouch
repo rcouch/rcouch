@@ -94,6 +94,8 @@ case "$1" in
 
 
         # Setup beam-required vars
+        HEART_COMMAND="$RUNNER_SCRIPT_DIR/$SCRIPT start_front"
+        export HEART_COMMAND
         ROOTDIR=$RUNNER_BASE_DIR
         BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
         EMU=beam
