@@ -1,7 +1,7 @@
 before_install:
    - sudo apt-get update
-   - sudo apt-get install libicu-dev curl 
-script: make rel
+   - sudo apt-get install curl 
+script: make rel USE_STATIC_ICU=1
 language: erlang
 otp_release:
    - R15B
