@@ -1,8 +1,10 @@
 before_install:
    - sudo apt-get update
-   - sudo apt-get install curl 
+   - sudo apt-get install curl libcurl4-openssl-dev libcurl3 
 script: make rel USE_STATIC_ICU=1
 language: erlang
 otp_release:
+   - R15B02
+   - R15B01
    - R15B
    - R14B04
