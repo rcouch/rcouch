@@ -26,7 +26,7 @@ RCouch is brought you by the [Refuge project](http://refuge.io).
 ## Requirements
 
 - OS supported: Linux, OSX, BSDs (windows support is coming)
-- Erlang R14
+- Erlang R15
 - Curl
 - zip (during build)
 - ICU (if not built statically)
