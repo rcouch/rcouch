@@ -42,7 +42,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Apache CouchDB Documentation'
+project = u'rcouch'
 copyright = u'2012, The Apache Foundation'
 
 # The version info for the project you're documenting, acts as replacement for
