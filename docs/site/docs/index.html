@@ -1,0 +1,188 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Apache CouchDB Documentation &mdash; An Introduction to libuv</title>
+    
+    <link rel="stylesheet" href="static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="An Introduction to libuv" href="#" />
+    <link rel="next" title="Introduction" href="intro.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="#">
+          <span>An Introduction to libuv</span></a></h1>
+        <h2 class="heading"><span>Apache CouchDB Documentation</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        <a class="uplink" href="#">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="intro.html">Introduction</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="apache-couchdb-documentation">
+<h1>Apache CouchDB Documentation<a class="headerlink" href="#apache-couchdb-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#using-futon">Using Futon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#using-curl">Using <tt class="docutils literal"><span class="pre">curl</span></tt></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-basics.html">CouchDB API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-basics.html#request-format-and-responses">Request Format and Responses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-basics.html#http-headers">HTTP Headers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-basics.html#json-basics">JSON Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-basics.html#http-status-codes">HTTP Status Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-basics.html#couchdb-api-overview">CouchDB API Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="range.html">HTTP Range Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuring.html">Configuring CouchDB</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuring.html#couchdb-configuration-files">CouchDB Configuration Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuring.html#configuration-file-locations">Configuration File Locations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuring.html#update-notifications">Update Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuring.html#mochiweb-server-options">MochiWeb Server Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuring.html#socket-options-configuration-setting">Socket Options Configuration Setting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuring.html#vhosts-definitions"><tt class="docutils literal"><span class="pre">vhosts</span></tt> definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ssl.html">Native SSL Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os-daemons.html">OS Daemons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="http-proxying.html">HTTP Proxying</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config_reference.html">Configuration options reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#configuration-groups">Configuration Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#attachments-configuration-options">attachments Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#couchdb-configuration-options">couchdb Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#daemons-configuration-options">daemons Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#httpd-db-handlers-configuration-options">httpd_db_handlers Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#couch-httpd-auth-configuration-options">couch_httpd_auth Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#httpd-configuration-options">httpd Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#httpd-design-handlers-configuration-options">httpd_design_handlers Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#httpd-global-handlers-configuration-options">httpd_global_handlers Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#log-configuration-options">log Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#query-servers-configuration-options">query_servers Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#query-server-config-configuration-options">query_server_config Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#replicator-configuration-options">replicator Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#stats-configuration-options">stats Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_reference.html#uuids-configuration-options">uuids Configuration Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="replication.html">Replicator Database</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="replication.html#basics">Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="replication.html#documents-describing-the-same-replication">Documents describing the same replication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="replication.html#canceling-replications">Canceling replications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="replication.html#server-restart">Server restart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="replication.html#changing-the-replicator-database">Changing the Replicator Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="replication.html#replicating-the-replicator-database">Replicating the replicator database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="replication.html#delegations">Delegations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ddocs.html">Design Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonjs.html">CommonJS support for map functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="errors.html">Error Messages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Changes Feed</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#polling">Polling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#long-polling">Long Polling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#continuous">Continuous</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#filters">Filters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="release.html">CouchDB Release 1.0.0 Feature Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="release.html#upgrading-to-couchdb-version">Upgrading to CouchDB 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release.html#new-features-in-couchdb-version">New features in CouchDB 1.0.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/configuration.html">Configuration Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/authn.html">Authentication Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/database.html">Database Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/documents.html">Document Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/design.html">Design Document Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/misc.html">Miscellaneous Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/local.html">Local (non-replicating) Document Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/dbmaint.html">Database Maintenance</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="json-structure.html">JSON Structure Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#all-database-documents">All Database Documents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#bulk-document-response">Bulk Document Response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#bulk-documents">Bulk Documents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#changes-information-for-a-database">Changes information for a database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#couchdb-document">CouchDB Document</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#couchdb-error-status">CouchDB Error Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#couchdb-database-information-object">CouchDB database information object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#design-document">Design Document</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#design-document-information">Design Document Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#design-document-spatial-index-information">Design Document spatial index Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#document-with-attachments">Document with Attachments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#list-of-active-tasks">List of Active Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#replication-settings">Replication Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#replication-status">Replication Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#request-object">Request object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#returned-couchdb-document-with-detailed-revision-info">Returned CouchDB Document with Detailed Revision Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#returned-couchdb-document-with-revision-info">Returned CouchDB Document with Revision Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#returned-document-with-attachments">Returned Document with Attachments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#security-object">Security Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json-structure.html#user-context-object">User Context Object</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        <a class="uplink" href="#">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="intro.html">Introduction</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, The Apache Foundation.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

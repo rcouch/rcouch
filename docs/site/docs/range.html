@@ -1,0 +1,122 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>HTTP Range Requests &mdash; An Introduction to libuv</title>
+    
+    <link rel="stylesheet" href="static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="An Introduction to libuv" href="index.html" />
+    <link rel="next" title="Configuring CouchDB" href="configuring.html" />
+    <link rel="prev" title="CouchDB API" href="api-basics.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>An Introduction to libuv</span></a></h1>
+        <h2 class="heading"><span>HTTP Range Requests</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="api-basics.html">CouchDB API</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="configuring.html">Configuring CouchDB</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="http-range-requests">
+<h1>HTTP Range Requests<a class="headerlink" href="#http-range-requests" title="Permalink to this headline">¶</a></h1>
+<p>HTTP allows you to specify byte ranges for requests. This allows the
+implementation of resumable downloads and skippable audio and video
+streams alike. This is available for all attachments inside CouchDB.</p>
+<p>This is just a real quick run through how this looks under the hood.
+Usually, you will have larger binary files to serve from CouchDB, like
+MP3s and videos, but to make things a little more obvious, I use a text
+file here (Note that I use the <tt class="docutils literal"><span class="pre">application/octet-stream</span></tt> Content-Type
+instead of <tt class="docutils literal"><span class="pre">text/plain</span></tt>).</p>
+<div class="highlight-bash"><div class="highlight"><pre>shell&gt; cat file.txt
+My hovercraft is full of eels!
+</pre></div>
+</div>
+<p>Now let&#8217;s store this text file as an attachment in CouchDB. First, we
+create a database:</p>
+<div class="highlight-bash"><div class="highlight"><pre>shell&gt; curl -X PUT http://127.0.0.1:5984/test
+<span class="o">{</span><span class="s2">&quot;ok&quot;</span>:true<span class="o">}</span>
+</pre></div>
+</div>
+<p>Then we create a new document and the file attachment in one go:</p>
+<div class="highlight-bash"><div class="highlight"><pre>shell&gt; curl -X PUT http://127.0.0.1:5984/test/doc/file.txt <span class="se">\</span>
+            -H <span class="s2">&quot;Content-Type: application/octet-stream&quot;</span> -d@file.txt
+<span class="o">{</span><span class="s2">&quot;ok&quot;</span>:true,<span class="s2">&quot;id&quot;</span>:<span class="s2">&quot;doc&quot;</span>,<span class="s2">&quot;rev&quot;</span>:<span class="s2">&quot;1-287a28fa680ae0c7fb4729bf0c6e0cf2&quot;</span><span class="o">}</span>
+</pre></div>
+</div>
+<p>Now we can request the whole file easily:</p>
+<div class="highlight-bash"><div class="highlight"><pre>shell&gt; curl -X GET http://127.0.0.1:5984/test/doc/file.txt
+My hovercraft is full of eels!
+</pre></div>
+</div>
+<p>But say we only want the first 13 bytes:</p>
+<div class="highlight-bash"><div class="highlight"><pre>shell&gt; curl -X GET http://127.0.0.1:5984/test/doc/file.txt <span class="se">\</span>
+            -H <span class="s2">&quot;Range: bytes=0-12&quot;</span>
+My hovercraft
+</pre></div>
+</div>
+<p>HTTP supports many ways to specify single and even multiple byte
+ranges. Read all about it in <a class="reference external" href="http://tools.ietf.org/html/rfc2616#section-14.27">RFC 2616</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Databases that have been created with CouchDB 1.0.2 or earlier will
+support range requests in 1.0.0, but they are using a less-optimal
+algorithm. If you plan to make heavy use of this feature, make sure
+to compact your database with CouchDB 1.0.0 to take advantage of a
+better algorithm to find byte ranges.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="api-basics.html">CouchDB API</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="configuring.html">Configuring CouchDB</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, The Apache Foundation.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

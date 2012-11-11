@@ -1,0 +1,148 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Native SSL Support &mdash; An Introduction to libuv</title>
+    
+    <link rel="stylesheet" href="static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="An Introduction to libuv" href="index.html" />
+    <link rel="next" title="OS Daemons" href="os-daemons.html" />
+    <link rel="prev" title="Configuring CouchDB" href="configuring.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>An Introduction to libuv</span></a></h1>
+        <h2 class="heading"><span>Native SSL Support</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="configuring.html">Configuring CouchDB</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="os-daemons.html">OS Daemons</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="native-ssl-support">
+<h1>Native SSL Support<a class="headerlink" href="#native-ssl-support" title="Permalink to this headline">¶</a></h1>
+<p>CouchDB 1.0.0 supports SSL natively. All your secure connection needs can
+now be served without needing to setup and maintain a separate proxy server
+that handles SSL.</p>
+<p>SSL setup can be tricky, but the configuration in CouchDB was designed
+to be as easy as possible. All you need is two files; a certificate and
+a private key. If you bought an official SSL certificate from a
+certificate authority, both should be in your possession already.</p>
+<p>If you just want to try this out and don&#8217;t want to pay anything upfront,
+you can create a self-signed certificate. Everything will work the same,
+but clients will get a warning about an insecure certificate.</p>
+<p>You will need the OpenSSL command line tool installed. It probably
+already is.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">shell</span><span class="o">&gt;</span> <span class="n">mkdir</span> <span class="n">cert</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="n">cert</span>
+<span class="n">shell</span><span class="o">&gt;</span> <span class="n">openssl</span> <span class="n">genrsa</span> <span class="o">&gt;</span> <span class="n">privkey</span><span class="p">.</span><span class="n">pem</span>
+<span class="n">shell</span><span class="o">&gt;</span> <span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="n">new</span> <span class="o">-</span><span class="n">x509</span> <span class="o">-</span><span class="n">key</span> <span class="n">privkey</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">out</span> <span class="n">mycert</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">days</span> <span class="mi">1095</span>
+<span class="n">shell</span><span class="o">&gt;</span> <span class="n">ls</span>
+<span class="n">mycert</span><span class="p">.</span><span class="n">pem</span> <span class="n">privkey</span><span class="p">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+<p>Now, you need to edit CouchDB&#8217;s configuration, either by editing your
+<tt class="docutils literal"><span class="pre">local.ini</span></tt> file or using the <tt class="docutils literal"><span class="pre">/_config</span></tt> API calls or the
+configuration screen in Futon. Here is what you need to do in
+<tt class="docutils literal"><span class="pre">local.ini</span></tt>, you can infer what needs doing in the other places.</p>
+<p>Be sure to make these edits. Under <tt class="docutils literal"><span class="pre">[daemons]</span></tt> you should see:</p>
+<div class="highlight-c"><pre>; enable SSL support by uncommenting the following line and supply the PEM's below.
+; the default ssl port CouchDB listens on is 6984
+;httpsd = {couch_httpd, start_link, [https]}</pre>
+</div>
+<p>Here uncomment the last line:</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">httpsd</span> <span class="o">=</span> <span class="p">{</span><span class="n">couch_httpd</span><span class="p">,</span> <span class="n">start_link</span><span class="p">,</span> <span class="p">[</span><span class="n">https</span><span class="p">]}</span>
+</pre></div>
+</div>
+<p>Next, under <tt class="docutils literal"><span class="pre">[ssl]</span></tt> you will see:</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="p">;</span><span class="n">cert_file</span> <span class="o">=</span> <span class="o">/</span><span class="n">full</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">server_cert</span><span class="p">.</span><span class="n">pem</span>
+<span class="p">;</span><span class="n">key_file</span> <span class="o">=</span> <span class="o">/</span><span class="n">full</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">server_key</span><span class="p">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+<p>Uncomment and adjust the paths so it matches your system&#8217;s paths:</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">cert_file</span> <span class="o">=</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">jan</span><span class="o">/</span><span class="n">cert</span><span class="o">/</span><span class="n">mycert</span><span class="p">.</span><span class="n">pem</span>
+<span class="n">key_file</span> <span class="o">=</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">jan</span><span class="o">/</span><span class="n">cert</span><span class="o">/</span><span class="n">privkey</span><span class="p">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+<p>For more information please read
+<a class="reference external" href="http://www.openssl.org/docs/HOWTO/certificates.txt">http://www.openssl.org/docs/HOWTO/certificates.txt</a>.</p>
+<p>Now start (or restart) CouchDB. You should be able to connect to it
+using HTTPS on port 6984:</p>
+<div class="highlight-c"><pre>shell&gt; curl https://127.0.0.1:6984/
+curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:
+error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed
+More details here: http://curl.haxx.se/docs/sslcerts.html
+
+curl performs SSL certificate verification by default, using a "bundle"
+of Certificate Authority (CA) public keys (CA certs). If the default
+bundle file isn't adequate, you can specify an alternate file
+using the --cacert option.
+If this HTTPS server uses a certificate signed by a CA represented in
+the bundle, the certificate verification probably failed due to a
+problem with the certificate (it might be expired, or the name might
+not match the domain name in the URL).
+If you'd like to turn off curl's verification of the certificate, use
+the -k (or --insecure) option.</pre>
+</div>
+<p>Oh no what happened?! — Remember, clients will notify their users that
+your certificate is self signed. <tt class="docutils literal"><span class="pre">curl</span></tt> is the client in this case and
+it notifies you. Luckily you trust yourself (don&#8217;t you?) and you can
+specify the <tt class="docutils literal"><span class="pre">-k</span></tt> option as the message reads:</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">shell</span><span class="o">&gt;</span> <span class="n">curl</span> <span class="o">-</span><span class="n">k</span> <span class="n">https</span><span class="o">:</span><span class="c1">//127.0.0.1:6984/</span>
+<span class="p">{</span><span class="s">&quot;couchdb&quot;</span><span class="o">:</span><span class="s">&quot;Welcome&quot;</span><span class="p">,</span><span class="s">&quot;version&quot;</span><span class="o">:</span><span class="s">&quot;|version|&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>All done.</p>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="configuring.html">Configuring CouchDB</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="os-daemons.html">OS Daemons</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, The Apache Foundation.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,104 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>OS Daemons &mdash; An Introduction to libuv</title>
+    
+    <link rel="stylesheet" href="static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="An Introduction to libuv" href="index.html" />
+    <link rel="next" title="HTTP Proxying" href="http-proxying.html" />
+    <link rel="prev" title="Native SSL Support" href="ssl.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>An Introduction to libuv</span></a></h1>
+        <h2 class="heading"><span>OS Daemons</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="ssl.html">Native SSL Support</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="http-proxying.html">HTTP Proxying</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="os-daemons">
+<h1>OS Daemons<a class="headerlink" href="#os-daemons" title="Permalink to this headline">¶</a></h1>
+<p>CouchDB now supports starting external processes. The support is simple
+and enables CouchDB to start each configured OS daemon. If the daemon
+stops at any point, CouchDB will restart it (with protection to ensure
+regularly failing daemons are not repeatedly restarted).</p>
+<p>The daemon starting process is one-to-one; for each each configured
+daemon in the configuration file, CouchDB will start exactly one
+instance. If you need to run multiple instances, then you must create
+separate individual configurations. Daemons are configured within the
+<tt class="docutils literal"><span class="pre">[os_daemons]</span></tt> section of your configuration file (<tt class="docutils literal"><span class="pre">local.ini</span></tt>). The
+format of each configured daemon is:</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="na">NAME</span> <span class="o">=</span> <span class="s">PATH ARGS</span>
+</pre></div>
+</div>
+<p>Where <tt class="docutils literal"><span class="pre">NAME</span></tt> is an arbitrary (and unique) name to identify the daemon;
+<tt class="docutils literal"><span class="pre">PATH</span></tt> is the full path to the daemon to be executed; <tt class="docutils literal"><span class="pre">ARGS</span></tt> are any
+required arguments to the daemon.</p>
+<p>For example:</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[os_daemons]</span>
+<span class="na">basic_responder</span> <span class="o">=</span> <span class="s">/usr/local/bin/responder.js</span>
+</pre></div>
+</div>
+<p>There is no interactivity between CouchDB and the running process, but
+you can use the OS Daemons service to create new HTTP servers and
+responders and then use the new proxy service to redirect requests and
+output to the CouchDB managed service. For more information on proxying,
+see <a class="reference internal" href="http-proxying.html#http-proxying"><em>HTTP Proxying</em></a>. For further background on the OS Daemon service, see
+<a class="reference external" href="http://davispj.com/2010/09/26/new-couchdb-externals-api.html">CouchDB Externals API</a>.</p>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="ssl.html">Native SSL Support</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="http-proxying.html">HTTP Proxying</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, The Apache Foundation.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
