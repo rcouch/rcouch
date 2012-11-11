@@ -17,24 +17,8 @@ if [ ! -z "$RUNNER_USER" ] && [ `whoami` != "$RUNNER_USER" ]; then
 fi
 
 # Make sure CWD is set to runner base dir
-cd $RUNNER_BASE_DIR
+#cd $RUNNER_BASE_DIR
 
-# Make sure log directory exists
-mkdir -p $RUNNER_LOG_DIR
-
-# Extract the target node name from node.args
-NAME_ARG=`egrep '^-s?name' $RUNNER_ETC_DIR/vm.args`
-if [ -z "$NAME_ARG" ]; then
-    echo "vm.args needs to have either -name or -sname parameter."
-    exit 1
-fi
-
-# Extract the target cookie
-COOKIE_ARG=`grep '^-setcookie' $RUNNER_ETC_DIR/vm.args`
-if [ -z "$COOKIE_ARG" ]; then
-    echo "vm.args needs to have a -setcookie parameter."
-    exit 1
-fi
 
 # Identify the script name
 SCRIPT=`basename $0`
