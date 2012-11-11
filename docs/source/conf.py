@@ -107,7 +107,7 @@ html_theme = 'haiku'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = "An Introduction to libuv"
+html_title = "The Apache CouchDB Documentation"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -259,10 +259,10 @@ texinfo_documents = [(
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'An Introduction to libuv'
-epub_author = u'Nikhil Marathe'
-epub_publisher = u'Nikhil Marathe'
-epub_copyright = u'2012, Nikhil Marathe'
+epub_title = u'Apache CouchDB Documentation'
+epub_author = u'Apache CouchDB'
+epub_publisher = u'Apache CouchDB'
+epub_copyright = u'2012, The Apache Foundation'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
