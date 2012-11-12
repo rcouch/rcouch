@@ -20,7 +20,7 @@
 
 -include_lib("couch/include/couch_db.hrl").
 -include_lib("couch_httpd/include/couch_httpd.hrl").
--include("include/couch_randomdoc.hrl").
+-include("couch_randomdoc.hrl").
 
 handle_req(#httpd{method='GET'}=Req, Db) ->
     #random_query{options = Opts,
