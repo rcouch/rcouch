@@ -77,8 +77,9 @@ Notes:
         [httpd]
         changes_timeout=#millisecs
 
-(7) Reference a filter function from a design document to selectively get
-    updates. See the `section in the book`_ for more information.
+(7) Reference to a :ref:`filter function <filterfun>` from a design document
+    that will filter whole stream emitting only filtered events.
+    See the `section in the book`_ for more information.
 
 (8) Include the associated document with each result. If there are conflicts,
     only the winning revision is returned.
@@ -178,14 +179,8 @@ results.
 Obviously, `... tum tee tum ...` does not appear in the actual response, but
 represents a long pause before the change with seq 6 occurred.  
 
-Filters
-=======
-
-Classic filters
----------------
-
-By default changes feed emits all database documents changes. But if you're
-waiting for some special changes it's not optimal to process each record.
+.. _section in the book: http://books.couchdb.org/relax/reference/change-notifications
+cial changes it's not optimal to process each record.
 
 Filters are special design document functions that allows changes feed to emit
 only specific documents that passed filter rules.

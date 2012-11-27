@@ -10,12 +10,14 @@
 .. License for the specific language governing permissions and limitations under
 .. the License.
 
+.. _commonjs:
+
 CommonJS support for map functions
 ==================================
 
-CommonJS support allows you to use CommonJS notation inside map and
-reduce functions, but only of libraries that are stored inside the views
-part of the design doc.
+CommonJS support allows you to use `CommonJS notation <http://commonjs.org/specs>`_
+inside map and reduce functions, but only of libraries that are stored
+inside the views part of the design doc.
 
 So you could continue to access CommonJS code in design\_doc.foo, from
 your list functions etc, but we'd add the ability to require CommonJS
@@ -52,5 +54,3 @@ A sample design doc (taken from the test suite in Futon) is below:
 
 The ``require()`` statement is relative to the design document, but
 anything loaded form outside of ``views/lib`` will fail.
-
-.. _CommonJS: http://commonjs.org/specs
