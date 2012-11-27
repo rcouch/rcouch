@@ -608,11 +608,7 @@ while if <cite>DELETE</cite> or <cite>HEAD</cite> value is <tt class="docutils l
 (empty string)</td>
 </tr>
 <tr class="row-odd"><td>cookie</td>
-<td>Cookies <cite>object</cite>.
-If request method is <cite>GET</cite> method contains
-this field contains <tt class="docutils literal"><span class="pre">&quot;undefined&quot;</span></tt> value,
-while if <cite>DELETE</cite> or <cite>HEAD</cite> value is <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt>
-(empty string).</td>
+<td>Cookies <cite>object</cite>.</td>
 </tr>
 <tr class="row-even"><td>form</td>
 <td>Form data <cite>object</cite>.
@@ -666,18 +662,6 @@ config file.</td>
 </tr>
 </tbody>
 </table>
-<p class="versionadded">
-<span class="versionmodified">New in version 0.9.0.</span></p>
-<p class="versionchanged">
-<span class="versionmodified">Changed in version 0.10.0: </span>Add <tt class="docutils literal"><span class="pre">userCtx</span></tt> field.</p>
-<p class="versionchanged">
-<span class="versionmodified">Changed in version 0.11.0: </span>Rename <tt class="docutils literal"><span class="pre">verb</span></tt> field to <tt class="docutils literal"><span class="pre">method</span></tt>.</p>
-<p class="versionchanged">
-<span class="versionmodified">Changed in version 0.11.0: </span>Add <tt class="docutils literal"><span class="pre">id</span></tt>, <tt class="docutils literal"><span class="pre">peer</span></tt> and <tt class="docutils literal"><span class="pre">uuid</span></tt> fields.</p>
-<p class="versionchanged">
-<span class="versionmodified">Changed in version 1.1.0: </span>Add <tt class="docutils literal"><span class="pre">requested_path</span></tt> and <tt class="docutils literal"><span class="pre">secObj</span></tt> fields.</p>
-<p class="versionchanged">
-<span class="versionmodified">Changed in version 1.2.0: </span>Add <tt class="docutils literal"><span class="pre">raw_path</span></tt> field.</p>
 <div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
     <span class="s2">&quot;body&quot;</span><span class="o">:</span> <span class="s2">&quot;undefined&quot;</span><span class="p">,</span>
     <span class="s2">&quot;cookie&quot;</span><span class="o">:</span> <span class="p">{</span>
@@ -754,6 +738,62 @@ config file.</td>
     <span class="s2">&quot;uuid&quot;</span><span class="o">:</span> <span class="s2">&quot;3184f9d1ea934e1f81a24c71bde5c168&quot;</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="response-object">
+<span id="id2"></span><h2>Response object<a class="headerlink" href="#response-object" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="42%" />
+<col width="58%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Field</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>code</td>
+<td>HTTP status code <cite>number</cite>.</td>
+</tr>
+<tr class="row-odd"><td>json</td>
+<td>JSON encodable <cite>object</cite>.
+Implicitly sets <cite>Content-Type</cite> header as
+<tt class="docutils literal"><span class="pre">application/json</span></tt>.</td>
+</tr>
+<tr class="row-even"><td>body</td>
+<td>Raw response text <cite>string</cite>.
+Implicitly sets <cite>Content-Type</cite> header as
+<tt class="docutils literal"><span class="pre">text/html;</span> <span class="pre">charset=utf-8</span></tt>.</td>
+</tr>
+<tr class="row-odd"><td>base64</td>
+<td>Base64 encoded <cite>string</cite>.
+Implicitly sets <cite>Content-Type</cite> header as
+<tt class="docutils literal"><span class="pre">application/binary</span></tt>.</td>
+</tr>
+<tr class="row-even"><td>headers</td>
+<td>Response headers <cite>object</cite>.
+<cite>Content-Type</cite> header from this object
+overrides any implicitly assigned one.</td>
+</tr>
+<tr class="row-odd"><td>stop</td>
+<td><cite>boolean</cite> signal to stop iteration over
+view result rows (for list functions only)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><tt class="docutils literal"><span class="pre">body</span></tt>, <tt class="docutils literal"><span class="pre">base64</span></tt> and <tt class="docutils literal"><span class="pre">json</span></tt> object keys are overlaps each other and
+the last wins. Since most realizations of key-value objects doesn&#8217;t preserve
+key order mixing them may create confusing situation. Try to use only one of
+them.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Any custom property makes CouchDB raise internal exception.
+Also <cite>Response object</cite> could be a simple string value which would be
+implicitly wrapped into <tt class="docutils literal"><span class="pre">{&quot;body&quot;:</span> <span class="pre">...}</span></tt> object.</p>
 </div>
 </div>
 <div class="section" id="returned-couchdb-document-with-detailed-revision-info">
@@ -863,7 +903,7 @@ document)</td>
 </table>
 </div>
 <div class="section" id="security-object">
-<span id="id2"></span><h2>Security Object<a class="headerlink" href="#security-object" title="Permalink to this headline">¶</a></h2>
+<span id="id3"></span><h2>Security Object<a class="headerlink" href="#security-object" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
 <col width="42%" />
@@ -944,6 +984,34 @@ operation.</td>
     <span class="s2">&quot;roles&quot;</span><span class="o">:</span> <span class="p">[</span>
         <span class="s2">&quot;_admin&quot;</span>
     <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="view-head-information">
+<span id="view-head-info-object"></span><h2>View Head Information<a class="headerlink" href="#view-head-information" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="42%" />
+<col width="58%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Field</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>total_rows</td>
+<td>Number of documents in the view</td>
+</tr>
+<tr class="row-odd"><td>offset</td>
+<td>Offset where the document list started</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s2">&quot;total_rows&quot;</span><span class="o">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="s2">&quot;offset&quot;</span><span class="o">:</span> <span class="mi">3</span>
 <span class="p">}</span>
 </pre></div>
 </div>

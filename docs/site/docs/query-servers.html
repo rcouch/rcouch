@@ -1,0 +1,674 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Query servers &mdash; The Apache CouchDB Documentation</title>
+    
+    <link rel="stylesheet" href="static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="The Apache CouchDB Documentation" href="index.html" />
+    <link rel="next" title="CommonJS support for map functions" href="commonjs.html" />
+    <link rel="prev" title="Design Docs" href="ddocs.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>The Apache CouchDB Documentation</span></a></h1>
+        <h2 class="heading"><span>Query servers</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="ddocs.html">Design Docs</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="commonjs.html">CommonJS support for map functions</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="query-servers">
+<h1>Query servers<a class="headerlink" href="#query-servers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="javascript">
+<span id="queryserver-js"></span><h2>JavaScript<a class="headerlink" href="#javascript" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">While every design function has access to all JavaScript objects,
+the table below describes appropriate usage cases. For example,
+you may use <a class="reference internal" href="#emit" title="emit"><tt class="xref js js-func docutils literal"><span class="pre">emit()</span></tt></a> in <a class="reference internal" href="ddocs.html#listfun"><em>List functions</em></a>, but <a class="reference internal" href="#getRow" title="getRow"><tt class="xref js js-func docutils literal"><span class="pre">getRow()</span></tt></a> is not permitted during <a class="reference internal" href="ddocs.html#mapfun"><em>Map functions</em></a>.</p>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="42%" />
+<col width="58%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">JS Function</th>
+<th class="head">Reasonable to use in design doc functions</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="#emit" title="emit"><tt class="xref js js-func docutils literal"><span class="pre">emit()</span></tt></a></td>
+<td><a class="reference internal" href="ddocs.html#mapfun"><em>Map functions</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#getRow" title="getRow"><tt class="xref js js-func docutils literal"><span class="pre">getRow()</span></tt></a></td>
+<td><a class="reference internal" href="ddocs.html#listfun"><em>List functions</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#JSON" title="JSON"><tt class="xref js js-data docutils literal"><span class="pre">JSON</span></tt></a></td>
+<td>any</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#isArray" title="isArray"><tt class="xref js js-func docutils literal"><span class="pre">isArray()</span></tt></a></td>
+<td>any</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#log" title="log"><tt class="xref js js-func docutils literal"><span class="pre">log()</span></tt></a></td>
+<td>any</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#provides" title="provides"><tt class="xref js js-func docutils literal"><span class="pre">provides()</span></tt></a></td>
+<td><a class="reference internal" href="ddocs.html#showfun"><em>Show functions</em></a>, <a class="reference internal" href="ddocs.html#listfun"><em>List functions</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#registerType" title="registerType"><tt class="xref js js-func docutils literal"><span class="pre">registerType()</span></tt></a></td>
+<td><a class="reference internal" href="ddocs.html#showfun"><em>Show functions</em></a>, <a class="reference internal" href="ddocs.html#listfun"><em>List functions</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#require" title="require"><tt class="xref js js-func docutils literal"><span class="pre">require()</span></tt></a></td>
+<td>every except <a class="reference internal" href="ddocs.html#reducefun"><em>Reduce and rereduce functions</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#send" title="send"><tt class="xref js js-func docutils literal"><span class="pre">send()</span></tt></a></td>
+<td><a class="reference internal" href="ddocs.html#listfun"><em>List functions</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#start" title="start"><tt class="xref js js-func docutils literal"><span class="pre">start()</span></tt></a></td>
+<td><a class="reference internal" href="ddocs.html#listfun"><em>List functions</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#sum" title="sum"><tt class="xref js js-func docutils literal"><span class="pre">sum()</span></tt></a></td>
+<td>any</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#toJSON" title="toJSON"><tt class="xref js js-func docutils literal"><span class="pre">toJSON()</span></tt></a></td>
+<td>any</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="design-functions-context">
+<h3>Design functions context<a class="headerlink" href="#design-functions-context" title="Permalink to this headline">¶</a></h3>
+<p>Each design function executes within special context of predefined objects,
+modules and functions:</p>
+<dl class="function">
+<dt id="emit">
+<tt class="descname">emit</tt><big>(</big><em>key</em>, <em>value</em><big>)</big><a class="headerlink" href="#emit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Puts <cite>key</cite>-<cite>value</cite> pair into inner stack for further passing to CouchDB
+when map function is done.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> &#8211; View&#8217;s key.</li>
+<li><strong>value</strong> &#8211; Associated value with <cite>key</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">doc</span><span class="p">){</span>
+  <span class="nx">emit</span><span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">_id</span><span class="p">,</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">_rev</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="getRow">
+<tt class="descname">getRow</tt><big>(</big><big>)</big><a class="headerlink" href="#getRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts next row from the related view result.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">View result row</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">object</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">head</span><span class="p">,</span> <span class="nx">req</span><span class="p">){</span>
+  <span class="nx">send</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">);</span>
+  <span class="nx">row</span> <span class="o">=</span> <span class="nx">getRow</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">row</span><span class="p">){</span>
+    <span class="nx">send</span><span class="p">(</span><span class="nx">toJSON</span><span class="p">(</span><span class="nx">row</span><span class="p">));</span>
+    <span class="k">while</span><span class="p">(</span><span class="nx">row</span> <span class="o">=</span> <span class="nx">getRow</span><span class="p">()){</span>
+      <span class="nx">send</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">);</span>
+      <span class="nx">send</span><span class="p">(</span><span class="nx">toJSON</span><span class="p">(</span><span class="nx">row</span><span class="p">));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="s1">&#39;]&#39;</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="JSON">
+<tt class="descname">JSON</tt><a class="headerlink" href="#JSON" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://git-wip-us.apache.org/repos/asf?p=couchdb.git;a=blob;f=share/server/json2.js">JSON2</a>
+object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="isArray">
+<tt class="descname">isArray</tt><big>(</big><em>obj</em><big>)</big><a class="headerlink" href="#isArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to check is provided value <cite>array</cite> or not</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; Any Javascript value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">true</span></tt> is <cite>obj</cite> is <cite>array</cite> typed, <tt class="docutils literal"><span class="pre">false</span></tt> otherwise.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="log">
+<tt class="descname">log</tt><big>(</big><em>message</em><big>)</big><a class="headerlink" href="#log" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> &#8211; Message to log in at CouchDB <cite>INFO</cite> level.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">doc</span><span class="p">){</span>
+  <span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Procesing doc &#39;</span> <span class="o">+</span> <span class="nx">doc</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">]);</span>
+  <span class="nx">emit</span><span class="p">(</span><span class="nx">doc</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">],</span> <span class="kc">null</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>On map function run in CouchDB logs (e.g. at <cite>/var/log/couchdb/couch.log</cite>)
+you may find next record:</p>
+<div class="highlight-text"><div class="highlight"><pre>[Sat, 03 Nov 2012 17:38:02 GMT] [info] [&lt;0.7543.0&gt;] OS Process #Port&lt;0.3289&gt; Log :: Processing doc 8d300b86622d67953d102165dbe99467
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="provides">
+<tt class="descname">provides</tt><big>(</big><em>key</em>, <em>func</em><big>)</big><a class="headerlink" href="#provides" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers callable handler for specified MIME key.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> &#8211; MIME key previously defined by <a class="reference internal" href="#registerType" title="registerType"><tt class="xref js js-func docutils literal"><span class="pre">registerType()</span></tt></a></li>
+<li><strong>func</strong> &#8211; MIME type handler.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="registerType">
+<tt class="descname">registerType</tt><big>(</big><em>key</em>, <em>*mimes</em><big>)</big><a class="headerlink" href="#registerType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers list of MIME types by associated <cite>key</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> &#8211; MIME types</li>
+<li><strong>mimes</strong> &#8211; MIME types enumeration.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Predefined mappings (<cite>key</cite>-<cite>array</cite>):</p>
+<ul class="simple">
+<li><strong>all</strong>: <tt class="docutils literal"><span class="pre">*/*</span></tt></li>
+<li><strong>text</strong>: <tt class="docutils literal"><span class="pre">text/plain;</span> <span class="pre">charset=utf-8</span></tt>, <tt class="docutils literal"><span class="pre">txt</span></tt></li>
+<li><strong>html</strong>: <tt class="docutils literal"><span class="pre">text/html;</span> <span class="pre">charset=utf-8</span></tt></li>
+<li><strong>xhtml</strong>: <tt class="docutils literal"><span class="pre">application/xhtml+xml</span></tt>, <tt class="docutils literal"><span class="pre">xhtml</span></tt></li>
+<li><strong>xml</strong>: <tt class="docutils literal"><span class="pre">application/xml</span></tt>, <tt class="docutils literal"><span class="pre">text/xml</span></tt>, <tt class="docutils literal"><span class="pre">application/x-xml</span></tt></li>
+<li><strong>js</strong>: <tt class="docutils literal"><span class="pre">text/javascript</span></tt>, <tt class="docutils literal"><span class="pre">application/javascript</span></tt>,
+<tt class="docutils literal"><span class="pre">application/x-javascript</span></tt></li>
+<li><strong>css</strong>: <tt class="docutils literal"><span class="pre">text/css</span></tt></li>
+<li><strong>ics</strong>: <tt class="docutils literal"><span class="pre">text/calendar</span></tt></li>
+<li><strong>csv</strong>: <tt class="docutils literal"><span class="pre">text/csv</span></tt></li>
+<li><strong>rss</strong>: <tt class="docutils literal"><span class="pre">application/rss+xml</span></tt></li>
+<li><strong>atom</strong>: <tt class="docutils literal"><span class="pre">application/atom+xml</span></tt></li>
+<li><strong>yaml</strong>: <tt class="docutils literal"><span class="pre">application/x-yaml</span></tt>, <tt class="docutils literal"><span class="pre">text/yaml</span></tt></li>
+<li><strong>multipart_form</strong>: <tt class="docutils literal"><span class="pre">multipart/form-data</span></tt></li>
+<li><strong>url_encoded_form</strong>: <tt class="docutils literal"><span class="pre">application/x-www-form-urlencoded</span></tt></li>
+<li><strong>json</strong>: <tt class="docutils literal"><span class="pre">application/json</span></tt>, <tt class="docutils literal"><span class="pre">text/x-json</span></tt></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="require">
+<tt class="descname">require</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#require" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads CommonJS module by specified <cite>path</cite>. Path shouldn&#8217;t starts with slash.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> &#8211; CommonJS module path started from design document root.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Exported statements.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="send">
+<tt class="descname">send</tt><big>(</big><em>chunk</em><big>)</big><a class="headerlink" href="#send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a single string <cite>chunk</cite> in response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chunk</strong> &#8211; Text chunk</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">head</span><span class="p">,</span> <span class="nx">req</span><span class="p">){</span>
+  <span class="nx">send</span><span class="p">(</span><span class="s1">&#39;Hello,&#39;</span><span class="p">);</span>
+  <span class="nx">send</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+  <span class="nx">send</span><span class="p">(</span><span class="s1">&#39;Couch&#39;</span><span class="p">);</span>
+  <span class="k">return</span> <span class="o">!</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="start">
+<tt class="descname">start</tt><big>(</big><em>init_resp</em><big>)</big><a class="headerlink" href="#start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiates chunked response. As an option, custom
+<a class="reference internal" href="json-structure.html#response-object"><em>response</em></a> object may be sent at this point.
+For <cite>list</cite>-functions only!</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only at this point list functions may set response <cite>HTTP code</cite> and
+<cite>headers</cite>. Also, you need to run this function before <a class="reference internal" href="#send" title="send"><tt class="xref js js-func docutils literal"><span class="pre">send()</span></tt></a>,
+<a class="reference internal" href="#getRow" title="getRow"><tt class="xref js js-func docutils literal"><span class="pre">getRow()</span></tt></a> or <cite>return</cite> statement or query server will implicitly call
+this function with empty object (<tt class="docutils literal"><span class="pre">{}</span></tt>).</p>
+</div>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">head</span><span class="p">,</span> <span class="nx">req</span><span class="p">){</span>
+  <span class="nx">start</span><span class="p">({</span>
+    <span class="s2">&quot;code&quot;</span><span class="o">:</span> <span class="mi">302</span><span class="p">,</span>
+    <span class="s2">&quot;headers&quot;</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">&quot;Location&quot;</span><span class="o">:</span> <span class="s2">&quot;http://couchdb.apache.org&quot;</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  <span class="k">return</span> <span class="s2">&quot;Relax!&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sum">
+<tt class="descname">sum</tt><big>(</big><em>arr</em><big>)</big><a class="headerlink" href="#sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summarize <cite>arr</cite> items.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>arr</strong> &#8211; Array of numbers.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">number</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="toJSON">
+<tt class="descname">toJSON</tt><big>(</big><em>obj</em><big>)</big><a class="headerlink" href="#toJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes <cite>obj</cite> to JSON string. Actually is a proxy to <tt class="docutils literal"><span class="pre">JSON.stringify</span></tt>
+method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; JSON encodable object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">JSON string.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="commonjs-modules">
+<h3>CommonJS Modules<a class="headerlink" href="#commonjs-modules" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://wiki.commonjs.org/wiki/Modules/1.1.1">CommonJS Modules</a> is the one of
+major CouchDB feature introduced in 0.11.0 version that allows to create modular
+design functions without needs to duplicate a lot of same functionality.</p>
+<p>Example of CommonJS module that checks user permissions:</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span> <span class="nx">user_context</span><span class="p">(</span><span class="nx">userctx</span><span class="p">,</span> <span class="nx">secobj</span><span class="p">){</span>
+  <span class="kd">var</span> <span class="nx">is_admin</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="k">return</span> <span class="nx">userctx</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;_admin&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">is_db_admin</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">is_admin</span><span class="p">()</span> <span class="o">||</span> <span class="o">!</span><span class="nx">secobj</span><span class="p">){</span>
+      <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">secobj</span><span class="p">.</span><span class="nx">admins</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">userctx</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+      <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">idx</span> <span class="k">in</span> <span class="nx">userctx</span><span class="p">.</span><span class="nx">roles</span><span class="p">){</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">secobj</span><span class="p">.</span><span class="nx">admins</span><span class="p">.</span><span class="nx">roles</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">userctx</span><span class="p">.</span><span class="nx">roles</span><span class="p">[</span><span class="nx">idx</span><span class="p">])</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">is_db_member</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">is_admin</span><span class="p">()</span> <span class="o">||</span> <span class="nx">is_db_admin</span><span class="p">()</span> <span class="o">||</span> <span class="o">!</span><span class="nx">secobj</span><span class="p">){</span>
+      <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">secobj</span><span class="p">.</span><span class="nx">members</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">userctx</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+      <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">idx</span> <span class="k">in</span> <span class="nx">userctx</span><span class="p">.</span><span class="nx">roles</span><span class="p">){</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">secobj</span><span class="p">.</span><span class="nx">members</span><span class="p">.</span><span class="nx">roles</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">userctx</span><span class="p">.</span><span class="nx">roles</span><span class="p">[</span><span class="nx">idx</span><span class="p">])</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">has_all_roles</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">roles</span><span class="p">){</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">idx</span> <span class="k">in</span> <span class="nx">roles</span><span class="p">){</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">userctx</span><span class="p">.</span><span class="nx">roles</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">roles</span><span class="p">[</span><span class="nx">idx</span><span class="p">])</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">has_any_role</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">roles</span><span class="p">){</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">idx</span> <span class="k">in</span> <span class="nx">roles</span><span class="p">){</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">userctx</span><span class="p">.</span><span class="nx">roles</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">roles</span><span class="p">[</span><span class="nx">idx</span><span class="p">])</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="s1">&#39;is_admin&#39;</span><span class="o">:</span> <span class="nx">is_admin</span><span class="p">,</span>
+    <span class="s1">&#39;is_db_admin&#39;</span><span class="o">:</span> <span class="nx">is_db_admin</span><span class="p">,</span>
+    <span class="s1">&#39;is_db_member&#39;</span><span class="o">:</span> <span class="nx">is_db_member</span><span class="p">,</span>
+    <span class="s1">&#39;has_all_roles&#39;</span><span class="o">:</span> <span class="nx">has_all_roles</span><span class="p">,</span>
+    <span class="s1">&#39;has_any_role&#39;</span><span class="o">:</span> <span class="nx">has_any_role</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">exports</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nx">user_context</span>
+</pre></div>
+</div>
+<p>Each module has access to additional global variables:</p>
+<ul class="simple">
+<li><strong>module</strong> (<cite>object</cite>): Contains information about stored module.<ul>
+<li><strong>id</strong> (<cite>string</cite>): Module id that is actually JSON path in ddoc context.</li>
+<li><strong>current</strong> (<cite>code</cite>): Compiled module code object.</li>
+<li><strong>parent</strong> (<cite>object</cite>): Parent frame.</li>
+<li><strong>exports</strong> (<cite>object</cite>): Export statements.</li>
+</ul>
+</li>
+<li><strong>exports</strong> (<cite>object</cite>): Shortcut to <tt class="docutils literal"><span class="pre">module.exports</span></tt> object.</li>
+</ul>
+<p>Lets place module above within design document under <cite>lib/validate</cite> path.
+Now we could use it in our design functions:</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">newdoc</span><span class="p">,</span> <span class="nx">olddoc</span><span class="p">,</span> <span class="nx">userctx</span><span class="p">,</span> <span class="nx">secobj</span><span class="p">){</span>
+  <span class="nx">user</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;lib/validate&#39;</span><span class="p">).</span><span class="nx">user</span><span class="p">(</span><span class="nx">userctx</span><span class="p">,</span> <span class="nx">secobj</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">is_admin</span><span class="p">()){</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">newdoc</span><span class="p">.</span><span class="nx">author</span> <span class="o">!=</span> <span class="nx">olddoc</span><span class="p">.</span><span class="nx">author</span><span class="p">){</span>
+    <span class="k">throw</span><span class="p">({</span><span class="s1">&#39;forbidden&#39;</span><span class="o">:</span> <span class="s1">&#39;unable to update `author` field&#39;</span><span class="p">});</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="erlang">
+<span id="queryserver-erlang"></span><h2>Erlang<a class="headerlink" href="#erlang" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>Erlang query server runs out of sandbox feature like JavaScript has to!
+This means, that Erlang code has full access to your OS, file system and
+network which may leads to security issues. While Erlang functions are
+faster than JavaScript ones, you need to be careful with running them,
+especially if they  wasn&#8217;t written by your own hands.</p>
+<p class="last">Keep in mind: don&#8217;t trust every code - review it first before running.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Due to security restriction, Erlang query server is disabled by default.
+To enable it you&#8217;ll need to edit your <cite>local.ini</cite> to include a
+<tt class="docutils literal"><span class="pre">native_query_servers</span></tt> section:</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[native_query_servers]</span>
+<span class="na">erlang</span> <span class="o">=</span> <span class="s">{couch_native_process, start_link, []}</span>
+</pre></div>
+</div>
+<p class="last">And don&#8217;t forget to restart CouchDB after that and use <tt class="docutils literal"><span class="pre">language:</span> <span class="pre">&quot;erlang&quot;</span></tt>
+property in your Erlang design documents.</p>
+</div>
+<dl class="function">
+<dt id="Emit">
+<tt class="descname">Emit</tt><big>(</big><em>Id</em>, <em>Value</em><big>)</big><a class="headerlink" href="#Emit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emits <cite>key</cite>-<cite>value</cite> pair to view indexer process.</p>
+<div class="highlight-erlang"><div class="highlight"><pre><span class="k">fun</span><span class="p">({</span><span class="nv">Doc</span><span class="p">})</span> <span class="o">-&gt;</span>
+  <span class="o">&lt;&lt;</span><span class="nv">K</span><span class="p">,_</span><span class="o">/</span><span class="n">binary</span><span class="o">&gt;&gt;</span> <span class="o">=</span> <span class="nn">proplists</span><span class="p">:</span><span class="n">get_value</span><span class="p">(</span><span class="o">&lt;&lt;</span><span class="s">&quot;_rev&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">Doc</span><span class="p">,</span> <span class="n">null</span><span class="p">),</span>
+  <span class="nv">V</span> <span class="o">=</span> <span class="nn">proplists</span><span class="p">:</span><span class="n">get_value</span><span class="p">(</span><span class="o">&lt;&lt;</span><span class="s">&quot;_id&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">Doc</span><span class="p">,</span> <span class="n">null</span><span class="p">),</span>
+  <span class="nv">Emit</span><span class="p">(</span><span class="o">&lt;&lt;</span><span class="nv">K</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">V</span><span class="p">)</span>
+<span class="k">end</span><span class="p">.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoldRows">
+<tt class="descname">FoldRows</tt><big>(</big><em>Fun</em>, <em>Acc</em><big>)</big><a class="headerlink" href="#FoldRows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to iterate over all rows in list function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Fun</strong> &#8211; Function object.</li>
+<li><strong>Acc</strong> &#8211; Previous returned value by <cite>Fun</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-erlang"><div class="highlight"><pre><span class="k">fun</span><span class="p">(</span><span class="nv">Head</span><span class="p">,</span> <span class="p">{</span><span class="nv">Req</span><span class="p">})</span> <span class="o">-&gt;</span>
+  <span class="nv">Fun</span> <span class="o">=</span> <span class="k">fun</span><span class="p">({</span><span class="nv">Row</span><span class="p">},</span> <span class="nv">Acc</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Id</span> <span class="o">=</span> <span class="nn">couch_util</span><span class="p">:</span><span class="n">get_value</span><span class="p">(</span><span class="o">&lt;&lt;</span><span class="s">&quot;id&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">Row</span><span class="p">),</span>
+    <span class="nv">Send</span><span class="p">(</span><span class="nb">list_to_binary</span><span class="p">(</span><span class="nn">io_lib</span><span class="p">:</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;Previous doc id: </span><span class="si">~p~n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nv">Acc</span><span class="p">]))),</span>
+    <span class="nv">Send</span><span class="p">(</span><span class="nb">list_to_binary</span><span class="p">(</span><span class="nn">io_lib</span><span class="p">:</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;Current  doc id: </span><span class="si">~p~n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nv">Id</span><span class="p">]))),</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Id</span><span class="p">}</span>
+  <span class="k">end</span><span class="p">,</span>
+  <span class="nv">FoldRows</span><span class="p">(</span><span class="nv">Fun</span><span class="p">,</span> <span class="n">nil</span><span class="p">),</span>
+  <span class="s">&quot;&quot;</span>
+<span class="k">end</span><span class="p">.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="GetRow">
+<tt class="descname">GetRow</tt><big>(</big><big>)</big><a class="headerlink" href="#GetRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves next row from related view result.</p>
+<div class="highlight-erlang"><div class="highlight"><pre><span class="c">%% FoldRows background implementation.</span>
+<span class="c">%% https://git-wip-us.apache.org/repos/asf?p=couchdb.git;a=blob;f=src/couchdb/couch_native_process.erl;hb=HEAD#l368</span>
+<span class="c">%%</span>
+<span class="nf">foldrows</span><span class="p">(</span><span class="nv">GetRow</span><span class="p">,</span> <span class="nv">ProcRow</span><span class="p">,</span> <span class="nv">Acc</span><span class="p">)</span> <span class="o">-&gt;</span>
+  <span class="k">case</span> <span class="nv">GetRow</span><span class="p">()</span> <span class="k">of</span>
+    <span class="n">nil</span> <span class="o">-&gt;</span>
+      <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Acc</span><span class="p">};</span>
+    <span class="nv">Row</span> <span class="o">-&gt;</span>
+      <span class="k">case</span> <span class="p">(</span><span class="k">catch</span> <span class="nv">ProcRow</span><span class="p">(</span><span class="nv">Row</span><span class="p">,</span> <span class="nv">Acc</span><span class="p">))</span> <span class="k">of</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Acc2</span><span class="p">}</span> <span class="o">-&gt;</span>
+          <span class="n">foldrows</span><span class="p">(</span><span class="nv">GetRow</span><span class="p">,</span> <span class="nv">ProcRow</span><span class="p">,</span> <span class="nv">Acc2</span><span class="p">);</span>
+        <span class="p">{</span><span class="n">stop</span><span class="p">,</span> <span class="nv">Acc2</span><span class="p">}</span> <span class="o">-&gt;</span>
+          <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Acc2</span><span class="p">}</span>
+      <span class="k">end</span>
+<span class="k">end</span><span class="p">.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="Log">
+<tt class="descname">Log</tt><big>(</big><em>Msg</em><big>)</big><a class="headerlink" href="#Log" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Msg</strong> &#8211; Message to log in at CouchDB <cite>INFO</cite> level.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-erlang"><div class="highlight"><pre><span class="k">fun</span><span class="p">({</span><span class="nv">Doc</span><span class="p">})</span> <span class="o">-&gt;</span>
+  <span class="o">&lt;&lt;</span><span class="nv">K</span><span class="p">,_</span><span class="o">/</span><span class="n">binary</span><span class="o">&gt;&gt;</span> <span class="o">=</span> <span class="nn">proplists</span><span class="p">:</span><span class="n">get_value</span><span class="p">(</span><span class="o">&lt;&lt;</span><span class="s">&quot;_rev&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">Doc</span><span class="p">,</span> <span class="n">null</span><span class="p">),</span>
+  <span class="nv">V</span> <span class="o">=</span> <span class="nn">proplists</span><span class="p">:</span><span class="n">get_value</span><span class="p">(</span><span class="o">&lt;&lt;</span><span class="s">&quot;_id&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">Doc</span><span class="p">,</span> <span class="n">null</span><span class="p">),</span>
+  <span class="nv">Log</span><span class="p">(</span><span class="nn">lists</span><span class="p">:</span><span class="n">flatten</span><span class="p">(</span><span class="nn">io_lib</span><span class="p">:</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;Hello from </span><span class="si">~s</span><span class="s"> doc!&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nv">V</span><span class="p">]))),</span>
+  <span class="nv">Emit</span><span class="p">(</span><span class="o">&lt;&lt;</span><span class="nv">K</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nv">V</span><span class="p">)</span>
+<span class="k">end</span><span class="p">.</span>
+</pre></div>
+</div>
+<p>On map function run in CouchDB logs (e.g. at <cite>/var/log/couchdb/couch.log</cite>)
+you may find next record:</p>
+<div class="highlight-text"><div class="highlight"><pre>[Sun, 04 Nov 2012 11:33:58 GMT] [info] [&lt;0.9144.2&gt;] Hello from 8d300b86622d67953d102165dbe99467 doc!
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="Send">
+<tt class="descname">Send</tt><big>(</big><em>Chunk</em><big>)</big><a class="headerlink" href="#Send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a single string <cite>Chunk</cite> in response.</p>
+<div class="highlight-erlang"><div class="highlight"><pre><span class="k">fun</span><span class="p">(</span><span class="nv">Head</span><span class="p">,</span> <span class="p">{</span><span class="nv">Req</span><span class="p">})</span> <span class="o">-&gt;</span>
+  <span class="nv">Send</span><span class="p">(</span><span class="s">&quot;Hello,&quot;</span><span class="p">),</span>
+  <span class="nv">Send</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">),</span>
+  <span class="nv">Send</span><span class="p">(</span><span class="s">&quot;Couch&quot;</span><span class="p">),</span>
+  <span class="s">&quot;!&quot;</span>
+<span class="k">end</span><span class="p">.</span>
+</pre></div>
+</div>
+<p>Function above produces next response:</p>
+<div class="highlight-text"><div class="highlight"><pre>Hello, Couch!
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="Start">
+<tt class="descname">Start</tt><big>(</big><em>Headers</em><big>)</big><a class="headerlink" href="#Start" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Headers</strong> &#8211; Proplist of <a class="reference internal" href="json-structure.html#response-object"><em>response object</em></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Initialize <a class="reference internal" href="ddocs.html#listfun"><em>List functions</em></a> response. At this point response code and headers
+may be defined. For example, next function redirect to CouchDB web site:</p>
+<div class="highlight-erlang"><div class="highlight"><pre><span class="k">fun</span><span class="p">(</span><span class="nv">Head</span><span class="p">,</span> <span class="p">{</span><span class="nv">Req</span><span class="p">})</span> <span class="o">-&gt;</span>
+  <span class="nv">Start</span><span class="p">({[{</span><span class="o">&lt;&lt;</span><span class="s">&quot;code&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="mi">302</span><span class="p">},</span>
+          <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;headers&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="p">{[</span>
+            <span class="p">{</span><span class="o">&lt;&lt;</span><span class="s">&quot;Location&quot;</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="s">&quot;http://couchdb.apache.org&quot;</span><span class="o">&gt;&gt;</span><span class="p">}]</span>
+          <span class="p">}}</span>
+        <span class="p">]}),</span>
+  <span class="s">&quot;Relax!&quot;</span>
+<span class="k">end</span><span class="p">.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="ddocs.html">Design Docs</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="commonjs.html">CommonJS support for map functions</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, The Apache Foundation.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

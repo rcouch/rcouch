@@ -159,5 +159,5 @@ doctest:
 
 gh-pages: clean html
 	mkdir -p site/docs
-	mv -fv build/html/* ./site/docs
+	mv -fv build/html/* ./site/docs/
 	./ghp-import -p site

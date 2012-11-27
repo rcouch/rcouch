@@ -153,8 +153,9 @@ prevent undetected dead connections.</p>
 </pre></div>
 </div>
 </li>
-<li><p class="first">Reference a filter function from a design document to selectively get
-updates. See the <a class="reference external" href="http://books.couchdb.org/relax/reference/change-notifications">section in the book</a> for more information.</p>
+<li><p class="first">Reference to a <a class="reference internal" href="ddocs.html#filterfun"><em>filter function</em></a> from a design document
+that will filter whole stream emitting only filtered events.
+See the <a class="reference external" href="http://books.couchdb.org/relax/reference/change-notifications">section in the book</a> for more information.</p>
 </li>
 <li><p class="first">Include the associated document with each result. If there are conflicts,
 only the winning revision is returned.</p>
@@ -244,110 +245,6 @@ results.</p>
 </div>
 <p>Obviously, <cite>... tum tee tum ...</cite> does not appear in the actual response, but
 represents a long pause before the change with seq 6 occurred.</p>
-</div>
-<div class="section" id="filters">
-<h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="classic-filters">
-<h3>Classic filters<a class="headerlink" href="#classic-filters" title="Permalink to this headline">¶</a></h3>
-<p>By default changes feed emits all database documents changes. But if you&#8217;re
-waiting for some special changes it&#8217;s not optimal to process each record.</p>
-<p>Filters are special design document functions that allows changes feed to emit
-only specific documents that passed filter rules.</p>
-<p>Let assume that our database is mailbox and we need to listen changes to handle
-only new mails (documents with status <cite>new</cite>). Assuming that, our filter function
-would looks like next one:</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="nx">req</span><span class="p">){</span>
-  <span class="c1">// we need only `mail` documents</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">type</span> <span class="o">!=</span> <span class="s1">&#39;mail&#39;</span><span class="p">){</span>
-    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="c1">// we&#39;re interested only in `new` ones</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">status</span> <span class="o">!=</span> <span class="s1">&#39;new&#39;</span><span class="p">){</span>
-    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="c1">// passed!</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>Filter function must return true in fact if document passed all defined rules.
-Now, if you apply this function to changes feed, you&#8217;re changes feed will emit
-only changes about &#8220;new mail&#8221;:</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">GET</span> <span class="o">/</span><span class="n">somedatabase</span><span class="o">/</span><span class="n">_changes</span><span class="o">?</span><span class="n">filter</span><span class="o">=</span><span class="n">mailbox</span><span class="o">/</span><span class="n">new_mail</span> <span class="n">HTTP</span><span class="o">/</span><span class="mf">1.1</span>
-</pre></div>
-</div>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span><span class="s2">&quot;results&quot;</span><span class="o">:</span><span class="p">[</span>
-<span class="p">{</span><span class="s2">&quot;seq&quot;</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;df8eca9da37dade42ee4d7aa3401f1dd&quot;</span><span class="p">,</span><span class="s2">&quot;changes&quot;</span><span class="o">:</span><span class="p">[{</span><span class="s2">&quot;rev&quot;</span><span class="o">:</span><span class="s2">&quot;1-c2e0085a21d34fa1cecb6dc26a4ae657&quot;</span><span class="p">}]},</span>
-<span class="p">{</span><span class="s2">&quot;seq&quot;</span><span class="o">:</span><span class="mi">7</span><span class="p">,</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;df8eca9da37dade42ee4d7aa34024714&quot;</span><span class="p">,</span><span class="s2">&quot;changes&quot;</span><span class="o">:</span><span class="p">[{</span><span class="s2">&quot;rev&quot;</span><span class="o">:</span><span class="s2">&quot;1-29d748a6e87b43db967fe338bcb08d74&quot;</span><span class="p">}]},</span>
-<span class="p">],</span>
-<span class="s2">&quot;last_seq&quot;</span><span class="o">:</span><span class="mi">27</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>Note, that <tt class="docutils literal"><span class="pre">last_seq</span></tt> number is 27, but we&#8217;d received only two records.
-Seems like any other changes was about documents, that hadn&#8217;t passed our filter.</p>
-<p>Probably, we also need to filter changes feed of our mailbox not only by single
-status value: we also interested in statuses like &#8220;spam&#8221; to update spam-filter
-heuristic rules, &#8220;outgoing&#8221; to let mail daemon actually send mails and so on.
-Creating a lot of similar functions that actually does same work isn&#8217;t good
-idea - so we need dynamic filter to go.</p>
-<p>If you have noted, filter functions takes second argument as
-<a class="reference internal" href="json-structure.html#request-object"><em>request</em></a> object - it allows to create dynamic filters
-based on query parameters, <a class="reference internal" href="json-structure.html#userctx-object"><em>user context</em></a> and more.</p>
-<p>The dynamic version of our filter now will be next:</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="nx">req</span><span class="p">){</span>
-  <span class="c1">// we need only `mail` documents</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">type</span> <span class="o">!=</span> <span class="s1">&#39;mail&#39;</span><span class="p">){</span>
-    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="c1">// we&#39;re interested only in requested status</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">status</span> <span class="o">!=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">query</span><span class="p">.</span><span class="nx">status</span><span class="p">){</span>
-    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="c1">// passed!</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>and now we have pass <cite>status</cite> query parameter in request to let filter match
-only required documents:</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">GET</span> <span class="o">/</span><span class="n">somedatabase</span><span class="o">/</span><span class="n">_changes</span><span class="o">?</span><span class="n">filter</span><span class="o">=</span><span class="n">mailbox</span><span class="o">/</span><span class="n">by_status</span><span class="o">&amp;</span><span class="n">status</span><span class="o">=</span><span class="n">new</span> <span class="n">HTTP</span><span class="o">/</span><span class="mf">1.1</span>
-</pre></div>
-</div>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span><span class="s2">&quot;results&quot;</span><span class="o">:</span><span class="p">[</span>
-<span class="p">{</span><span class="s2">&quot;seq&quot;</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;df8eca9da37dade42ee4d7aa3401f1dd&quot;</span><span class="p">,</span><span class="s2">&quot;changes&quot;</span><span class="o">:</span><span class="p">[{</span><span class="s2">&quot;rev&quot;</span><span class="o">:</span><span class="s2">&quot;1-c2e0085a21d34fa1cecb6dc26a4ae657&quot;</span><span class="p">}]},</span>
-<span class="p">{</span><span class="s2">&quot;seq&quot;</span><span class="o">:</span><span class="mi">7</span><span class="p">,</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;df8eca9da37dade42ee4d7aa34024714&quot;</span><span class="p">,</span><span class="s2">&quot;changes&quot;</span><span class="o">:</span><span class="p">[{</span><span class="s2">&quot;rev&quot;</span><span class="o">:</span><span class="s2">&quot;1-29d748a6e87b43db967fe338bcb08d74&quot;</span><span class="p">}]},</span>
-<span class="p">],</span>
-<span class="s2">&quot;last_seq&quot;</span><span class="o">:</span><span class="mi">27</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>and we can change filter behavior with easy:</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">GET</span> <span class="o">/</span><span class="n">somedatabase</span><span class="o">/</span><span class="n">_changes</span><span class="o">?</span><span class="n">filter</span><span class="o">=</span><span class="n">mailbox</span><span class="o">/</span><span class="n">by_status</span><span class="o">&amp;</span><span class="n">status</span><span class="o">=</span><span class="n">spam</span> <span class="n">HTTP</span><span class="o">/</span><span class="mf">1.1</span>
-</pre></div>
-</div>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span><span class="s2">&quot;results&quot;</span><span class="o">:</span><span class="p">[</span>
-<span class="p">{</span><span class="s2">&quot;seq&quot;</span><span class="o">:</span><span class="mi">11</span><span class="p">,</span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="s2">&quot;8960e91220798fc9f9d29d24ed612e0d&quot;</span><span class="p">,</span><span class="s2">&quot;changes&quot;</span><span class="o">:</span><span class="p">[{</span><span class="s2">&quot;rev&quot;</span><span class="o">:</span><span class="s2">&quot;3-cc6ff71af716ddc2ba114967025c0ee0&quot;</span><span class="p">}]},</span>
-<span class="p">],</span>
-<span class="s2">&quot;last_seq&quot;</span><span class="o">:</span><span class="mi">27</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>Combining filters with <cite>continuous</cite> feed allows to create powerful event-driven
-systems.</p>
-</div>
-<div class="section" id="view-filters">
-<h3>View filters<a class="headerlink" href="#view-filters" title="Permalink to this headline">¶</a></h3>
-<p>View filters are the same as classic one with one small difference: they used
-view map function instead to filter changes feed. Each time a value could be
-emitted, a change is returned. This allows to avoid creating filter functions
-that are mostly does same works as views.</p>
-<p>To use them just specify <cite>_view</cite> value for <tt class="docutils literal"><span class="pre">filter</span></tt> parameter and
-<cite>designdoc/viewname</cite> for <tt class="docutils literal"><span class="pre">view</span></tt> one:</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">GET</span> <span class="o">/</span><span class="n">somedatabase</span><span class="o">/</span><span class="n">_changes</span><span class="o">?</span><span class="n">filter</span><span class="o">=</span><span class="n">_view</span><span class="o">&amp;</span><span class="n">view</span><span class="o">=</span><span class="n">dname</span><span class="o">/</span><span class="n">viewname</span>  <span class="n">HTTP</span><span class="o">/</span><span class="mf">1.1</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Since view filters are uses map function as filter they couldn&#8217;t have
-dynamic behavior since <a class="reference internal" href="json-structure.html#request-object"><em>request object</em></a> is not available</p>
-</div>
-</div>
 </div>
 </div>
 
