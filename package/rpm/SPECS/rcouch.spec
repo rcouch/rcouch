@@ -99,7 +99,10 @@ cp -R $RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/share/* \
 		%{buildroot}%{_datadir}/%{name}/
 chmod 0755 %{buildroot}%{platform_lib_dir}/erts*/bin/*
 install -p -D -m 0644 \
-	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/default.ini \
+	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/couch.ini \
+	%{buildroot}%{platform_etc_dir}/
+install -p -D -m 0644 \
+	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/couch_httpd.ini \
 	%{buildroot}%{platform_etc_dir}/
 install -p -D -m 0644 \
 	$RPM_BUILD_DIR/%{name}-%{_revision}/rel/%{name}/etc/local.ini \

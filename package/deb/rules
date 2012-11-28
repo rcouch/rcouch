@@ -38,7 +38,8 @@ install: build
 	chmod 0755 debian/$(package)/usr/lib/rcouch/erts*/bin/*
 	install -p -D -m 0755 rel/rcouch/bin/couchjs debian/$(package)/usr/bin/couchjs
 	install -p -D -m 0755 rel/rcouch/bin/rcouch debian/$(package)/usr/sbin/rcouch
-	install -p -D -m 0644 rel/$(package)/etc/default.ini debian/$(package)/etc/rcouch/default.ini
+	install -p -D -m 0644 rel/$(package)/etc/couch.ini debian/$(package)/etc/rcouch/couch.ini
+	install -p -D -m 0644 rel/$(package)/etc/couch_httpd.ini debian/$(package)/etc/rcouch/couch_httpd.ini
 	install -p -D -m 0664 rel/$(package)/etc/local.ini debian/$(package)/etc/rcouch/local.ini
 	install -p -D -m 0644 rel/$(package)/etc/app.config debian/$(package)/etc/rcouch/app.config
 	install -p -D -m 0644 rel/$(package)/etc/vm.args debian/$(package)/etc/rcouch/vm.args
