@@ -34,7 +34,6 @@ contrib/DerivedData
 contrib/rcouchx/rcouchx.xcodeproj/xcuserdata
 contrib/rcouchx.xcworkspace/xcuserdata
 contrib/rcouchx-build
-rebar
 support/rebar
 support
 

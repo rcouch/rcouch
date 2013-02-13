@@ -12,7 +12,7 @@ DESTDIR?=
 DISTDIR=rel/archive
 
 
-.PHONY: rebar rel deps
+.PHONY: rel deps
 
 all: deps compile
 
@@ -32,7 +32,7 @@ rebar:
 compile:
 	@WITHOUT_CURL=$(WITHOUT_CURL) $(REBAR) compile
 
-deps: rebar
+deps:
 	@$(REBAR) get-deps
 
 clean: 
@@ -67,7 +67,7 @@ buildtar = mkdir distdir && \
                      git rev-list --max-count=1 HEAD > ../../../$(RCOUCH_TAG)/$${dep}/priv/git.vsn && \
                      cd ../..; done
 
-distdir: rebar
+distdir:
 	$(if $(RCOUCH_TAG), $(call buildtar), $(error "You can't generate a release tarball from a non-tagged revision. Run 'git checkout <tag>', then 'make dist'"))
 
 dist $(RCOUCH_TAG).tar.gz: distdir
