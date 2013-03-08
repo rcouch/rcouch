@@ -19,6 +19,7 @@
 -export([get_info/2]).
 -export([get_view_info/3]).
 -export([refresh/2]).
+-export([trigger_update/2, trigger_update/3]).
 -export([compact/2, compact/3, cancel_compaction/2]).
 -export([cleanup/1]).
 
@@ -190,6 +191,16 @@ refresh(Db, DDoc) ->
         Error ->
             {error, Error}
     end.
+
+
+trigger_update(Db, DDoc) ->
+    trigger_update(Db, DDoc, couch_db:get_update_seq(Db)).
+
+
+trigger_update(Db, DDoc, UpdateSeq) ->
+    {ok, Pid} = couch_index_server:get_index(couch_mrview_index, Db, DDoc),
+    couch_index:trigger_update(Pid, UpdateSeq).
+
 
 compact(Db, DDoc) ->
     compact(Db, DDoc, []).
