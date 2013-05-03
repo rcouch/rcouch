@@ -51,6 +51,4 @@ apps/couch/share/server/main-coffee.js
 deps
 ebin
 distdir
-package/osxbuild
-package/packages
-
+package
