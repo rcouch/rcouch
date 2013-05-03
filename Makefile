@@ -2,8 +2,8 @@ BASE_DIR         = $(shell pwd)
 REBAR           ?= $(BASE_DIR)/rebar
 OVERLAY_VARS    ?=
 ERLANG_BIN       = $(shell dirname $(shell which erl))
-WITHOUT_CURL?=1
-USE_STATIC_ICU?=1
+WITHOUT_CURL	?=1
+USE_STATIC_ICU	?=1
 
 REPO			?= rcouch
 PKG_REVISION	?= $(shell git describe ==tags)
@@ -17,7 +17,7 @@ $(if $(ERLANG_BIN),,$(warning "Warning: No Erlang found in your path, this will 
 all: deps compile
 
 compile:
-	@WITHOUT_CURL=$(WITHOUT_CURL) USE_STATIC_ICU?=$(USE_STATIC_ICU) $(REBAR) compile
+	@WITHOUT_CURL=$(WITHOUT_CURL) USE_STATIC_ICU=$(USE_STATIC_ICU) $(REBAR) compile
 
 deps:
 	@$(REBAR) get-deps
@@ -29,7 +29,7 @@ distclean: clean relclean
 	@$(REBAR) delete-deps
 
 generate:
-	@WITHOUT_CURL=$(WITHOUT_CURL) USE_STATIC_ICU?=$(USE_STATIC_ICU) $(REBAR) generate $(OVERLAY_VARS)
+	@WITHOUT_CURL=$(WITHOUT_CURL) USE_STATIC_ICU=$(USE_STATIC_ICU) $(REBAR) generate $(OVERLAY_VARS)
 
 rel: relclean compile generate
 
