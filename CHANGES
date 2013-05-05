@@ -1,0 +1,15 @@
+Rcouch changes
+==============
+
+0.7.0 - 2013/05/05
+------------------
+
+- support Erlang R16B
+- updated the acceptor loop to use ranch 0.8.2 [1] from ninenine
+- improved packaging. now use node_package [2] from Basho
+- fix view seq changes
+- fix couch_httpd boot
+- fix acceptor loop on Erlang R15
+
+[1] https://github.com/refuge/ranch
+[2] https://github.com/refuge/node_package
