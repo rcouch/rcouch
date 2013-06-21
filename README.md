@@ -37,6 +37,7 @@ RCouch is brought you by the [Refuge project](http://refuge.io).
 
 Installation is pretty simple. Just run the command line:
 
+    $ make 
     $ make rel
 
 and it will generate a couch folder in rel/couch. This release is
