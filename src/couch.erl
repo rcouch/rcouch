@@ -12,10 +12,29 @@
 
 -module(couch).
 
--compile(export_all).
+-export([get_app_env/2,
+         version/0,
+         start/0,
+         stop/0,
+         restart/0,
+         reload/0]).
+
+get_app_env(Env, Default) ->
+    case application:get_env(couch, Env) of
+        {ok, Val} -> Val;
+        undefined -> Default
+    end.
+
+version() ->
+    case application:get_key(couch, vsn) of
+        {ok, FullVersion} ->
+            hd(string:tokens(FullVersion, "-"));
+        _ ->
+            "0.0.0"
+    end.
 
 start() ->
-    ok = application:start(couch).
+    application:start(couch).
 
 stop() ->
     application:stop(couch).

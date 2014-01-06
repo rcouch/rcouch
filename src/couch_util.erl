@@ -12,14 +12,16 @@
 
 -module(couch_util).
 
+-export([start_app_deps/1, ensure_started/1]).
 -export([priv_dir/0, normpath/1]).
 -export([should_flush/0, should_flush/1, to_existing_atom/1]).
--export([rand32/0, implode/2, collate/2, collate/3]).
+-export([rand32/0, implode/2]).
 -export([abs_pathname/1,abs_pathname/2, trim/1]).
 -export([encodeBase64Url/1, decodeBase64Url/1]).
 -export([validate_utf8/1, to_hex/1, parse_term/1, dict_find/3]).
 -export([get_nested_json_value/2, json_user_ctx/1]).
 -export([proplist_apply_field/2, json_apply_field/2]).
+-export([json_decode/1]).
 -export([to_binary/1, to_integer/1, to_list/1, url_encode/1]).
 -export([verify/2,simple_call/2,shutdown_sync/1]).
 -export([get_value/2, get_value/3]).
@@ -35,13 +37,30 @@
 % arbitrarily chosen amount of memory to use before flushing to disk
 -define(FLUSH_MAX_MEM, 10000000).
 
+%% @spec start_app_deps(App :: atom()) -> ok
+%% @doc Start depedent applications of App.
+start_app_deps(App) ->
+    {ok, DepApps} = application:get_key(App, applications),
+    [ensure_started(A) || A <- DepApps],
+    ok.
+
+%% @spec ensure_started(Application :: atom()) -> ok
+%% @doc Start the named application if not already started.
+ensure_started(App) ->
+    case application:start(App) of
+	ok ->
+	    ok;
+	{error, {already_started, App}} ->
+	    ok
+    end.
+
 priv_dir() ->
     case code:priv_dir(couch) of
-        {error, bad_name} ->
-            % small hack, in dev mode "app" is couchdb. Fixing requires
-            % renaming src/couch to src/couch. Not really worth the hassle.
-            % -Damien
-            code:priv_dir(couchdb);
+        {error, _} ->
+            %% try to get relative priv dir. useful for tests.
+            EbinDir = filename:dirname(code:which(?MODULE)),
+            AppPath = filename:dirname(EbinDir),
+            filename:join(AppPath, "priv");
         Dir -> Dir
     end.
 
@@ -184,6 +203,13 @@ json_user_ctx(#db{name=DbName, user_ctx=Ctx}) ->
             {<<"name">>,Ctx#user_ctx.name},
             {<<"roles">>,Ctx#user_ctx.roles}]}.
 
+json_decode(D) ->
+    try
+        jiffy:decode(D)
+    catch
+        throw:Error ->
+            throw({invalid_json, Error})
+    end.
 
 % returns a random integer
 rand32() ->
@@ -259,34 +285,6 @@ implode([H], Sep, Acc) ->
     implode([], Sep, [H|Acc]);
 implode([H|T], Sep, Acc) ->
     implode(T, Sep, [Sep,H|Acc]).
-
-
-drv_port() ->
-    case get(couch_drv_port) of
-    undefined ->
-        Port = open_port({spawn, "couch_icu_driver"}, []),
-        put(couch_drv_port, Port),
-        Port;
-    Port ->
-        Port
-    end.
-
-collate(A, B) ->
-    collate(A, B, []).
-
-collate(A, B, Options) when is_binary(A), is_binary(B) ->
-    Operation =
-    case lists:member(nocase, Options) of
-        true -> 1; % Case insensitive
-        false -> 0 % Case sensitive
-    end,
-    SizeA = byte_size(A),
-    SizeB = byte_size(B),
-    Bin = <<SizeA:32/native, A/binary, SizeB:32/native, B/binary>>,
-    [Result] = erlang:port_control(drv_port(), Operation, Bin),
-    % Result is 0 for lt, 1 for eq and 2 for gt. Subtract 1 to return the
-    % expected typical -1, 0, 1
-    Result - 1.
 
 should_flush() ->
     should_flush(?FLUSH_MAX_MEM).

@@ -14,7 +14,7 @@
 -export([handle_proxy_req/2]).
 
 -include("couch_db.hrl").
--include("../ibrowse/ibrowse.hrl").
+-include_lib("ibrowse/include/ibrowse.hrl").
 
 -define(TIMEOUT, infinity).
 -define(PKT_SIZE, 4096).
@@ -38,7 +38,7 @@ handle_proxy_req(Req, ProxyDest) ->
         {error, Reason} ->
             throw({error, Reason})
     end.
-    
+
 
 get_method(#httpd{mochi_req=MochiReq}) ->
     case MochiReq:get(method) of
@@ -146,7 +146,7 @@ stream_chunked_body({stream, MReq, 0, Buf, BRem}) ->
     case CRem of
         0 ->
             BodyData = lists:reverse(Buf, Data),
-            {ok, BodyData, {trailers, MReq, [], ?PKT_SIZE}}; 
+            {ok, BodyData, {trailers, MReq, [], ?PKT_SIZE}};
         _ ->
             stream_chunked_body(
                 {stream, MReq, CRem, [Data | Buf], BRem-size(Data)}
