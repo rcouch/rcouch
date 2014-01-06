@@ -148,15 +148,15 @@ couch_readline(JSContext* cx, FILE* fp)
 
     bytes = JS_malloc(cx, byteslen);
     if(bytes == NULL) return NULL;
-    
+
     while((readlen = couch_fgets(bytes+used, byteslen-used, fp)) > 0) {
         used += readlen;
-        
+
         if(bytes[used-1] == '\n') {
             bytes[used-1] = '\0';
             break;
         }
-        
+
         // Double our buffer and read more.
         byteslen *= 2;
         tmp = JS_realloc(cx, bytes, byteslen);
@@ -164,7 +164,7 @@ couch_readline(JSContext* cx, FILE* fp)
             JS_free(cx, bytes);
             return NULL;
         }
-        
+
         bytes = tmp;
     }
 
@@ -202,7 +202,7 @@ couch_readfile(JSContext* cx, const char* filename)
         free(bytes);
         return string;
     }
-    return NULL;    
+    return NULL;
 }
 
 
@@ -250,15 +250,9 @@ couch_error(JSContext* cx, const char* mesg, JSErrorReport* report)
             // Use JS regexp to indent the stack trace.
             // If the regexp can't be created, don't JS_ReportError since it is
             // probably not productive to wind up here again.
-#ifdef SM185
             if(JS_GetProperty(cx, JSVAL_TO_OBJECT(v), "stack", &v) &&
                (regexp = JS_NewRegExpObjectNoStatics(
                    cx, "^(?=.)", 6, JSREG_GLOB | JSREG_MULTILINE)))
-#else
-            if(JS_GetProperty(cx, JSVAL_TO_OBJECT(v), "stack", &v) &&
-               (regexp = JS_NewRegExpObject(
-                   cx, "^(?=.)", 6, JSREG_GLOB | JSREG_MULTILINE)))
-#endif
             {
                 // Set up the arguments to ``String.replace()``
                 re_args[0] = OBJECT_TO_JSVAL(regexp);

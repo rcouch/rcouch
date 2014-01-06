@@ -1,0 +1,93 @@
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ft=erlang ts=4 sw=4 et
+
+%% Licensed under the Apache License, Version 2.0 (the "License"); you may not
+%% use this file except in compliance with the License. You may obtain a copy of
+%% the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing, software
+%% distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+%% WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+%% License for the specific language governing permissions and limitations under
+%% the License.
+
+
+Cfg = case file:consult("../../vars.config") of
+          {ok, Terms} ->
+              Terms;
+          _Err ->
+              []
+      end,
+
+
+%% get version infos
+MajorVersion = integer_to_list(proplists:get_value(version_major, Cfg, 0)),
+MinorVersion = integer_to_list(proplists:get_value(version_minor, Cfg, 0)),
+RevVersion = integer_to_list(proplists:get_value(version_revision, Cfg, 0)),
+StageVersion = proplists:get_value(version_stage, Cfg, ""),
+RelVersion = proplists:get_value(version_release, Cfg, ""),
+
+%% build the version
+BaseVersion = MajorVersion ++ "." ++ MinorVersion ++ "." ++ RevVersion,
+SecondaryVersion = StageVersion ++ RelVersion,
+Version = case os:getenv("RELEASE") of
+    "1" ->
+        BaseVersion;
+    _ ->
+        BaseVersion ++ SecondaryVersion
+end,
+
+Cfg1 = [{package_string, proplists:get_value(package_name, Cfg, "")
+                         ++ " " ++ Version },
+        {package_version, Version}] ++ Cfg,
+
+%% write config.h
+CfgStr = lists:foldl(fun({K, V}, Acc) ->
+            K1 = string:to_upper(atom_to_list(K)),
+            case K1 of
+                "VERSION_" ++ _ -> Acc;
+                _ ->
+                    ["#define ", K1, " ", $", V, $", $\n | Acc]
+            end
+        end, [], Cfg1),
+ok = file:write_file("c_src/couch_js/config.h", iolist_to_binary(CfgStr)),
+
+
+
+GetFlag = fun(Name, Default) ->
+        case os:getenv(Name) of
+            false -> Default;
+            Val -> Val
+        end
+    end,
+
+
+JSLIBS = GetFlag("JS_LIBS", "-lmozjs185"),
+JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/include/js"),
+
+{CFLAGS, LDFLAGS}  = case os:type() of
+    {unix, darwin} ->
+        {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS};
+    {unix, _} ->
+        {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS ++ " -lm"};
+    _ ->
+        {"-DXP_WIN " ++ JSCFLAGS, JSLIBS}
+end,
+
+{CFLAGS1, LDFLAGS1} = case os:getenv("WITHOUT_CURL") of
+    "1" -> {"-DWITHOUT_CURL " ++ CFLAGS, LDFLAGS};
+    _ -> {CFLAGS, LDFLAGS ++ " -lcurl"}
+end,
+
+PortEnv = [{port_env, [
+            {"CFLAGS",  "$CFLAGS -Wall -c -g -O2 " ++ CFLAGS1},
+            {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1}]},
+
+           {port_specs, [
+            {filename:join(["priv", "couchjs"]),
+            ["c_src/couch_js/*.c"]}]}
+],
+
+lists:keymerge(1,lists:keysort(1, PortEnv), lists:keysort(1, CONFIG)).
