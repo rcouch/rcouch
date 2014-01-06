@@ -12,7 +12,7 @@
 
 -module(couch_mrview_compactor).
 
--include("couch_db.hrl").
+-include_lib("couch/include/couch_db.hrl").
 -include_lib("couch_mrview/include/couch_mrview.hrl").
 
 -export([compact/3, swap_compacted/2]).
@@ -174,5 +174,5 @@ swap_compacted(OldState, NewState) ->
     unlink(OldState#mrst.fd),
     couch_ref_counter:drop(OldState#mrst.refc),
     {ok, NewRefCounter} = couch_ref_counter:start([NewState#mrst.fd]),
-    
+
     {ok, NewState#mrst{refc=NewRefCounter}}.
