@@ -10,11 +10,21 @@
 % License for the specific language governing permissions and limitations under
 % the License.
 
-{application, couch_index, [
-    {description, "CouchDB Secondary Index Manager"},
-    {vsn, "@version@"},
-    {modules, []},
-    {registered, [couch_index_server]},
-    {applications, [kernel, stdlib, couch]},
-    {mod, {couch_index_app, []}}
-]}.
+-module(couch_index_sup).
+-behaviour(supervisor).
+
+-export([start_link/0]).
+-export([init/1]).
+
+
+%% Helper macro for declaring children of supervisor
+-define(CHILD(I), {I, {I, start_link, []}, permanent, 5000, worker, [I]}).
+
+start_link() ->
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+
+
+init([]) ->
+    Server = ?CHILD(couch_index_server),
+    {ok, {{one_for_one, 10, 3600}, [Server]}}.
+
