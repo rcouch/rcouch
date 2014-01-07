@@ -73,7 +73,7 @@ static const char USAGE_TEMPLATE[] =
             USAGE_TEMPLATE,                     \
             basename,                           \
             basename,                           \
-            PACKAGE_NAME,                       \
+            VENDOR_NAME,                       \
             basename,                           \
             PACKAGE_BUGREPORT)
 

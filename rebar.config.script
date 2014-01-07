@@ -14,13 +14,12 @@
 %% the License.
 
 
-Cfg = case file:consult("../../vars.config") of
+Cfg = case file:consult("../../pkg.vars.config") of
           {ok, Terms} ->
               Terms;
           _Err ->
               []
       end,
-
 
 %% get version infos
 MajorVersion = integer_to_list(proplists:get_value(version_major, Cfg, 0)),
@@ -39,7 +38,7 @@ Version = case os:getenv("RELEASE") of
         BaseVersion ++ SecondaryVersion
 end,
 
-Cfg1 = [{package_string, proplists:get_value(package_name, Cfg, "")
+Cfg1 = [{package_string, proplists:get_value(vendor_name, Cfg, "")
                          ++ " " ++ Version },
         {package_version, Version}] ++ Cfg,
 
@@ -53,7 +52,6 @@ CfgStr = lists:foldl(fun({K, V}, Acc) ->
             end
         end, [], Cfg1),
 ok = file:write_file("c_src/couch_js/config.h", iolist_to_binary(CfgStr)),
-
 
 
 GetFlag = fun(Name, Default) ->
