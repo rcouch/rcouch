@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <jsapi.h>
+#include <js/jsapi.h>
 
 #include "help.h"
 #include "util.h"

@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <jsapi.h>
+#include <js/jsapi.h>
 #include "utf8.h"
 #include "util.h"
 

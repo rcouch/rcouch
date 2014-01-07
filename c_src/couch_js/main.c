@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <jsapi.h>
+#include <js/jsapi.h>
 #include "http.h"
 #include "utf8.h"
 #include "util.h"

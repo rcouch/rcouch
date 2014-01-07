@@ -13,7 +13,7 @@
 #ifndef COUCHJS_UTIL_H
 #define COUCHJS_UTIL_H
 
-#include <jsapi.h>
+#include <js/jsapi.h>
 
 typedef struct {
     int          use_http;
