@@ -85,13 +85,24 @@ end,
     _ -> {CFLAGS, LDFLAGS ++ " -lcurl"}
 end,
 
+PortSpecs0 = case os:type() of
+    {win32, _} ->
+        [{filename:join(["priv", "couchspawnkillable"]),
+            ["c_src/spawnkillable/*.c"]}];
+    _ ->
+        {ok, _} = file:copy("priv/couchspawnkillable.sh",
+                            "priv/couchspawnkillable"),
+        os:cmd("chmod +x priv/couchspawnkillable"),
+        []
+    end,
+
 PortEnv = [{port_env, [
             {"CFLAGS",  "$CFLAGS -Wall -c -g -O2 " ++ CFLAGS1},
             {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1}]},
 
            {port_specs, [
             {filename:join(["priv", CouchJSName]),
-            ["c_src/couch_js/*.c"]}]}
+            ["c_src/couch_js/*.c"]}] ++ PortSpecs0}
 ],
 
 lists:keymerge(1,lists:keysort(1, PortEnv), lists:keysort(1, CONFIG)).
