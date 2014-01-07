@@ -35,13 +35,7 @@ dev_start() ->
     couch:start().
 
 get_version() ->
-    Apps = application:loaded_applications(),
-    case lists:keysearch(couch, 1, Apps) of
-    {value, {_, _, Vsn}} ->
-        Vsn;
-    false ->
-        "0.0.0"
-    end.
+    couch:release_version().
 get_version(short) ->
   %% strip git hash from version string
   [Version|_Rest] = string:tokens(get_version(), "+"),
@@ -428,7 +422,7 @@ handle_cast(Msg, _Server) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-    
+
 handle_info({'EXIT', _Pid, config_change}, Server) ->
     {noreply, shutdown, Server};
 handle_info({'EXIT', Pid, Reason}, Server) ->

@@ -14,6 +14,7 @@
 
 -export([get_app_env/2,
          version/0,
+         release_version/0,
          start/0,
          stop/0,
          restart/0,
@@ -29,6 +30,14 @@ version() ->
     case application:get_key(couch, vsn) of
         {ok, FullVersion} ->
             hd(string:tokens(FullVersion, "-"));
+        _ ->
+            "0.0.0"
+    end.
+
+release_version() ->
+    case application:get_env(couch, couch_rel) of
+        {ok, Vsn} ->
+            Vsn;
         _ ->
             "0.0.0"
     end.

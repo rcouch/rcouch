@@ -1,0 +1,67 @@
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ft=erlang ts=4 sw=4 et
+
+%% Licensed under the Apache License, Version 2.0 (the "License"); you may not
+%% use this file except in compliance with the License. You may obtain a copy of
+%% the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing, software
+%% distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+%% WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+%% License for the specific language governing permissions and limitations under
+%% the License.
+
+
+Cfg = case file:consult("../../pkg.vars.config") of
+          {ok, Terms} ->
+              Terms;
+          _Err ->
+              []
+      end,
+
+%% get version infos
+MajorVersion = integer_to_list(proplists:get_value(version_major, Cfg, 0)),
+MinorVersion = integer_to_list(proplists:get_value(version_minor, Cfg, 0)),
+RevVersion = integer_to_list(proplists:get_value(version_revision, Cfg, 0)),
+StageVersion = proplists:get_value(version_stage, Cfg, ""),
+RelVersion = proplists:get_value(version_release, Cfg, ""),
+
+%% build the version
+BaseVersion = MajorVersion ++ "." ++ MinorVersion ++ "." ++ RevVersion,
+SecondaryVersion = StageVersion ++ RelVersion,
+RelVsn = case os:getenv("RELEASE") of
+    "1" ->
+        BaseVersion;
+    _ ->
+        BaseVersion ++ SecondaryVersion
+end,
+
+
+[
+    {application, couch, [
+        {description, "Apache CouchDB"},
+        {vsn, "1.6.1"},
+        {registered, [
+            couch_config,
+            couch_db_update,
+            couch_db_update_notifier_sup,
+            couch_external_manager,
+            couch_httpd,
+            couch_log,
+            couch_primary_services,
+            couch_query_servers,
+            couch_secondary_services,
+            couch_server,
+            couch_server_sup,
+            couch_stats_aggregator,
+            couch_stats_collector,
+            couch_task_status
+        ]},
+        {mod, {couch_app, []}},
+        {env, [{couch_rel, RelVsn}]},
+        {applications, [kernel, stdlib, crypto, sasl, public_key, ssl,
+                        inets, oauth, ibrowse, mochiweb, os_mon]}
+    ]}
+].
