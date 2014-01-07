@@ -1,6 +1,6 @@
 {application, couch, [
-    {description, "@package_name@"},
-    {vsn, "@version@"},
+    {description, "Apache CouchDB"},
+    {vsn, "1.6.1"},
     {registered, [
         couch_config,
         couch_db_update,

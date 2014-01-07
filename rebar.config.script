@@ -38,21 +38,27 @@ Version = case os:getenv("RELEASE") of
         BaseVersion ++ SecondaryVersion
 end,
 
-Cfg1 = [{package_string, proplists:get_value(vendor_name, Cfg, "")
-                         ++ " " ++ Version },
-        {package_version, Version}] ++ Cfg,
+%% couchjs name
+CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
+
+%% build config.h
+ConfigH = [{package_name, proplists:get_value(vendor_name, Cfg, "")},
+           {package_string, proplists:get_value(vendor_name, Cfg, "")
+                            ++ " " ++ Version },
+           {package_bugreport, proplists:get_value(package_bugreport, Cfg, "")},
+           {package_version, Version},
+           {couchjs_name, CouchJSName}],
 
 %% write config.h
-CfgStr = lists:foldl(fun({K, V}, Acc) ->
+ConfigHStr = lists:foldl(fun({K, V}, Acc) ->
             K1 = string:to_upper(atom_to_list(K)),
             case K1 of
                 "VERSION_" ++ _ -> Acc;
                 _ ->
                     ["#define ", K1, " ", $", V, $", $\n | Acc]
             end
-        end, [], Cfg1),
-ok = file:write_file("c_src/couch_js/config.h", iolist_to_binary(CfgStr)),
-
+        end, [], ConfigH),
+ok = file:write_file("c_src/couch_js/config.h", iolist_to_binary(ConfigHStr)),
 
 GetFlag = fun(Name, Default) ->
         case os:getenv(Name) of
@@ -84,7 +90,7 @@ PortEnv = [{port_env, [
             {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1}]},
 
            {port_specs, [
-            {filename:join(["priv", "couchjs"]),
+            {filename:join(["priv", CouchJSName]),
             ["c_src/couch_js/*.c"]}]}
 ],
 
