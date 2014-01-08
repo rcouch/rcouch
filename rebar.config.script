@@ -68,41 +68,86 @@ GetFlag = fun(Name, Default) ->
     end,
 
 
-JSLIBS = GetFlag("JS_LIBS", "-lmozjs185"),
-JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/include/js"),
 
-{CFLAGS, LDFLAGS}  = case os:type() of
-    {unix, darwin} ->
-        {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS};
-    {unix, _} ->
-        {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS ++ " -lm"};
+PortEnv = case os:getenv("COUCHDB_STATIC") of
+    "1" ->
+        {ok, Cwd} = file:get_cwd(),
+        IncJs = filename:join([Cwd, ".libs", "js", "include"]),
+        IncNspr= filename:join([Cwd, ".libs", "nsprpub", "include"]),
+        StaticJs = filename:join([Cwd, ".libs", "js", "lib",
+                                 "libjs_static.a"]),
+        StaticNspr = filename:join([Cwd, ".libs", "nsprpub", "lib",
+                                    "libnspr4.a"]),
+
+
+        CFLAGS = GetFlag("JS_CFLAGS", "-I" ++ IncJs ++
+                                      " -I" ++ IncNspr ++ " -DXP_UNIX -Wall"),
+        LDFLAGS = GetFlag("JS_LIBS", StaticJs ++ " " ++ StaticNspr),
+
+        {CFLAGS1, LDFLAGS1} = case os:getenv("WITHOUT_CURL") of
+            "1" -> {"-DWITHOUT_CURL " ++ CFLAGS, LDFLAGS};
+            _ -> {CFLAGS, LDFLAGS ++ " -lcurl"}
+        end,
+
+        [
+            {"CFLAGS", "$CFLAGS -Wall -c -g -O2 " ++ CFLAGS1},
+            {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1 ++ " -lstdc++"},
+            {"linux.*", "LDFLAGS", "$LDFLAGS " ++ LDFLAGS1 ++
+                                   " -lstdc++ -lpthread -lm"},
+
+            %% Prevent the make->gmake transition from infecting
+            %% MAKEFLAGS with bad flags that confuse gmake
+            {"freebsd.*", "MAKEFLAGS", ""},
+            {"freebsd.*","LDFLAGS", "$LDFLAGS " ++ LDFLAGS1 ++
+                                     " -lstdc++ -lpthread"}
+        ];
     _ ->
-        {"-DXP_WIN " ++ JSCFLAGS, JSLIBS}
+        JSLIBS = GetFlag("JS_LIBS", "-lmozjs185"),
+
+        {CFLAGS, LDFLAGS}  = case os:type() of
+            {unix, darwin} ->
+                JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/local/include/js"),
+                {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS};
+            {unix, linux} ->
+                %% generally linux install in /usr/include
+                JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/include/js"),
+                {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS ++ " -lm"};
+            {unix, _} ->
+                %% most likely a bsd
+                JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/local/include/js"),
+                {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS ++ " -lm"};
+            _ ->
+                JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/include/js"),
+                {"-DXP_WIN " ++ JSCFLAGS, JSLIBS}
+        end,
+
+        {CFLAGS1, LDFLAGS1} = case os:getenv("WITHOUT_CURL") of
+            "1" -> {"-DWITHOUT_CURL " ++ CFLAGS, LDFLAGS};
+            _ -> {CFLAGS, LDFLAGS ++ " -lcurl"}
+        end,
+
+        [
+            {"CFLAGS",  "$CFLAGS -Wall -c -g -O2 " ++ CFLAGS1},
+            {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1}
+        ]
 end,
 
-{CFLAGS1, LDFLAGS1} = case os:getenv("WITHOUT_CURL") of
-    "1" -> {"-DWITHOUT_CURL " ++ CFLAGS, LDFLAGS};
-    _ -> {CFLAGS, LDFLAGS ++ " -lcurl"}
-end,
+PortSpecs0 = [{filename:join(["priv", CouchJSName]), ["c_src/couch_js/*.c"]}],
 
-PortSpecs0 = case os:type() of
+PortSpecs = case os:type() of
     {win32, _} ->
-        [{filename:join(["priv", "couchspawnkillable"]),
+        PortSpecs0 ++ [{filename:join(["priv", "couchspawnkillable"]),
             ["c_src/spawnkillable/*.c"]}];
     _ ->
         {ok, _} = file:copy("priv/couchspawnkillable.sh",
                             "priv/couchspawnkillable"),
         os:cmd("chmod +x priv/couchspawnkillable"),
-        []
+        PortSpecs0
     end,
 
-PortEnv = [{port_env, [
-            {"CFLAGS",  "$CFLAGS -Wall -c -g -O2 " ++ CFLAGS1},
-            {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1}]},
+PortInfo = [{port_env, PortEnv},
+            {port_specs, PortSpecs},
+            {pre_hooks, [{compile, "./build_spidermonkey.sh"}]},
+            {post_hooks, [{clean, "./build_spidermonkey.sh clean"}]}],
 
-           {port_specs, [
-            {filename:join(["priv", CouchJSName]),
-            ["c_src/couch_js/*.c"]}] ++ PortSpecs0}
-],
-
-lists:keymerge(1,lists:keysort(1, PortEnv), lists:keysort(1, CONFIG)).
+lists:keymerge(1,lists:keysort(1, PortInfo), lists:keysort(1, CONFIG)).
