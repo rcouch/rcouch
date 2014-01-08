@@ -69,7 +69,7 @@ GetFlag = fun(Name, Default) ->
 
 
 JSLIBS = GetFlag("JS_LIBS", "-lmozjs185"),
-JSCFLAGS = GetFlag("JS_CFLAGS", "$CFLAGS"),
+JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/include/js"),
 
 {CFLAGS, LDFLAGS}  = case os:type() of
     {unix, darwin} ->
