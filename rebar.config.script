@@ -14,7 +14,7 @@
 %% the License.
 
 
-Cfg = case file:consult("../../pkg.vars.config") of
+Cfg = case file:consult("../../../pkg.vars.config") of
           {ok, Terms} ->
               Terms;
           _Err ->
