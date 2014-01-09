@@ -114,7 +114,7 @@ start_server(IniFiles) ->
         end
     end
     || Uri <- Uris],
-    case couch_config:get("couchdb", "uri_file", null) of 
+    case couch_config:get("couchdb", "uri_file", null) of
     null -> ok;
     UriFile ->
         Lines = [begin case Uri of

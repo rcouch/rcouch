@@ -18,7 +18,7 @@
 
 -export([start/2, stop/1]).
 
--define(CONF_FILES, ["couch.ini", "couch_httpd.ini", "local.ini"]).
+-define(CONF_FILES, ["couch.ini", "local.ini"]).
 
 start(_Type, _Args) ->
     couch_util:start_app_deps(couch),
