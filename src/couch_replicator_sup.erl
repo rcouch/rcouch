@@ -17,6 +17,7 @@
 
 %% API
 -export([start_link/0]).
+-export([stop/0]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -30,6 +31,9 @@
 
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+
+stop() ->
+    catch exit(whereis(couch_replicator_sup), normal).
 
 %% ===================================================================
 %% Supervisor callbacks
@@ -56,4 +60,4 @@ init([]) ->
             supervisor,
             [couch_replicator_manager_sup]}
     ],
-    {ok, { {one_for_one, 10, 3600}, Children} }.
+    {ok, { {one_for_one, 100, 3600}, Children} }.

@@ -119,8 +119,11 @@ test() ->
             delete_db(SourceDb),
             delete_db(TargetDb),
             couch_server_sup:stop(),
+            couch_replicator_sup:stop(),
+
             ok = timer:sleep(1000),
-            couch_server_sup:start_link(test_util:config_files())
+            couch_server_sup:start_link(test_util:config_files()),
+            couch_replicator_sup:start_link()
         end,
         Pairs),
 
