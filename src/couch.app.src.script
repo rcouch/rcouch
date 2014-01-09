@@ -61,7 +61,7 @@ end,
         ]},
         {mod, {couch_app, []}},
         {env, [{couch_rel, RelVsn}]},
-        {applications, [kernel, stdlib, crypto, sasl, public_key, ssl,
+        {applications, [kernel, stdlib, crypto, sasl, asn1, public_key, ssl,
                         inets, oauth, ibrowse, mochiweb, os_mon]}
     ]}
 ].

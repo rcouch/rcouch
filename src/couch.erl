@@ -43,7 +43,6 @@ release_version() ->
     end.
 
 start() ->
-    application:load(couch),
     couch_util:start_app_deps(couch),
     application:start(couch).
 
