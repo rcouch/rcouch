@@ -76,6 +76,8 @@ main(_) ->
 
 test() ->
     couch_server_sup:start_link(test_util:config_files()),
+    couch_replicator_sup:start_link(),
+
     ibrowse:start(),
     crypto:start(),
     couch_config:set("replicator", "connection_timeout", "90000", false),
