@@ -26,7 +26,8 @@
 -define(BY_DB, couchdb_indexes_by_db).
 
 
--record(st, {root_dir}).
+-record(st, {root_dir,
+             notifier_pid}).
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -73,10 +74,13 @@ init([]) ->
     ets:new(?BY_SIG, [protected, set, named_table]),
     ets:new(?BY_PID, [private, set, named_table]),
     ets:new(?BY_DB, [protected, bag, named_table]),
-    couch_db_update_notifier:start_link(fun ?MODULE:update_notify/1),
+
+    {ok, NotifierPid} = couch_db_update_notifier:start_link(
+            fun ?MODULE:update_notify/1),
     RootDir = couch_index_util:root_dir(),
     couch_file:init_delete_dir(RootDir),
-    {ok, #st{root_dir=RootDir}}.
+    {ok, #st{root_dir=RootDir,
+             notifier_pid=NotifierPid}}.
 
 
 terminate(_Reason, _State) ->
@@ -116,7 +120,6 @@ handle_call({reset_indexes, DbName}, _From, State) ->
 handle_cast({reset_indexes, DbName}, State) ->
     reset_indexes(DbName, State#st.root_dir),
     {noreply, State}.
-
 
 handle_info({'EXIT', Pid, Reason}, Server) ->
     case ets:lookup(?BY_PID, Pid) of
@@ -198,4 +201,3 @@ update_notify({ddoc_updated, {DbName, DDocId}}) ->
         ets:match_object(?BY_DB, {DbName, {DDocId, '$1'}}));
 update_notify(_) ->
     ok.
-

@@ -27,4 +27,3 @@ start_link() ->
 init([]) ->
     Server = ?CHILD(couch_index_server),
     {ok, {{one_for_one, 10, 3600}, [Server]}}.
-
