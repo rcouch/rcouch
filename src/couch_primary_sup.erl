@@ -42,7 +42,13 @@ init([]) ->
             permanent,
             brutal_kill,
             worker,
-            [couch_log]}
+            [couch_log]},
+        {couch_index_sup,
+             {couch_index_sup, start_link, []},
+             permanent,
+             infinity,
+             supervisor,
+             [couch_index_sup]}
     ],
     {ok, {{one_for_one, 10, 3600}, Children}}.
 

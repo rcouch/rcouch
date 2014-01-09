@@ -48,6 +48,7 @@ end,
             couch_db_update,
             couch_db_update_notifier_sup,
             couch_external_manager,
+            couch_index_sup,
             couch_httpd,
             couch_log,
             couch_primary_services,
@@ -62,6 +63,6 @@ end,
         {mod, {couch_app, []}},
         {env, [{couch_rel, RelVsn}]},
         {applications, [kernel, stdlib, crypto, sasl, asn1, public_key, ssl,
-                        inets, oauth, ibrowse, mochiweb, os_mon]}
+                        inets, ibrowse, os_mon]}
     ]}
 ].
