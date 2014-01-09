@@ -1,5 +1,7 @@
 #!/usr/bin/env escript
 %% -*- erlang -*-
+%%! -pa ./src/deps/*/ebin -pa ./src/apps/*/ebin -pa ./src/test/etap
+
 
 % Licensed under the Apache License, Version 2.0 (the "License"); you may not
 % use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +21,8 @@ main(_) ->
 
 test() ->
     couch_server_sup:start_link(test_util:config_files()),
+    couch_index_sup:start_link(),
+
     {ok, Db} = couch_mrview_test_util:init_db(<<"foo">>, map, 1000),
     couch_mrview:query_view(Db, <<"_design/bar">>, <<"baz">>),
     test_swap(Db),
@@ -26,7 +30,7 @@ test() ->
 
 
 test_swap(Db) ->
-    {ok, QPid} = start_query(Db),    
+    {ok, QPid} = start_query(Db),
     {ok, MonRef} = couch_mrview:compact(Db, <<"_design/bar">>, [monitor]),
     receive
         {'DOWN', MonRef, process, _, _} -> ok
@@ -50,7 +54,7 @@ start_query(Db) ->
             ({row, _}, Count) -> {ok, Count+1};
             (_, Count) -> {ok, Count}
         end,
-        {ok, Result} = 
+        {ok, Result} =
         couch_mrview:query_view(Db, <<"_design/bar">>, <<"baz">>, [], CB, wait),
         Self ! {self(), Result}
     end),
