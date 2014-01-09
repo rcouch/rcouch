@@ -20,7 +20,6 @@ main(_) ->
 
 test() ->
     couch_server_sup:start_link(test_util:config_files()),
-    couch_index_sup:start_link(),
 
     {ok, Db} = couch_mrview_test_util:init_db(<<"foo">>, map),
 
