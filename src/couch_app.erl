@@ -33,4 +33,6 @@ get_ini_files() ->
     Defaults = lists:map(fun(FName) ->
                     filename:join(DefaultConfDir, FName)
             end, ?CONF_FILES),
+    io:format("default files ~p~n", [couch:get_app_env(config_files,
+                                                       Defaults)]),
     couch:get_app_env(config_files, Defaults).
