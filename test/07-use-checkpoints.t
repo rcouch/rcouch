@@ -94,6 +94,7 @@ main(_) ->
 
 test() ->
     couch_server_sup:start_link(test_util:config_files()),
+    couch_httpd_sup:start_link(),
     couch_replicator_sup:start_link(),
     ibrowse:start(),
 
@@ -210,7 +211,7 @@ compare_dbs(#db{name = SourceName}, #db{name = TargetName}) ->
 db_url(DbName) ->
     iolist_to_binary([
         "http://", couch_config:get("httpd", "bind_address", "127.0.0.1"),
-        ":", integer_to_list(mochiweb_socket_server:get(couch_httpd, port)),
+        ":", integer_to_list(mochiweb_socket_server:get(couch_http, port)),
         "/", DbName
     ]).
 
