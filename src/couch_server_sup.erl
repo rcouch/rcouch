@@ -104,32 +104,6 @@ start_server(IniFiles) ->
 
     unlink(ConfigPid),
 
-    Ip = couch_config:get("httpd", "bind_address"),
-    io:format("Apache CouchDB has started. Time to relax.~n"),
-    Uris = [get_uri(Name, Ip) || Name <- [couch_httpd, https]],
-    [begin
-        case Uri of
-            undefined -> ok;
-            Uri -> ?LOG_INFO("Apache CouchDB has started on ~s", [Uri])
-        end
-    end
-    || Uri <- Uris],
-    case couch_config:get("couchdb", "uri_file", null) of
-    null -> ok;
-    UriFile ->
-        Lines = [begin case Uri of
-            undefined -> [];
-            Uri -> io_lib:format("~s~n", [Uri])
-            end end || Uri <- Uris],
-        case file:write_file(UriFile, Lines) of
-        ok -> ok;
-        {error, Reason2} = Error ->
-            ?LOG_ERROR("Failed to write to URI file ~s: ~s",
-                [UriFile, file:format_error(Reason2)]),
-            throw(Error)
-        end
-    end,
-
     {ok, Pid}.
 
 stop() ->
@@ -137,28 +111,7 @@ stop() ->
 
 config_change("daemons", _) ->
     supervisor:terminate_child(couch_server_sup, couch_secondary_services),
-    supervisor:restart_child(couch_server_sup, couch_secondary_services);
-config_change("couchdb", "util_driver_dir") ->
-    init:restart().
+    supervisor:restart_child(couch_server_sup, couch_secondary_services).
 
 init(ChildSpecs) ->
     {ok, ChildSpecs}.
-
-get_uri(Name, Ip) ->
-    case get_port(Name) of
-        undefined ->
-            undefined;
-        Port ->
-            io_lib:format("~s://~s:~w/", [get_scheme(Name), Ip, Port])
-    end.
-
-get_scheme(couch_httpd) -> "http";
-get_scheme(https) -> "https".
-
-get_port(Name) ->
-    try
-        mochiweb_socket_server:get(Name, port)
-    catch
-        exit:{noproc, _}->
-            undefined
-    end.
