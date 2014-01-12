@@ -99,7 +99,6 @@ handle_restart_req(#httpd{method='POST'}=Req) ->
     ok = couch_httpd:verify_is_server_admin(Req),
     Result = send_json(Req, 202, {[{ok, true}]}),
     couch_server_sup:restart_core_server(),
-    couch_httpd_sup:reload_listeners(),
     Result;
 handle_restart_req(Req) ->
     send_method_not_allowed(Req, "POST").
