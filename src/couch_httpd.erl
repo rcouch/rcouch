@@ -30,7 +30,7 @@
 -export([send_json/2,send_json/3,send_json/4,last_chunk/1,parse_multipart_request/3]).
 -export([accepted_encodings/1,handle_request_int/5,validate_referer/1,validate_ctype/2]).
 -export([http_1_0_keep_alive/2]).
-
+-export([set_auth_handlers/0]).
 
 start_link(couch_http) ->
     Port = couch_config:get("httpd", "port", "5984"),
@@ -157,7 +157,7 @@ set_auth_handlers() ->
         couch_config:get("httpd", "authentication_handlers", "")),
     AuthHandlers = lists:map(
         fun(A) -> {make_arity_1_fun(A), ?l2b(A)} end, AuthenticationSrcs),
-    ok = application:set_env(couch, auth_handlers, AuthHandlers).
+    ok = application:set_env(couch_httpd, auth_handlers, AuthHandlers).
 
 % SpecStr is a string like "{my_module, my_fun}"
 %  or "{my_module, my_fun, <<"my_arg">>}"
@@ -286,7 +286,7 @@ handle_request_int(MochiReq, DefaultFun,
     },
 
     HandlerFun = couch_util:dict_find(HandlerKey, UrlHandlers, DefaultFun),
-    {ok, AuthHandlers} = application:get_env(couch, auth_handlers),
+    {ok, AuthHandlers} = application:get_env(couch_httpd, auth_handlers),
 
     {ok, Resp} =
     try
