@@ -62,7 +62,7 @@ upgrade() ->
 %% @doc upgrade  a listener
 -spec reload_listener(atom()) -> {ok, pid()} | {error, term()}.
 reload_listener(Id) ->
-    %% stop the listener
+    %% stop the listener and remove it from the supervision temporarely
     supervisor:terminate_child(?MODULE, Id),
     supervisor:delete_child(?MODULE, Id),
 
