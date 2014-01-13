@@ -10,7 +10,7 @@
 % License for the specific language governing permissions and limitations under
 % the License.
 
--module(couch_server_sup).
+-module(couch_sup).
 -behaviour(supervisor).
 
 
@@ -23,7 +23,7 @@
 -export([init/1]).
 
 start_link(IniFiles) ->
-    case whereis(couch_server_sup) of
+    case whereis(couch_sup) of
     undefined ->
         start_server(IniFiles);
     _Else ->
@@ -72,7 +72,7 @@ start_server(IniFiles) ->
     BaseChildSpecs =
     {{one_for_all, 10, 3600},
         [{couch_config,
-            {couch_server_sup, couch_config_start_link_wrapper, [IniFiles, ConfigPid]},
+            {couch_sup, couch_config_start_link_wrapper, [IniFiles, ConfigPid]},
             permanent,
             brutal_kill,
             worker,
@@ -96,7 +96,7 @@ start_server(IniFiles) ->
     application:start(crypto),
 
     {ok, Pid} = supervisor:start_link(
-        {local, couch_server_sup}, couch_server_sup, BaseChildSpecs),
+        {local, couch_sup}, couch_sup, BaseChildSpecs),
 
     % launch the icu bridge
     % just restart if one of the config settings change.
@@ -107,11 +107,11 @@ start_server(IniFiles) ->
     {ok, Pid}.
 
 stop() ->
-    catch exit(whereis(couch_server_sup), normal).
+    catch exit(whereis(couch_sup), normal).
 
 config_change("daemons", _) ->
-    supervisor:terminate_child(couch_server_sup, couch_secondary_services),
-    supervisor:restart_child(couch_server_sup, couch_secondary_services).
+    supervisor:terminate_child(couch_sup, couch_secondary_services),
+    supervisor:restart_child(couch_sup, couch_secondary_services).
 
 init(ChildSpecs) ->
     {ok, ChildSpecs}.

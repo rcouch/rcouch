@@ -146,7 +146,7 @@ hash_admin_passwords(Persist) ->
 init([]) ->
     % read config and register for configuration changes
 
-    % just stop if one of the config settings change. couch_server_sup
+    % just stop if one of the config settings change. couch_sup
     % will restart us and then we will pick up the new settings.
 
     RootDir = couch_config:get("couchdb", "database_dir", "."),

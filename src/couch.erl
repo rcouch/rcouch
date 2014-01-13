@@ -60,9 +60,9 @@ restart() ->
     end.
 
 reload() ->
-    case supervisor:terminate_child(couch_server_sup, couch_config) of
+    case supervisor:terminate_child(couch_sup, couch_config) of
     ok ->
-        supervisor:restart_child(couch_server_sup, couch_config);
+        supervisor:restart_child(couch_sup, couch_config);
     {error, Reason} ->
         {error, Reason}
     end.

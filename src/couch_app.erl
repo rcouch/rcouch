@@ -23,7 +23,7 @@
 start(_Type, _Args) ->
     couch_util:start_app_deps(couch),
     IniFiles = get_ini_files(),
-    couch_server_sup:start_link(IniFiles).
+    couch_sup:start_link(IniFiles).
 
 stop(_) ->
     ok.
