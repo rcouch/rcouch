@@ -92,7 +92,7 @@ start_link(couch_https) ->
 start_link(Name, Options) ->
     % read config and register for configuration changes
 
-    % just stop if one of the config settings change. couch_server_sup
+    % just stop if one of the config settings change. couch_sup
     % will restart us and then we will pick up the new settings.
 
     BindAddress = couch_config:get("httpd", "bind_address", any),
