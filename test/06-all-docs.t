@@ -19,8 +19,7 @@ main(_) ->
 
 
 test() ->
-    couch_server_sup:start_link(test_util:config_files()),
-    couch_httpd_sup:start_link(),
+    test_util:start_couch(),
 
     {ok, Db} = couch_mrview_test_util:init_db(<<"foo">>, map),
 
@@ -31,6 +30,7 @@ test() ->
     test_include_docs(Db),
     test_empty_view(Db),
 
+    test_util:stop_couch(),
     ok.
 
 

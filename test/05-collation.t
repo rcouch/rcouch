@@ -19,8 +19,7 @@ main(_) ->
 
 
 test() ->
-    couch_server_sup:start_link(test_util:config_files()),
-    couch_httpd_sup:start_link(),
+    test_util:start_couch(),
 
     {ok, Db0} = couch_mrview_test_util:new_db(<<"foo">>, map),
     {ok, Db1} = couch_mrview_test_util:save_docs(Db0, docs()),
@@ -32,6 +31,7 @@ test() ->
     test_uninclusive_end(Db1),
     test_with_endkey_docid(Db1),
 
+    test_util:stop_couch(),
     ok.
 
 test_collated_fwd(Db) ->

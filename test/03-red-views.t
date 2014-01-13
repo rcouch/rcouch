@@ -19,8 +19,8 @@ main(_) ->
     test_util:run(4, fun() -> test() end).
 
 test() ->
-    couch_server_sup:start_link(test_util:config_files()),
-    couch_httpd_sup:start_link(),
+    test_util:start_couch(),
+
     {ok, Db} = couch_mrview_test_util:init_db(<<"foo">>, red),
 
     test_basic(Db),
@@ -28,6 +28,7 @@ test() ->
     test_group_level(Db),
     test_group_exact(Db),
 
+    test_util:stop_couch(),
     ok.
 
 
