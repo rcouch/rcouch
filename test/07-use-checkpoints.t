@@ -79,8 +79,6 @@ target_db_name() -> <<"couch_test_rep_db_b">>.
 
 
 main(_) ->
-    test_util:init_code_path(),
-
     etap:plan(16),
     case (catch test()) of
         ok ->
@@ -93,15 +91,12 @@ main(_) ->
 
 
 test() ->
-    couch_server_sup:start_link(test_util:config_files()),
-    couch_httpd_sup:start_link(),
-    couch_replicator_sup:start_link(),
-    ibrowse:start(),
+    test_util:start_couch(),
 
     test_use_checkpoints(false),
     test_use_checkpoints(true),
 
-    couch_server_sup:stop(),
+    test_util:stop_couch(),
     ok.
 
 

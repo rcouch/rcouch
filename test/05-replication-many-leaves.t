@@ -77,12 +77,8 @@ main(_) ->
 
 
 test() ->
-    couch_server_sup:start_link(test_util:config_files()),
-    couch_httpd_sup:start_link(),
-    couch_replicator_sup:start_link(),
-
-    ibrowse:start(),
-    crypto:start(),
+    test_util:start_couch(),
+ 
     couch_config:set("replicator", "connection_timeout", "90000", false),
 
     Pairs = [
@@ -130,7 +126,7 @@ test() ->
         end,
         Pairs),
 
-    couch_server_sup:stop(),
+    test_util:stop_couch(),
     ok.
 
 
