@@ -14,6 +14,7 @@
 
 -export([query_all_docs/2, query_all_docs/4]).
 -export([query_view/3, query_view/4, query_view/6]).
+-export([view_changes_since/6, view_changes_since/7]).
 -export([get_info/2]).
 -export([compact/2, compact/3, cancel_compaction/2]).
 -export([cleanup/1]).
@@ -86,6 +87,30 @@ query_view(Db, {Type, View}, Args, Callback, Acc) ->
         red -> red_fold(Db, View, Args, Callback, Acc)
     end.
 
+view_changes_since(Db, DDoc, VName, StartSeq, Fun, Acc) ->
+    view_changes_since(Db, DDoc, VName, StartSeq, Fun, [], Acc).
+
+view_changes_since(Db, DDoc, VName, StartSeq, Fun, Options, Acc) ->
+    Args0 = make_view_changes_args(Options),
+    {ok, {_, View}, _, Args} = couch_mrview_util:get_view(Db, DDoc, VName,
+                                                          Args0),
+    case View#mrview.seq_indexed of
+        true ->
+            OptList = make_view_changes_opts(StartSeq, Options, Args),
+            Btree = case is_key_byseq(Options) of
+                true -> View#mrview.key_byseq_btree;
+                _ -> View#mrview.seq_btree
+            end,
+            io:format("opt list ~p~n", [OptList]),
+            AccOut = lists:foldl(fun(Opts, Acc0) ->
+                        {ok, _R, A} = couch_mrview_util:fold_changes(
+                                    Btree, Fun, Acc0, Opts),
+                        A
+                end, Acc, OptList),
+            {ok, AccOut};
+        _ ->
+            {error, seqs_not_indexed}
+    end.
 
 get_info(Db, DDoc) ->
     {ok, Pid} = couch_index_server:get_index(couch_mrview_index, Db, DDoc),
@@ -385,3 +410,26 @@ lookup_index(Key) ->
         record_info(fields, mrargs), lists:seq(2, record_info(size, mrargs))
     ),
     couch_util:get_value(Key, Index).
+
+
+is_key_byseq(Options) ->
+    lists:any(fun({K, _}) ->
+                lists:member(K, [start_key, end_key, start_key_docid,
+                                 end_key_docid, keys])
+        end, Options).
+
+make_view_changes_args(Options) ->
+    case is_key_byseq(Options) of
+        true ->
+            to_mrargs(Options);
+        false ->
+            #mrargs{}
+    end.
+
+make_view_changes_opts(StartSeq, Options, Args) ->
+    case is_key_byseq(Options) of
+        true ->
+            couch_mrview_util:changes_key_opts(StartSeq, Args);
+        false ->
+            [[{start_key, {StartSeq+1, <<>>}}] ++ Options]
+    end.
