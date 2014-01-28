@@ -17,6 +17,7 @@
 -export([view_changes_since/6, view_changes_since/7]).
 -export([count_view_changes_since/4, count_view_changes_since/5]).
 -export([get_info/2]).
+-export([refresh/2]).
 -export([compact/2, compact/3, cancel_compaction/2]).
 -export([cleanup/1]).
 
@@ -145,6 +146,25 @@ get_info(Db, DDoc) ->
     {ok, Pid} = couch_index_server:get_index(couch_mrview_index, Db, DDoc),
     couch_index:get_info(Pid).
 
+
+%% @doc refresh a view index
+refresh(#db{name=DbName}, DDoc) ->
+    refresh(DbName, DDoc);
+
+refresh(Db, DDoc) ->
+    UpdateSeq = couch_util:with_db(Db, fun(WDb) ->
+                    couch_db:get_update_seq(WDb)
+            end),
+
+    case couch_index_server:get_index(couch_mrview_index, Db, DDoc) of
+        {ok, Pid} ->
+            case catch couch_index:get_state(Pid, UpdateSeq) of
+                {ok, _} -> ok;
+                Error -> {error, Error}
+            end;
+        Error ->
+            {error, Error}
+    end.
 
 compact(Db, DDoc) ->
     compact(Db, DDoc, []).
