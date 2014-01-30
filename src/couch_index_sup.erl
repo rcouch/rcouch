@@ -26,4 +26,9 @@ start_link() ->
 
 init([]) ->
     Server = ?CHILD(couch_index_server),
-    {ok, {{one_for_one, 10, 3600}, [Server]}}.
+
+    EventSup = {couch_index_events,
+                {gen_event, start_link, [{local, couch_index_events}]},
+                permanent, brutal_kill, worker, dynamic},
+
+    {ok, {{one_for_one, 10, 3600}, [Server, EventSup]}}.
