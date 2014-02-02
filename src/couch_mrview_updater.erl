@@ -182,7 +182,7 @@ map_docs(Parent, State0) ->
     end.
 
 
-write_results(Parent, #mrst{db_name=DbName, idx_name=IdxName}=State) ->
+write_results(Parent, State) ->
     case couch_work_queue:dequeue(State#mrst.write_queue) of
         closed ->
             Parent ! {new_state, State};
@@ -192,11 +192,6 @@ write_results(Parent, #mrst{db_name=DbName, idx_name=IdxName}=State) ->
                                                            [], dict:new()),
             NewState = write_kvs(State, Seq, ViewKVs, DocIdKeys, Log),
             send_partial(NewState#mrst.partial_resp_pid, NewState),
-
-            % notifify the view update
-            couch_index_event:notify({index_update, {DbName, IdxName,
-                                                     couch_mrview_index}}),
-
             write_results(Parent, NewState)
     end.
 
