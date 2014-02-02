@@ -219,9 +219,18 @@ handle_cast({new_state, NewIdxState}, State) ->
     } = State,
     assert_signature_match(Mod, OldIdxState, NewIdxState),
     CurrSeq = Mod:get(update_seq, NewIdxState),
+
+    DbName = Mod:get(db_name, NewIdxState),
+    DDocId = Mod:get(idx_name, NewIdxState),
+
+    %% notify to event listeners that the index has been
+    %% updated
+    couch_index_event:notify({index_update,
+                              {DbName, DDocId,
+                               Mod}}),
     Args = [
-        Mod:get(db_name, NewIdxState),
-        Mod:get(idx_name, NewIdxState),
+        DbName,
+        DDocId,
         CurrSeq
     ],
     ?LOG_DEBUG("Updated index for db: ~s idx: ~s seq: ~B", Args),
@@ -242,12 +251,27 @@ handle_cast(stop, State) ->
     {stop, normal, State};
 handle_cast(delete, State) ->
     #st{mod=Mod, idx_state=IdxState} = State,
+    DbName = Mod:get(db_name, IdxState),
+    DDocId = Mod:get(idx_name, IdxState),
+
     ok = Mod:delete(IdxState),
+
+    %% notify about the index deletion
+    couch_index_event:notify({index_delete,
+                              {DbName, DDocId, Mod}}),
+
     {stop, normal, State};
 handle_cast(ddoc_updated, State) ->
     #st{mod = Mod, idx_state = IdxState, waiters = Waiters} = State,
     DbName = Mod:get(db_name, IdxState),
     DDocId = Mod:get(idx_name, IdxState),
+
+    %% notify to event listeners that the index has been
+    %% updated
+    couch_index_event:notify({index_update,
+                              {DbName, DDocId,
+                               Mod}}),
+
     Shutdown = couch_util:with_db(DbName, fun(Db) ->
         case couch_db:open_doc(Db, DDocId, [ejson_body]) of
             {not_found, deleted} ->
