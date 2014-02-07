@@ -22,6 +22,10 @@
     parse_qs/2
 ]).
 
+-export([parse_boolean/1,
+         parse_int/1,
+         parse_pos_int/1]).
+
 -include_lib("couch/include/couch_db.hrl").
 -include_lib("couch_mrview/include/couch_mrview.hrl").
 
@@ -378,6 +382,10 @@ parse_qs(Key, Val, Args) ->
     end.
 
 
+parse_boolean(true) ->
+    true;
+parse_boolean(false) ->
+    false;
 parse_boolean(Val) ->
     case string:to_lower(Val) of
     "true" -> true;
@@ -387,7 +395,8 @@ parse_boolean(Val) ->
         throw({query_parse_error, ?l2b(Msg)})
     end.
 
-
+parse_int(Val) when is_integer(Val) ->
+    Val;
 parse_int(Val) ->
     case (catch list_to_integer(Val)) of
     IntVal when is_integer(IntVal) ->
@@ -396,7 +405,6 @@ parse_int(Val) ->
         Msg = io_lib:format("Invalid value for integer: ~p", [Val]),
         throw({query_parse_error, ?l2b(Msg)})
     end.
-
 
 parse_pos_int(Val) ->
     case parse_int(Val) of

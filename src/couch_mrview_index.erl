@@ -38,8 +38,10 @@ get(Property, State) ->
             Opts = State#mrst.design_opts,
             IncDesign = couch_util:get_value(<<"include_design">>, Opts, false),
             LocalSeq = couch_util:get_value(<<"local_seq">>, Opts, false),
+            SeqIndexed = couch_util:get_value(<<"seq_indexed">>, Opts, false),
             if IncDesign -> [include_design]; true -> [] end
-                ++ if LocalSeq -> [local_seq]; true -> [] end;
+                ++ if LocalSeq -> [local_seq]; true -> [] end
+                ++ if SeqIndexed -> [seq_indexed]; true -> [] end;
         info ->
             #mrst{
                 fd = Fd,
@@ -49,19 +51,32 @@ get(Property, State) ->
                 language = Lang,
                 update_seq = UpdateSeq,
                 purge_seq = PurgeSeq,
-                views = Views
+                views = Views,
+                design_opts = Opts
             } = State,
             {ok, Size} = couch_file:bytes(Fd),
             {ok, DataSize} = couch_mrview_util:calculate_data_size(IdBtree,
                                                                    LogBtree,
                                                                    Views),
+
+
+            IncDesign = couch_util:get_value(<<"include_design">>, Opts, false),
+            LocalSeq = couch_util:get_value(<<"local_seq">>, Opts, false),
+            SeqIndexed = couch_util:get_value(<<"seq_indexed">>, Opts, false),
+            UpdateOptions =
+                if IncDesign -> [<<"include_design">>]; true -> [] end
+                ++ if LocalSeq -> [<<"local_seq">>]; true -> [] end
+                ++ if SeqIndexed -> [<<"seq_indexed">>]; true -> [] end,
+
+
             {ok, [
                 {signature, list_to_binary(couch_index_util:hexsig(Sig))},
                 {language, Lang},
                 {disk_size, Size},
                 {data_size, DataSize},
                 {update_seq, UpdateSeq},
-                {purge_seq, PurgeSeq}
+                {purge_seq, PurgeSeq},
+                {update_options, UpdateOptions}
             ]};
         Other ->
             throw({unknown_index_property, Other})
