@@ -118,6 +118,7 @@ handle_changes_req1(Req, #db{name=DbName}=Db) ->
 
 
 handle_changes(ChangesArgs, Req, Db) ->
+
     case ChangesArgs#changes_args.filter of
         "_view" ->
             handle_view_changes(ChangesArgs, Req, Db);
@@ -146,18 +147,26 @@ handle_view_changes(ChangesArgs, Req, Db) ->
     ViewOptions = parse_view_options(Query, []),
 
     {ok, Infos} = couch_mrview:get_info(Db, DDocId),
-    case lists:member(<<"seq_indexed">>,
-                      proplists:get_value(update_options, Infos, [])) of
-        true ->
+    IsIndexed = lists:member(<<"seq_indexed">>,
+                             proplists:get_value(update_options, Infos,
+                                                 [])),
+
+    NoIndex = couch_httpd:qs_value(Req, "use_index", "yes") =:= "no",
+
+    case {IsIndexed, NoIndex} of
+        {true, false} ->
             handle_view_changes(Db, DDocId, VName, ViewOptions, ChangesArgs,
                                 Req);
-        false when ViewOptions /= [] ->
+        {true, true} when ViewOptions /= [] ->
             ?LOG_ERROR("Tried to filter a non sequence indexed view~n",[]),
             throw({bad_request, seqs_not_indexed});
-        false ->
+        {false, _} when ViewOptions /= [] ->
+            ?LOG_ERROR("Tried to filter a non sequence indexed view~n",[]),
+            throw({bad_request, seqs_not_indexed});
+        {_, _} ->
             %% old method we are getting changes using the btree instead
             %% which is not efficient, log it
-            ?LOG_WARN("Get view changes with seq_indexed=false.~n", []),
+            ?LOG_WARN("Filter without using a seq_indexed view.~n", []),
             couch_changes:handle_changes(ChangesArgs, Req, Db)
     end.
 
