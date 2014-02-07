@@ -254,11 +254,11 @@ handle_cast(delete, State) ->
     DbName = Mod:get(db_name, IdxState),
     DDocId = Mod:get(idx_name, IdxState),
 
-    ok = Mod:delete(IdxState),
-
     %% notify about the index deletion
     couch_index_event:notify({index_delete,
                               {DbName, DDocId, Mod}}),
+
+    ok = Mod:delete(IdxState),
 
     {stop, normal, State};
 handle_cast(ddoc_updated, State) ->
@@ -319,7 +319,14 @@ handle_info(commit, State) ->
             {noreply, State}
     end;
 handle_info({'DOWN', _, _, _Pid, _}, #st{mod=Mod, idx_state=IdxState}=State) ->
-    Args = [Mod:get(db_name, IdxState), Mod:get(idx_name, IdxState)],
+    DbName = Mod:get(db_name, IdxState),
+    DDocId = Mod:get(idx_name, IdxState),
+
+    %% notify to event listeners that the index has been
+    %% updated
+    couch_index_event:notify({index_delete, {DbName, DDocId, Mod}}),
+
+    Args = [DbName, DDocId],
     ?LOG_INFO("Index shutdown by monitor notice for db: ~s idx: ~s", Args),
     catch send_all(State#st.waiters, shutdown),
     {stop, normal, State#st{waiters=[]}}.

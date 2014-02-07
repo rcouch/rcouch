@@ -159,8 +159,6 @@ reset_indexes(DbName, Root) ->
         MRef = erlang:monitor(process, Pid),
         gen_server:cast(Pid, delete),
         receive {'DOWN', MRef, _, _, _} -> ok end,
-        couch_index_event:notify({index_delete,
-                                  {DbName, DDocId, couch_mrview_index}}),
         rem_from_ets(DbName, Sig, DDocId, Pid)
     end,
     lists:foreach(Fun, ets:lookup(?BY_DB, DbName)),
@@ -195,11 +193,6 @@ update_notify({ddoc_updated, {DbName, DDocId}}) ->
         fun({_DbName, {_DDocId, Sig}}) ->
             case ets:lookup(?BY_SIG, {DbName, Sig}) of
                 [{_, IndexPid}] ->
-                    %% notify to event listeners that the index has been
-                    %% updated
-                    couch_index_event:notify({index_update,
-                                              {DbName, DDocId,
-                                               couch_mrview_index}}),
                     (catch gen_server:cast(IndexPid, ddoc_updated));
                 [] ->
                     ok
