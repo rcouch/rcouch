@@ -32,6 +32,7 @@
 -export([with_db/2]).
 -export([rfc1123_date/0, rfc1123_date/1]).
 -export([find_in_binary/2]).
+-export([to_atom/1]).
 
 -include("couch_db.hrl").
 
@@ -351,6 +352,12 @@ to_list(V) when is_atom(V) ->
     atom_to_list(V);
 to_list(V) ->
     lists:flatten(io_lib:format("~p", [V])).
+
+
+to_atom(V) when is_binary(V) ->
+    list_to_atom(binary_to_list(V));
+to_atom(V) when is_list(V) ->
+    list_to_atom(V).
 
 url_encode(Bin) when is_binary(Bin) ->
     url_encode(binary_to_list(Bin));
