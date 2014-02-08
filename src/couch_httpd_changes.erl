@@ -177,8 +177,11 @@ handle_view_changes(#db{name=DbName}=Db0, DDocId, VName, ViewOptions,
         since = Since,
         db_open_options = DbOptions} = ChangesArgs,
 
+    Refresh = refresh_option(Req),
+
     Options0 = [{since, Since},
-                {view_options, ViewOptions}],
+                {view_options, ViewOptions},
+                {refresh, Refresh}],
     Options = case ResponseType of
         "continuous" -> [stream | Options0];
         "eventsource" -> [stream | Options0];
@@ -236,9 +239,9 @@ view_changes_cb({{Seq, _Key, DocId}, _VAl},
             %% if we achieved the limit, stop here, else continue.
             NewLimit = OldLimit + 1,
             if Limit > NewLimit ->
-                    {ok, {<<",\n">>, Db, NewLimit, Callback, Args}};
+                    {ok, {<<",\n">>, NewLimit, Db, Callback, Args}};
                 true ->
-                    {stop, {<<"">>, Db, NewLimit, Callback, Args}}
+                    {stop, {<<"">>, NewLimit, Db, Callback, Args}}
             end;
         {error, not_found} ->
             %% doc not found, continue
@@ -415,6 +418,15 @@ parse_view_options([{K, V} | Rest], Acc) ->
             Acc
     end,
     parse_view_options(Rest, Acc1).
+
+refresh_option({json_req, {Props}}) ->
+    {Query} = couch_util:get_value(<<"query">>, Props),
+    couch_util:get_value(<<"refresh">>, Query, true);
+refresh_option(Req) ->
+    case couch_httpd:qs_value(Req, "refresh", "true") of
+        "false" -> false;
+        _ -> true
+    end.
 
 parse_json(V) when is_list(V) ->
     ?JSON_DECODE(V);
