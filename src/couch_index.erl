@@ -17,6 +17,7 @@
 %% API
 -export([start_link/1, stop/1, get_state/2, get_info/1]).
 -export([compact/1, compact/2, get_compactor_pid/1]).
+-export([acquire_indexer/1, release_indexer/1]).
 -export([config_change/3]).
 
 %% gen_server callbacks
@@ -30,6 +31,7 @@
     idx_state,
     updater,
     compactor,
+    indexer=nil,
     waiters=[],
     commit_delay,
     committed=true,
@@ -68,6 +70,16 @@ compact(Pid, Options) ->
 get_compactor_pid(Pid) ->
     gen_server:call(Pid, get_compactor_pid).
 
+
+acquire_indexer(Pid) ->
+    {ok, IPid} = gen_server:call(Pid, get_indexer_pid),
+    gen_server:call(IPid, {acquire, self()}).
+
+release_indexer(Pid) ->
+    {ok, IPid} = gen_server:call(Pid, get_indexer_pid),
+    gen_server:call(IPid, {release, self()}).
+
+
 config_change("query_server_config", "commit_freq", NewValue) ->
     ok = gen_server:cast(?MODULE, {config_update, NewValue}).
 
@@ -88,6 +100,7 @@ init({Mod, IdxState}) ->
         {ok, NewIdxState} ->
             {ok, UPid} = couch_index_updater:start_link(self(), Mod),
             {ok, CPid} = couch_index_compactor:start_link(self(), Mod),
+
             Delay = couch_config:get("query_server_config", "commit_freq", "5"),
             MsDelay = 1000 * list_to_integer(Delay),
             State = #st{
@@ -196,7 +209,18 @@ handle_call({compacted, NewIdxState}, _From, State) ->
             }};
         _ ->
             {reply, recompact, State}
-    end.
+    end;
+handle_call(get_indexer_pid, _From, #st{mod=Mod, idx_state=IdxState}=State) ->
+    Pid = case State#st.indexer of
+        Pid1 when is_pid(Pid1) ->
+            Pid1;
+        _ ->
+            DbName = Mod:get(db_name, IdxState),
+            {ok, IPid} = couch_index_indexer:start_link(self(), DbName),
+            erlang:monitor(process, IPid),
+            IPid
+    end,
+    {reply, {ok, Pid}, State#st{indexer=Pid}}.
 
 
 handle_cast({config_change, NewDelay}, State) ->
@@ -318,6 +342,15 @@ handle_info(commit, State) ->
             erlang:send_after(Delay, self(), commit),
             {noreply, State}
     end;
+
+handle_info({'DOWN', _, _, Pid, _}, #st{mod=Mod, idx_state=IdxState,
+                                        indexer=Pid}=State) ->
+    Args = [Mod:get(db_name, IdxState),
+            Mod:get(idx_name, IdxState)],
+    ?LOG_INFO("Background indexer shutdown by monitor notice for db: ~s idx: ~s", Args),
+
+    {noreply, State#st{indexer=nil}};
+
 handle_info({'DOWN', _, _, _Pid, _}, #st{mod=Mod, idx_state=IdxState}=State) ->
     DbName = Mod:get(db_name, IdxState),
     DDocId = Mod:get(idx_name, IdxState),

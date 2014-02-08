@@ -14,6 +14,7 @@
 -behaviour(gen_server).
 
 -export([start_link/0, get_index/4, get_index/3, get_index/2]).
+-export([acquire_indexer/3, release_indexer/3]).
 -export([config_change/2, update_notify/1]).
 
 -export([init/1, terminate/2, code_change/3]).
@@ -66,6 +67,23 @@ get_index(Module, IdxState) ->
             Args = {Module, IdxState, DbName, Sig},
             gen_server:call(?MODULE, {get_index, Args}, infinity)
     end.
+
+acquire_indexer(Module, DbName, DDoc) ->
+    case get_index(Module, DbName, DDoc) of
+        {ok, Pid} ->
+            couch_index:acquire_indexer(Pid);
+        Error ->
+            Error
+    end.
+
+release_indexer(Module, DbName, DDoc) ->
+    case get_index(Module, DbName, DDoc) of
+        {ok, Pid} ->
+            couch_index:release_indexer(Pid);
+        Error ->
+            Error
+    end.
+
 
 
 init([]) ->
