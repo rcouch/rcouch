@@ -15,7 +15,7 @@
 % the License.
 
 main(_) ->
-    etap:plan(9),
+    etap:plan(12),
     case (catch test()) of
         ok ->
             etap:end_tests();
@@ -45,6 +45,14 @@ test() ->
     etap:is(getval(updater_running, Info), false, "No updater running."),
     etap:is(getval(compact_running, Info), false, "No compaction running."),
     etap:is(getval(waiting_clients, Info), 0, "No waiting clients."),
+
+
+    {ok, ViewInfo} = couch_mrview:get_view_info(Db, <<"_design/bar">>,
+                                           <<"baz">>),
+    etap:is(getval(update_seq, ViewInfo), 11, "View Update seq is ok."),
+    etap:is(getval(purge_seq, ViewInfo), 0, "View Update seq is ok."),
+    etap:is(getval(total_rows, ViewInfo), 10, "View total rows is ok."),
+
 
     test_util:stop_couch(),
     ok.
