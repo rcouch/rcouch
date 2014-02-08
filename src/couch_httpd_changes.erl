@@ -137,12 +137,15 @@ handle_view_changes(ChangesArgs, Req, Db) ->
     {DDocId, VName} = parse_view_param(Req),
 
     %% get view options
-    Query = case Req of
+    {Query, NoIndex} = case Req of
         {json_req, {Props}} ->
             {Q} = couch_util:get_value(<<"query">>, Props, {[]}),
-            Q;
+            NoIndex1 = (couch_util:get_value(<<"use_index">>, Q,
+                                            <<"yes">>) =:= <<"no">>),
+            {Q, NoIndex1};
         _ ->
-            couch_httpd:qs(Req)
+            NoIndex1 = couch_httpd:qs_value(Req, "use_index", "yes") =:= "no",
+            {couch_httpd:qs(Req), NoIndex1}
     end,
     ViewOptions = parse_view_options(Query, []),
 
@@ -150,8 +153,6 @@ handle_view_changes(ChangesArgs, Req, Db) ->
     IsIndexed = lists:member(<<"seq_indexed">>,
                              proplists:get_value(update_options, Infos,
                                                  [])),
-
-    NoIndex = couch_httpd:qs_value(Req, "use_index", "yes") =:= "no",
 
     case {IsIndexed, NoIndex} of
         {true, false} ->
