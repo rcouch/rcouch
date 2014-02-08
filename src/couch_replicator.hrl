@@ -18,6 +18,8 @@
     target,
     options,
     user_ctx,
+    type = db,
+    view = nil,
     doc_id
 }).
 

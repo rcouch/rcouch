@@ -19,6 +19,7 @@
 % Many options and apis aren't yet supported here, they are added as needed.
 
 -include_lib("couch/include/couch_db.hrl").
+-include_lib("couch_mrview/include/couch_mrview.hrl").
 -include("couch_replicator_api_wrap.hrl").
 
 -export([
@@ -26,6 +27,7 @@
     db_open/3,
     db_close/1,
     get_db_info/1,
+    get_view_info/3,
     update_doc/3,
     update_doc/4,
     update_docs/3,
@@ -119,6 +121,16 @@ get_db_info(#db{name = DbName, user_ctx = UserCtx}) ->
     {ok, Info} = couch_db:get_db_info(Db),
     couch_db:close(Db),
     {ok, [{couch_util:to_binary(K), V} || {K, V} <- Info]}.
+
+
+get_view_info(#httpdb{} = Db, DDocId, ViewName) ->
+    Path = iolist_to_binary([DDocId, "/_view/", ViewName, "/_info"]),
+    send_req(Db, [{path, Path}],
+        fun(200, _, {Props}) ->
+            {ok, Props}
+        end);
+get_view_info(#db{name = DbName}, DDocId, ViewName) ->
+    couch_mrview:get_view_info(DbName, DDocId, ViewName).
 
 
 ensure_full_commit(#httpdb{} = Db) ->
@@ -439,7 +451,8 @@ changes_since(Db, Style, StartSeq, UserFun, Options) ->
     },
     QueryParams = get_value(query_params, Options, {[]}),
     Req = changes_json_req(Db, Filter, QueryParams, Options),
-    ChangesFeedFun = couch_changes:handle_changes(Args, {json_req, Req}, Db),
+    ChangesFeedFun = couch_httpd_changes:handle_changes(Args, {json_req, Req},
+                                                        Db),
     ChangesFeedFun(fun({change, Change, _}, _) ->
             UserFun(json_to_doc_info(Change));
         (_, _) ->
@@ -454,6 +467,10 @@ maybe_add_changes_filter_q_args(BaseQS, Options) ->
     undefined ->
         BaseQS;
     FilterName ->
+        %% get list of view attributes
+        ViewFields0 = [atom_to_list(F) || F <- record_info(fields,  mrargs)],
+        ViewFields = ["key" | ViewFields0],
+
         {Params} = get_value(query_params, Options, {[]}),
         [{"filter", ?b2l(FilterName)} | lists:foldl(
             fun({K, V}, QSAcc) ->
@@ -461,6 +478,12 @@ maybe_add_changes_filter_q_args(BaseQS, Options) ->
                 case lists:keymember(Ks, 1, QSAcc) of
                 true ->
                     QSAcc;
+                false when FilterName =:= <<"_view">> ->
+                    V1 = case lists:member(Ks, ViewFields) of
+                        true -> ?JSON_ENCODE(V);
+                        false -> couch_util:to_list(V)
+                    end,
+                    [{Ks, V1} | QSAcc];
                 false ->
                     [{Ks, couch_util:to_list(V)} | QSAcc]
                 end

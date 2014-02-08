@@ -70,7 +70,9 @@
     target_monitor = nil,
     source_seq = nil,
     use_checkpoints = true,
-    checkpoint_interval = 5000
+    checkpoint_interval = 5000,
+    type = db,
+    view = nil
 }).
 
 
@@ -533,7 +535,8 @@ cancel_timer(#rep_state{timer = Timer} = State) ->
 init_state(Rep) ->
     #rep{
         source = Src, target = Tgt,
-        options = Options, user_ctx = UserCtx
+        options = Options, user_ctx = UserCtx,
+        type = Type, view = View
     } = Rep,
     {ok, Source} = couch_replicator_api_wrap:db_open(Src, [{user_ctx, UserCtx}]),
     {ok, Target} = couch_replicator_api_wrap:db_open(Tgt, [{user_ctx, UserCtx}],
@@ -547,6 +550,17 @@ init_state(Rep) ->
     {StartSeq0, History} = compare_replication_logs(SourceLog, TargetLog),
     StartSeq1 = get_value(since_seq, Options, StartSeq0),
     StartSeq = {0, StartSeq1},
+
+    SourceSeq = case Type of
+        db -> get_value(<<"update_seq">>, SourceInfo, ?LOWEST_SEQ);
+        view ->
+            {DDoc, VName} = View,
+            {ok, VInfo} = couch_replicator_api_wrap:get_view_info(Source, DDoc,
+                                                                  VName),
+            get_value(<<"update_seq">>, VInfo, ?LOWEST_SEQ)
+    end,
+
+
     #doc{body={CheckpointHistory}} = SourceLog,
     State = #rep_state{
         rep_details = Rep,
@@ -571,9 +585,12 @@ init_state(Rep) ->
             start_db_compaction_notifier(Target, self()),
         source_monitor = db_monitor(Source),
         target_monitor = db_monitor(Target),
-        source_seq = get_value(<<"update_seq">>, SourceInfo, ?LOWEST_SEQ),
+        source_seq = SourceSeq,
         use_checkpoints = get_value(use_checkpoints, Options, true),
-        checkpoint_interval = get_value(checkpoint_interval, Options, 5000)
+        checkpoint_interval = get_value(checkpoint_interval, Options,
+                                        5000),
+        type = Type,
+        view = View
     },
     State#rep_state{timer = start_timer(State)}.
 
@@ -914,6 +931,20 @@ db_monitor(#db{} = Db) ->
 db_monitor(_HttpDb) ->
     nil.
 
+source_cur_seq(#rep_state{source = #httpdb{} = Db, source_seq = Seq,
+                          type = view, view = {DDoc, VName}}) ->
+    case (catch couch_replicator_api_wrap:get_view_info(
+                Db#httpdb{retries = 3}, DDoc, VName)) of
+    {ok, Info} ->
+        get_value(<<"update_seq">>, Info, Seq);
+    _ ->
+        Seq
+    end;
+
+source_cur_seq(#rep_state{source = Db, source_seq = Seq,
+                          type = view, view = {DDoc, VName}}) ->
+    {ok, Info} = couch_replicator_api_wrap:get_view_info(Db, DDoc, VName),
+    get_value(<<"update_seq">>, Info, Seq);
 
 source_cur_seq(#rep_state{source = #httpdb{} = Db, source_seq = Seq}) ->
     case (catch couch_replicator_api_wrap:get_db_info(Db#httpdb{retries = 3})) of
