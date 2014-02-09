@@ -19,6 +19,8 @@
 
 -record(state, {index,
                 dbname,
+                threshold,
+                refresh_interval,
                 db_updates=0,
                 tref=nil,
                 notifier=nil,
@@ -30,10 +32,25 @@ start_link(Index, DbName) ->
 
 init({Index, DbName}) ->
     process_flag(trap_exit, true),
+    %% register to config events
+    Self = self(),
+    ok  = couch_config:register(fun
+                ("couch_index", "threshold") ->
+                    gen_server:cast(Self, config_threshold);
+                ("couch_index", "refresh_interval") ->
+                    gen_server:cast(Self, config_refresh)
+            end),
+
+    %% get defaults
+    Threshold = get_db_threshold(),
+    Refresh = get_refresh_interval(),
+
     %% delay background index indexing
     self() ! start_indexing,
     {ok, #state{index=Index,
                 dbname=DbName,
+                threshold=Threshold,
+                refresh_interval=Refresh,
                 locks=dict:new()}}.
 
 handle_call({acquire, Pid}, _From, #state{locks=Locks}=State) ->
@@ -66,9 +83,24 @@ handle_call({release, Pid}, _From, #state{locks=Locks}=State) ->
 handle_call(stop, _From, State) ->
     {stop, normal, ok, State}.
 
-handle_cast(updated, #state{index=Index, dbname=DbName,
-                            db_updates=Updates}=State) ->
+
+handle_cast(config_threshold, State) ->
     Threshold = get_db_threshold(),
+    {noreply, State#state{threshold=Threshold}};
+handle_cast(config_refresh, #state{tref=TRef}=State) ->
+    R = get_refresh_interval(),
+    %% stop the old timee
+    if TRef /= nil ->
+            erlang:cancel_timer(TRef);
+        true -> ok
+    end,
+    %% start the new timer
+    NTRef = erlang:start_timer(R, self(), refresh_index),
+    {noreply, State#state{refresh_interval=R, tref=NTRef}};
+
+handle_cast(updated, #state{index=Index, dbname=DbName,
+                            threshold=Threshold,
+                            db_updates=Updates}=State) ->
     NUpdates = Updates + 1,
 
     %% we only update if the number of updates is greater than the
@@ -85,12 +117,12 @@ handle_cast(updated, #state{index=Index, dbname=DbName,
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-handle_info(start_indexing, #state{dbname=DbName}=State) ->
+handle_info(start_indexing, #state{dbname=DbName,
+                                   refresh_interval=R}=State) ->
     %% start the db notifier to watch db update events
     {ok, NotifierPid} = start_db_notifier(DbName),
 
     %% start the timer
-    R = get_refresh_interval(),
     TRef = erlang:start_timer(R, self(), refresh_index),
 
     {noreply, State#state{tref=TRef, notifier=NotifierPid}};
