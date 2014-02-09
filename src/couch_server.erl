@@ -35,7 +35,7 @@ dev_start() ->
     couch:start().
 
 get_version() ->
-    couch:release_version().
+    couch:version().
 get_version(short) ->
   %% strip git hash from version string
   [Version|_Rest] = string:tokens(get_version(), "+"),
