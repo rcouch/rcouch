@@ -14,6 +14,8 @@
 
 -behaviour(gen_server).
 
+-compile([{parse_transform, lager_transform}]).
+
 % public API
 -export([start_link/0, stop/0]).
 -export([debug/2, info/2, warn/2, error/2]).
