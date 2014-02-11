@@ -35,7 +35,7 @@
     ]},
     {mod, {couch_app, []}},
     {env, []},
-    {applications, [kernel, stdlib, crypto, sasl, asn1, public_key,
+    {applications, [kernel, stdlib, lager, crypto, sasl, asn1, public_key,
                     ssl, os_mon, inets]}
 ]}.
 
