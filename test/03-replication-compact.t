@@ -61,6 +61,8 @@
     target,
     options,
     user_ctx,
+    type = db,
+    view = nil,
     doc_id
 }).
 
@@ -69,7 +71,7 @@ source_db_name() -> <<"couch_test_rep_db_a">>.
 target_db_name() -> <<"couch_test_rep_db_b">>.
 
 
-main(_) ->    
+main(_) ->
 etap:plan(376),
     case (catch test()) of
         ok ->
@@ -115,7 +117,7 @@ test() ->
             delete_db(TargetDb),
             test_util:stop_couch(),
             ok = timer:sleep(1000),
-            test_util:start_couch()  
+            test_util:start_couch()
         end,
         Pairs),
 
