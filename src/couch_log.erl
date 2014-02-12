@@ -144,6 +144,9 @@ init([]) ->
     Sasl = couch_config:get("log", "include_sasl", "true") =:= "true",
     LevelByModule = couch_config:get("log_level_by_module"),
 
+    %% maybe start the log file backend
+    maybe_start_logfile_backend(Filename, ALevel),
+
     %% initialise the ets table if needed
     case ets:info(?MODULE) of
         undefined -> ets:new(?MODULE, [named_table]);
@@ -172,13 +175,19 @@ handle_call({set_level_integer, Module, NewLevel}, _From, State) ->
     ets:insert(?MODULE, {Module, NewLevel}),
     {ok, ok, State#state{level = NewLevel}}.
 
-handle_cast(config_update, State) ->
+handle_cast(config_update, #state{log_file=OldFilename}=State) ->
     Filename = log_file(),
     ALevel = list_to_atom(couch_config:get("log", "level", "info")),
     Level = level_integer(ALevel),
 
     %% set default module
     ets:insert(?MODULE, {level, Level}),
+
+    %% should we restart the file backend with a new config?
+    if OldFilename =/= Filename ->
+            restart_logfile_backend(OldFilename, Filename, ALevel);
+        true -> ok
+    end,
 
     %% set log level
     set_loglevel(Filename, ALevel),
@@ -246,6 +255,50 @@ read(Bytes, Offset) ->
     ok = file:close(Fd),
     Chunk.
 
+
+maybe_start_logfile_backend(Filename, Level) ->
+    Started = case application:get_env(lager, handlers) of
+        undefined -> false;
+        {ok, Handlers} ->
+            LogFiles = lists:foldl(fun
+                    ({lager_file_backend, Config}, Acc) ->
+                        [hfile(Config) | Acc];
+                    (_, Acc) ->
+                        Acc
+                end, [], Handlers),
+            lists:member(Filename, LogFiles)
+    end,
+
+    case Started of
+        true -> ok;
+        false ->
+            Config = [{file, Filename},
+                      {level, Level},
+                      {formatter, lager_default_formatter},
+                      {formatter_config,
+                       ["[", time, "] [", pid, "] [", severity, "] ",
+                        message, "\n"]}],
+            HandlerId = {lager_file_backend, Filename},
+            {ok, _} = supervisor:start_child(lager_handler_watcher_sup,
+                                             [lager_event, HandlerId, Config])
+    end.
+
+
+restart_logfile_backend(OldFilename, Filename, Level) ->
+    ok = gen_event:delete_handler(lager_event, {lager_file_backend,
+                                                OldFilename}, []),
+
+    %% restart a new handler
+    Config = [{file, Filename},
+              {level, Level},
+              {formatter, lager_default_formatter},
+              {formatter_config,
+               ["[", time, "] [", pid, "] [", severity, "] ", message, "\n"]}],
+    HandlerId = {lager_file_backend, Filename},
+    {ok, _} = supervisor:start_child(lager_handler_watcher_sup,
+                                     [lager_event, HandlerId, Config]),
+    ok.
+
 set_loglevel(Filename, ALevel) ->
     %% set default log level
     lager:set_loglevel(lager_console_backend, ALevel),
@@ -260,10 +313,30 @@ set_loglevel(Filename, ALevel) ->
                 end, Handlers)
     end.
 
-
 log_file() ->
     DefaultLogFile = case application:get_env(couch, log_file) of
         undefined -> "couchdb.log";
         FName -> FName
     end,
     couch_config:get("log", "file", DefaultLogFile).
+
+hfile({FileName, LogLevel}) when is_list(FileName), is_atom(LogLevel) ->
+    %% backwards compatability hack
+    FileName;
+hfile({FileName, LogLevel, _Size, _Date, _Count})
+        when is_list(FileName), is_atom(LogLevel) ->
+    %% backwards compatability hack
+    FileName;
+hfile([{FileName, LogLevel, _Size, _Date, _Count}, {Formatter, _FormatterConfig}])
+    when is_list(FileName), is_atom(LogLevel), is_atom(Formatter) ->
+    %% backwards compatability hack
+    FileName;
+hfile([LogFile,{Formatter}]) ->
+    %% backwards compatability hack
+    hfile([LogFile,{Formatter,[]}]);
+hfile([{FileName, LogLevel}, {Formatter, _FormatterConfig}])
+    when is_list(FileName), is_atom(LogLevel), is_atom(Formatter) ->
+    %% backwards compatability hack
+   FileName;
+hfile(LogFileConfig) when is_list(LogFileConfig) ->
+    proplists:get_value(file, LogFileConfig).
