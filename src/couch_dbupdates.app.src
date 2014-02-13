@@ -1,7 +1,7 @@
 {application, couch_dbupdates,
  [
-  {description, ""},
-  {vsn, "@version@"},
+  {description, "couch DB updates events module"},
+  {vsn, "1.0"},
   {registered, []},
   {applications, [
                   kernel,
