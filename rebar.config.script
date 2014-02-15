@@ -25,17 +25,19 @@ Cfg = case file:consult("../../pkg.vars.config") of
 MajorVersion = integer_to_list(proplists:get_value(version_major, Cfg, 0)),
 MinorVersion = integer_to_list(proplists:get_value(version_minor, Cfg, 0)),
 RevVersion = integer_to_list(proplists:get_value(version_revision, Cfg, 0)),
-StageVersion = proplists:get_value(version_stage, Cfg, ""),
-RelVersion = proplists:get_value(version_release, Cfg, ""),
 
 %% build the version
 BaseVersion = MajorVersion ++ "." ++ MinorVersion ++ "." ++ RevVersion,
-SecondaryVersion = StageVersion ++ RelVersion,
-Version = case os:getenv("RELEASE") of
-    "1" ->
+
+Version = case os:getenv("RELEASE_TAG") of
+    false ->
         BaseVersion;
-    _ ->
-        BaseVersion ++ SecondaryVersion
+    "git" ->
+        {0, Ret} = eunit_lib:command("git describe --always"),
+        Tag = [C||C <- Ret, C =/= $\n],
+        BaseVersion ++ "+build." ++ Tag;
+    Tag ->
+        BaseVersion ++ Tag
 end,
 
 %% couchjs name
