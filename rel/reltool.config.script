@@ -109,7 +109,7 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
             {app, couch_mrview, [{incl_cond, include}]},
             {app, couch_replicator, [{incl_cond, include}]},
             {app, couch_dbupdates, [{incl_cond, include}]},
-            {app, couch_plugins, [{incl_cond, include}]}
+            {app, couch_randomdoc, [{incl_cond, include}]}
 
         ]},
 
