@@ -503,16 +503,23 @@ close_db(#db{fd_ref_counter = RefCntr}) ->
 refresh_validate_doc_funs(Db0) ->
     Db = Db0#db{user_ctx = #user_ctx{roles=[<<"_admin">>]}},
     DesignDocs = couch_db:get_design_docs(Db),
-    ProcessDocFuns = lists:flatmap(
-        fun(DesignDocInfo) ->
-            {ok, DesignDoc} = couch_db:open_doc_int(
-                Db, DesignDocInfo, [ejson_body]),
-            case couch_doc:get_validate_doc_fun(DesignDoc) of
-            nil -> [];
-            Fun -> [Fun]
-            end
-        end, DesignDocs),
-    Db0#db{validate_doc_funs=ProcessDocFuns}.
+    {UpdateFuns, ReadFuns} = lists:foldl(
+            fun(DesignDocInfo, {UAcc, RAcc}) ->
+                    {ok, DesignDoc} = couch_db:open_doc_int(Db, DesignDocInfo,
+                                                            [ejson_body]),
+                    UAcc1 = case couch_doc:get_validate_doc_fun(DesignDoc) of
+                        nil -> UAcc;
+                        Fun -> [Fun|UAcc]
+                    end,
+                    RAcc1 = case couch_doc:get_validate_read_doc_fun(
+                            DesignDoc) of
+                        nil -> RAcc;
+                        Fun1 -> [Fun1|RAcc]
+                    end,
+                    {UAcc1, RAcc1}
+            end, {[], []}, DesignDocs),
+    Db0#db{validate_doc_funs=UpdateFuns, validate_doc_read_funs=ReadFuns}.
+
 
 % rev tree functions
 
