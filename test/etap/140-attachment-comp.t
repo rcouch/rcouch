@@ -30,11 +30,12 @@ main(_) ->
 
 test() ->
     test_util:start_couch(),
-    timer:sleep(1000),
 
-    erlang:put(addr, couch_config:get("httpd", "bind_address", "127.0.0.1")),
+erlang:put(addr, couch_config:get("httpd", "bind_address", "127.0.0.1")),
     erlang:put(port, integer_to_list(mochiweb_socket_server:get(couch_http,
                                                                 port))),
+
+    timer:sleep(1000),
 
     couch_server:delete(test_db_name(), []),
     couch_db:create(test_db_name(), []),
@@ -722,7 +723,6 @@ test_png_data() ->
     {ok, Data} = file:read_file(
         test_util:build_file("share/www/image/logo.png")
     ),
-    io:format("boun", []),
     Data.
 
 test_text_data() ->
