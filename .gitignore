@@ -20,14 +20,14 @@ THANKS
 
 __pycache__
 b
-src
+/src
 rel/rcouch
 
 # rebar
 support/rebar/rebar
 support/rebar/inttest/rt.work
 rt.work
-\rebar
+/rebar
 support/rebar/.test
 
 # couch_collate

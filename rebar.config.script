@@ -18,7 +18,7 @@ DepDescs = [
     {mochiweb, "couchdb-mochiweb", {branch, "import-upstream"}},
     {oauth, "couchdb-oauth", {branch, "1843-feature-bigcouch"}},
     {snappy, "couchdb-snappy", {branch, "1994-merge-rcouch"}},
-    {lager, "couchdb-lager", {branch, "import-master"}},
+    {lager, "couchdb-lager", {branch, "refuge"}},
 
     %% couchdb applications
     {couch_collate, "couchdb-couch-collate", {branch, "1994-merge-rcouch"}},
@@ -27,12 +27,11 @@ DepDescs = [
     {couch_index, "couchdb-couch-index", {branch, "1994-merge-rcouch"}},
     {couch_mrview, "couchdb-couch-mrview", {branch, "1994-merge-rcouch"}},
     {couch_replicator, "couchdb-couch-replicator", {branch, "1994-merge-rcouch"}},
-    {couch_plugins, "couchdb-couch-plugins", {branch, "1994-merge-rcouch"}},
     {couch_dbupdates, "couchdb-couch-dbupdates", {branch, "1994-merge-rcouch"}}
 ],
 
 MakeDep = fun({AppName, RepoName, Version}) ->
-    Url = "https://git-wip-us.apache.org/repos/asf/" ++ RepoName ++ ".git",
+    Url = "https://github.com/refuge/" ++ RepoName ++ ".git",
     {AppName, ".*", {git, Url, Version}}
 end,
 
