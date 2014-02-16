@@ -30,16 +30,18 @@ main(_) ->
 
 test() ->
     test_util:start_couch(),
+    timer:sleep(1000),
 
     erlang:put(addr, couch_config:get("httpd", "bind_address", "127.0.0.1")),
     erlang:put(port, integer_to_list(mochiweb_socket_server:get(couch_http,
                                                                 port))),
-    timer:sleep(1000),
+
     couch_server:delete(test_db_name(), []),
     couch_db:create(test_db_name(), []),
 
     couch_config:set("attachments", "compression_level", "8", false),
     couch_config:set("attachments", "compressible_types", "text/*", false),
+
 
     create_1st_text_att(),
     create_1st_png_att(),
@@ -720,10 +722,11 @@ test_png_data() ->
     {ok, Data} = file:read_file(
         test_util:build_file("share/www/image/logo.png")
     ),
+    io:format("boun", []),
     Data.
 
 test_text_data() ->
     {ok, Data} = file:read_file(
-        test_util:build_file("README.rst")
+        test_util:build_file("README.md")
     ),
     Data.
