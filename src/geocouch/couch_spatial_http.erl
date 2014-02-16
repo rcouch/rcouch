@@ -94,7 +94,7 @@ design_doc_view(Req, Db, DDoc, ViewName) ->
 
 design_doc_view(Req, Db, DDoc, ViewName, #spatial_args{count=true}=Args) ->
     Count = couch_spatial:query_view_count(Db, DDoc, ViewName, Args),
-    couch_httpd:send_json(Req, {[{"count", Count}]});
+    couch_httpd:send_json(Req, {[{<<"count">>, Count}]});
 design_doc_view(Req, Db, DDoc, ViewName, Args0) ->
     EtagFun = fun(Sig, Acc0) ->
         Etag = couch_httpd:make_etag(Sig),
