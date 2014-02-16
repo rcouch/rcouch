@@ -23,7 +23,7 @@
 -export([validate_args/1]).
 -export([expand_dups/2]).
 
--include("couch_db.hrl").
+-include_lib("couch/include/couch_db.hrl").
 -include("couch_spatial.hrl").
 
 -define(MOD, couch_spatial_index).

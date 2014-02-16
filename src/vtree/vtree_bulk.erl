@@ -12,7 +12,7 @@
 
 -module(vtree_bulk).
 
--include("couch_db.hrl").
+-include_lib("couch/include/couch_db.hrl").
 
 -ifndef(makecheck).
 -define(MAX_FILLED, 40).

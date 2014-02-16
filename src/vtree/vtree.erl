@@ -12,7 +12,7 @@
 
 -module(vtree).
 
--include("couch_db.hrl").
+-include_lib("couch/include/couch_db.hrl").
 
 -export([add_remove/5, area/1, calc_mbr/1, calc_nodes_mbr/1, count_lookup/3,
     count_total/2, disjoint/2, foldl/4, insert/4, lookup/5, merge_mbr/2,

@@ -12,8 +12,8 @@
 
 -module(couch_spatial_compactor).
 
--include ("couch_db.hrl").
--include ("couch_spatial.hrl").
+-include_lib("couch/include/couch_db.hrl").
+-include("couch_spatial.hrl").
 
 -export([compact/3, swap_compacted/2]).
 

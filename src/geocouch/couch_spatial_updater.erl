@@ -24,7 +24,7 @@
 % for polygon search
 -export([extract_bbox/2, geojsongeom_to_geocouch/1]).
 
--include("couch_db.hrl").
+-include_lib("couch/include/couch_db.hrl").
 -include("couch_spatial.hrl").
 
 

@@ -15,7 +15,7 @@
 -export([handle_spatial_req/3, handle_info_req/3, handle_compact_req/3,
     handle_cleanup_req/2, parse_qs/1]).
 
--include("couch_db.hrl").
+-include_lib("couch/include/couch_db.hrl").
 -include("couch_spatial.hrl").
 
 -record(acc, {
