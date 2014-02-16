@@ -14,6 +14,10 @@ embed couchdb in your own applications.
 
 RCouch is brought you by the [Refuge project](http://refuge.io).
 
+## Contribute
+
+For issues, comments or feedback please [create an issue](https://jira.refuge.io/browse/RCOUCH).
+
 ## Features:
 
 - Apache CouchDB based

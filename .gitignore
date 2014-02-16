@@ -1,53 +1,66 @@
+!.gitignore
+!.mailmap
 *.beam
-*.gz
-*.tpl
-*.o
-*.lo
-*.la
-*.m4
-*.in
-*~
-*.orig
-*.rej
-erl_crash.dump
-configure
-autom4te.cache
-build-aux
 *.diff
-.DS_Store
-*.dSYM
-*.sw*
 *.gz
+*.la
+*.lo
+*.o
+*.orig
+*.pyc
+*.rej
+*.stamp
+*.sw*
+*.tpl
+*~
+.*
+INSTALL
+Makefile.in
+THANKS
 
-#doc
-
-docs/build
-
-# relase
+__pycache__
+b
+/src
 rel/rcouch
-dev
-rcouchx.app
-contrib/rcouchx/build/
-contrib/rcouchx/DerivedData
-rcouchx-build
-contrib/DerivedData
-contrib/rcouchx/rcouchx.xcodeproj/xcuserdata
-contrib/rcouchx.xcworkspace/xcuserdata
-contrib/rcouchx-build
-support/rebar
-support
 
-# couch
-apps/couch/couchjs
+# rebar
+support/rebar/rebar
+support/rebar/inttest/rt.work
+rt.work
+/rebar
+support/rebar/.test
 
-apps/couch/c_src/obj/*.so
-apps/couch/priv/*.so
-apps/couch/priv/couchspawnkillable
-apps/couch/libs
-apps/couch/share/server/main.js
-apps/couch/share/server/main-coffee.js
+# couch_collate
+src/couch_collate/ebin
+src/couch_collate/priv
+src/couch_collate/c_src/*.o
+src/couch_collate/.libs
+src/couch_collate/.dists
 
-# other
-deps
-distdir
-package
+src/couch/ebin
+src/couch_replicator/ebin
+src/couch_mrview/ebin
+src/couch_index/ebin
+src/couch_dbupdates/ebin
+src/couch_plugins/ebin
+src/couch_rel/ebin/*.beam
+
+# couchjs
+src/couch/c_src/couch_js/*.o
+src/couch/c_src/couch_js/config.h
+src/couch/priv/couchjs
+src/couch/c_src/spawnkillable/*.o
+src/couch/priv/couchspawnkillable
+src/couch/.libs
+src/couch/.dists
+
+share/server/main-coffee.js
+share/server/main.js
+
+test/etap/test_cfg_register
+test/out
+test/etap/*.beam
+test/etap/*.o
+test/etap/temp.*
+
+share/doc/build
