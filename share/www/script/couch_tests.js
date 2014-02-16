@@ -112,3 +112,12 @@ loadTest("view_sandboxing.js");
 loadTest("view_update_seq.js");
 // keep sorted
 
+// geocouch tests
+loadTest("spatial.js");
+loadTest("list_spatial.js");
+loadTest("etags_spatial.js");
+loadTest("multiple_spatial_rows.js");
+loadTest("spatial_compaction.js");
+loadTest("spatial_design_docs.js");
+loadTest("spatial_bugfixes.js");
+loadTest("spatial_offsets.js");

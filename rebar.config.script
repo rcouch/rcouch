@@ -28,7 +28,10 @@ DepDescs = [
     {couch_mrview, "couchdb-couch-mrview", {branch, "1994-merge-rcouch"}},
     {couch_replicator, "couchdb-couch-replicator", {branch, "1994-merge-rcouch"}},
     {couch_dbupdates, "couchdb-couch-dbupdates", {branch, "1994-merge-rcouch"}},
-    {couch_randomdoc, "couch_randomdoc", {branch, "rcouch-0.1"}}
+
+    %% extras
+    {couch_randomdoc, "couch_randomdoc", {branch, "rcouch-0.1"}},
+    {geocouch, "geocouch", {branch, "rcouch"}}
 ],
 
 MakeDep = fun({AppName, RepoName, Version}) ->
