@@ -1,20 +1,38 @@
-refuge
+rcouch
 ------
 
-2011 (c) Benoît Chesneau <benoitc@e-engura.org>
-2011 (c) Nicolas R Dufour <nrdufour@gmail.com>
+2011-2014 (c) Benoît Chesneau <benoitc@e-engura.org>
+2011-2014 (c) Nicolas R Dufour <nrdufour@gmail.com>
 
-refuge is released under the Apache 2 license. See the LICENSE file for
+rcouch is released under the Apache 2 license. See the LICENSE file for
 the complete license.
 
 third parties attributions
 --------------------------
+ 
+ * Apache CouchDB http://couchdb.apache.org
+   Copyright 2009-2014 The Apache Software Foundation
 
-- packages/*
-    under Apache 2 license
-    2010 (c) Basho Technologies
+ * rebar https://github.com/rebar/rebar
 
-- packages/osx/makedmg.sh
-    under BSD license
-    2011 (c) Coucbase
+   Copyright (c) 2009 Dave Smith (dizzyd@dizzyd.com)
 
+ * rel/files/app_epath.sh https://github.com/basho/node_package
+
+   Copyright 2014 Basho - Apache License 2
+
+ * rel/files/env.sh https://github.com/basho/node_package
+
+   Copyright 2014 Basho - Apache License 2
+
+ * rel/files/erl https://github.com/basho/node_package
+
+   Copyright 2014 Basho - Apache License 2
+
+ * rel/files/nodetool https://github.com/basho/node_package
+
+   Copyright 2014 Basho - Apache License 2
+
+ * rel/files/runner https://github.com/basho/node_package
+
+   Copyright 2014 Basho - Apache License 2

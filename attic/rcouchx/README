@@ -1,4 +1,0 @@
-# CouchDBX Application Wrapper
-
-Get http://github.com/janl/couchdbx-core/ and compile it. Copy the resulting `couchdbx-core` folder into the top level dir of this project. Launch Xcode and build the app.
-
