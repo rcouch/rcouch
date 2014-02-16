@@ -191,8 +191,7 @@ request(Url, Headers, Method, Body, N) ->
     _ ->
         ok
     end,
-    io:format("start this fucking request ~p-~p-~p~n", [Url, Headers,
-                                                        Method]),
+
     case ibrowse:send_req(Url, Headers, Method, Body) of
     {ok, Code0, RespHeaders, RespBody0} ->
         Code = list_to_integer(Code0),
