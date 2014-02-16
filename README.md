@@ -5,13 +5,12 @@
 document fetching. It allows you to fetch doc via teh HTTP Api, filter
 them and even render them dirrently using a show function.
 
-It's actually **supported by all the [refuge](http://refuge.io) projects**:
+This extension is included in
+[rcouch](https://github.com/refuge/rcouch).
 
-- [refuge](https://github.com/refuge/refuge)
-- [rcouch](https://github.com/refuge/rcouch)
-- [rcouch_template](https://github.com/refuge/rcouch_template)
+## Contribute
 
-**Note**: A port as an Apache Couchdb plugin is in progress.
+For issues, comments or feedback please [create an issue](https://jira.refuge.io/browse/RCOUCH).
 
 ## HTTP API
 
