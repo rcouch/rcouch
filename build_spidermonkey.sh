@@ -48,7 +48,7 @@ CXX=g++
 PATCH=patch
 case "$SYSTEM" in
     Linux)
-        ARCH=`arch 2>/dev/null`
+        ARCH=`(uname -p) 2>/dev/null`
         ;;
     FreeBSD|OpenBSD|NetBSD)
         ARCH=`(uname -p) 2>/dev/null`
@@ -84,7 +84,7 @@ build_nspr()
     NSPR_CONFIGURE_ENV=""
     case "$SYSTEM" in
         Linux)
-            ARCH=`arch 2>/dev/null`
+            ARCH=`(uname -p) 2>/dev/null`
             if [ "$ARCH" = "x86_64" ]; then
                 NSPR_CONFIGURE_ENV="--enable-64bit"
             fi
