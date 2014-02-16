@@ -23,7 +23,7 @@
 
 -define(REWRITE_COUNT, couch_rewrite_count).
 
--define(JSON_ENCODE(V), jiffy:encode(V, [uescape])).
+-define(JSON_ENCODE(V), jiffy:encode(V, [force_utf8])).
 -define(JSON_DECODE(V), couch_util:json_decode(V)).
 
 -define(b2l(V), binary_to_list(V)).
