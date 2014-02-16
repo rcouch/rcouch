@@ -366,10 +366,10 @@ geojsongeom_to_geocouch(Geom) ->
 % @doc Transforms internal structure to a GeoJSON geometry (as Erlang terms)
 geocouch_to_geojsongeom({Type, Coords}) ->
     Coords2 = case Type of
-    'GeometryCollection' ->
-        Geoms = [geocouch_to_geojsongeom(C) || C <- Coords],
-        {"geometries", Geoms};
-    _ ->
-        {<<"coordinates">>, Coords}
+        'GeometryCollection' ->
+            Geoms = [geocouch_to_geojsongeom(C) || C <- Coords],
+            {<<"geometries">>, Geoms};
+        _ ->
+            {<<"coordinates">>, Coords}
     end,
-    {[{<<"type">>, Type}, Coords2]}.
+    {[{<<"type">>, couch_util:to_binary(Type)}, Coords2]}.

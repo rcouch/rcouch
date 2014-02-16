@@ -61,8 +61,8 @@ handle_info_req(#httpd{method='GET'}=Req, Db, DDoc) ->
     [_, _, DesignName, _, _] = Req#httpd.path_parts,
     {ok, GroupInfoList} = couch_spatial:get_info(Db, DDoc),
     couch_httpd:send_json(Req, 200, {[
-        {name, DesignName},
-        {spatial_index, {GroupInfoList}}
+                {<<"name">>, DesignName},
+                {<<"spatial_index">>, {GroupInfoList}}
     ]});
 handle_info_req(Req, _Db, _DDoc) ->
     couch_httpd:send_method_not_allowed(Req, "GET").
@@ -72,7 +72,7 @@ handle_compact_req(#httpd{method='POST'}=Req, Db, DDoc) ->
     ok = couch_db:check_is_admin(Db),
     couch_httpd:validate_ctype(Req, "application/json"),
     ok = couch_spatial:compact(Db, DDoc),
-    couch_httpd:send_json(Req, 202, {[{ok, true}]});
+    couch_httpd:send_json(Req, 202, {[{<<"ok">>, true}]});
 handle_compact_req(Req, _Db, _DDoc) ->
     couch_httpd:send_method_not_allowed(Req, "POST").
 
@@ -82,7 +82,7 @@ handle_cleanup_req(#httpd{method='POST'}=Req, Db) ->
     ok = couch_db:check_is_admin(Db),
     couch_httpd:validate_ctype(Req, "application/json"),
     ok = couch_spatial:cleanup(Db),
-    couch_httpd:send_json(Req, 202, {[{ok, true}]});
+    couch_httpd:send_json(Req, 202, {[{<<"ok">>, true}]});
 handle_cleanup_req(Req, _Db) ->
     couch_httpd:send_method_not_allowed(Req, "POST").
 
