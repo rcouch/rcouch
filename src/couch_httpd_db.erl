@@ -12,11 +12,13 @@
 
 -module(couch_httpd_db).
 -include_lib("couch/include/couch_db.hrl").
+-include("couch_httpd.hrl").
 
 -export([handle_request/1, handle_compact_req/2, handle_design_req/2,
-    db_req/2, couch_doc_open/4,handle_changes_req/2,
-    update_doc_result_to_json/1, update_doc_result_to_json/2,
-    handle_design_info_req/3]).
+         db_req/2, couch_doc_open/4,handle_changes_req/2,
+         update_doc_result_to_json/1, update_doc_result_to_json/2,
+         handle_design_info_req/3]).
+-export([parse_doc_query/1]).
 
 -import(couch_httpd,
         [send_json/2,send_json/3,send_json/4,send_method_not_allowed/2,
@@ -24,13 +26,6 @@
          start_chunked_response/3, absolute_uri/2, send/2,
          start_response_length/4, send_error/4]).
 
--record(doc_query_args, {
-    options = [],
-    rev = nil,
-    open_revs = [],
-    update_type = interactive_edit,
-    atts_since = nil
-}).
 
 % Database request handlers
 handle_request(#httpd{path_parts=[DbName|RestParts],method=Method,
@@ -657,7 +652,7 @@ send_docs_multipart(Req, Results, Options1) ->
              couch_httpd:send_chunk(Resp, <<"\r\n--", OuterBoundary/binary>>);
         ({{not_found, missing}, RevId}) ->
              RevStr = couch_doc:rev_to_str(RevId),
-             Json = ?JSON_ENCODE({[{"missing", RevStr}]}),
+             Json = ?JSON_ENCODE({[{<<"missing">>, RevStr}]}),
              couch_httpd:send_chunk(Resp,
                 [<<"\r\nContent-Type: application/json; error=\"true\"\r\n\r\n">>,
                 Json,
