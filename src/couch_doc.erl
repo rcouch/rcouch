@@ -18,7 +18,8 @@
 -export([from_json_obj/1,to_json_obj/2,has_stubs/1, merge_stubs/2]).
 -export([validate_docid/1]).
 -export([doc_from_multi_part_stream/2]).
--export([doc_to_multi_part_stream/5, len_doc_to_multi_part_stream/4]).
+-export([doc_to_multi_part_stream/5, doc_to_multi_part_stream/6,
+         len_doc_to_multi_part_stream/4, len_doc_to_multi_part_stream/5]).
 -export([abort_multi_part_stream/1]).
 -export([to_path/1]).
 -export([mp_parse_doc/2]).
@@ -461,6 +462,12 @@ fold_streamed_data(RcvFun, LenLeft, Fun, Acc) when LenLeft > 0->
     fold_streamed_data(RcvFun, LenLeft - size(Bin), Fun, ResultAcc).
 
 len_doc_to_multi_part_stream(Boundary, JsonBytes, Atts, SendEncodedAtts) ->
+    len_doc_to_multi_part_stream(Boundary, JsonBytes, Atts,
+                                 SendEncodedAtts, false).
+
+len_doc_to_multi_part_stream(Boundary, JsonBytes, Atts, SendEncodedAtts,
+                             ForceMp) ->
+
     AttsSize = lists:foldl(fun(Att, AccAttsSize) ->
             #att{
                 data=Data,
@@ -505,29 +512,48 @@ len_doc_to_multi_part_stream(Boundary, JsonBytes, Atts, SendEncodedAtts) ->
                 end
             end
         end, 0, Atts),
-    if AttsSize == 0 ->
-        {<<"application/json">>, iolist_size(JsonBytes)};
-    true ->
-        {<<"multipart/related; boundary=\"", Boundary/binary, "\"">>,
-            2 + % "--"
-            size(Boundary) +
-            36 + % "\r\ncontent-type: application/json\r\n\r\n"
-            iolist_size(JsonBytes) +
-            4 + % "\r\n--"
-            size(Boundary) +
-            + AttsSize +
-            2 % "--"
-            }
+    case AttsSize of
+        0 when ForceMp /= true ->
+            {<<"application/json">>, iolist_size(JsonBytes)};
+        0 ->
+            {<<"multipart/related; boundary=\"", Boundary/binary, "\"">>,
+                2 + % "--"
+                size(Boundary) +
+                36 + % "\r\ncontent-type: application/json\r\n\r\n"
+                iolist_size(JsonBytes) +
+                4 + % "\r\n--"
+                size(Boundary) +
+                2};
+        _ ->
+            {<<"multipart/related; boundary=\"", Boundary/binary, "\"">>,
+                2 + % "--"
+                size(Boundary) +
+                36 + % "\r\ncontent-type: application/json\r\n\r\n"
+                iolist_size(JsonBytes) +
+                4 + % "\r\n--"
+                size(Boundary) +
+                + AttsSize +
+                2 % "--"
+                }
     end.
 
 doc_to_multi_part_stream(Boundary, JsonBytes, Atts, WriteFun,
-    SendEncodedAtts) ->
+                         SendEncodedAtts) ->
+    doc_to_multi_part_stream(Boundary, JsonBytes, Atts, WriteFun,
+                         SendEncodedAtts, false).
+
+doc_to_multi_part_stream(Boundary, JsonBytes, Atts, WriteFun,
+    SendEncodedAtts, ForceMp) ->
     case lists:any(fun(#att{data=Data})-> Data /= stub end, Atts) of
     true ->
         WriteFun([<<"--", Boundary/binary,
                 "\r\nContent-Type: application/json\r\n\r\n">>,
                 JsonBytes, <<"\r\n--", Boundary/binary>>]),
         atts_to_mp(Atts, Boundary, WriteFun, SendEncodedAtts);
+    false when ForceMp ->
+        WriteFun([<<"--", Boundary/binary,
+                "\r\nContent-Type: application/json\r\n\r\n">>,
+                  JsonBytes, <<"\r\n--", Boundary/binary, "--" >>]);
     false ->
         WriteFun(JsonBytes)
     end.
