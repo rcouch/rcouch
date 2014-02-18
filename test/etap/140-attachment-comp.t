@@ -31,7 +31,7 @@ main(_) ->
 test() ->
     test_util:start_couch(),
 
-erlang:put(addr, couch_config:get("httpd", "bind_address", "127.0.0.1")),
+    erlang:put(addr, couch_config:get("httpd", "bind_address", "127.0.0.1")),
     erlang:put(port, integer_to_list(mochiweb_socket_server:get(couch_http,
                                                                 port))),
 
