@@ -22,8 +22,8 @@ DepDescs = [
 
     %% couchdb applications
     {couch_collate, "couchdb-couch-collate", {branch, "1994-merge-rcouch"}},
-    {couch, "couchdb-couch", {branch, "1994-merge-rcouch"}},
-    {couch_httpd, "couchdb-couch-httpd", {branch, "1994-merge-rcouch"}},
+    {couch, "couchdb-couch", {branch, "maint"}},
+    {couch_httpd, "couchdb-couch-httpd", {branch, "maint"}},
     {couch_index, "couchdb-couch-index", {branch, "1994-merge-rcouch"}},
     {couch_mrview, "couchdb-couch-mrview", {branch, "1994-merge-rcouch"}},
     {couch_replicator, "couchdb-couch-replicator", {branch, "1994-merge-rcouch"}},
