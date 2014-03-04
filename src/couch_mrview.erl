@@ -192,10 +192,15 @@ refresh(Db, DDoc) ->
             {error, Error}
     end.
 
+trigger_update(#db{name=DbName}, DDoc) ->
+    trigger_update(DbName, DDoc);
 
 trigger_update(Db, DDoc) ->
-    trigger_update(Db, DDoc, couch_db:get_update_seq(Db)).
+    UpdateSeq = couch_util:with_db(Db, fun(WDb) ->
+                    couch_db:get_update_seq(WDb)
+            end),
 
+    trigger_update(Db, DDoc, UpdateSeq).
 
 trigger_update(Db, DDoc, UpdateSeq) ->
     {ok, Pid} = couch_index_server:get_index(couch_mrview_index, Db, DDoc),
