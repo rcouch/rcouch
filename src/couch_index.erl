@@ -60,6 +60,7 @@ trigger_update(Pid, UpdateSeq) ->
     gen_server:cast(Pid, {trigger_update, UpdateSeq}).
 
 
+
 compact(Pid) ->
     compact(Pid, []).
 
@@ -234,11 +235,31 @@ handle_cast({config_change, NewDelay}, State) ->
 handle_cast({trigger_update, UpdateSeq}, State) ->
     #st{
         mod=Mod,
-        idx_state=IdxState
+        idx_state=IdxState,
+        updater=Updater,
+        commit_delay=Delay
     } = State,
     case UpdateSeq =< Mod:get(update_seq, IdxState) of
         true ->
-            {noreply, State};
+            {ok, NewIdxState} = Mod:reset(IdxState),
+
+            % Restart the indexer if it's running or start it.
+            case couch_index_updater:is_running(Updater) of
+                true ->
+                    ok = couch_index_updater:restart(Updater, NewIdxState);
+                false ->
+                    couch_index_updater:run(Updater, NewIdxState)
+            end,
+
+            erlang:send_after(Delay, self(), commit),
+            case State#st.committed of
+                true -> erlang:send_after(Delay, self(), commit);
+                false -> ok
+            end,
+            {noreply, State#st{
+                idx_state=NewIdxState,
+                committed=false
+            }};
         false ->
             couch_index_updater:run(State#st.updater, IdxState),
             {noreply, State}
