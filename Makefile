@@ -28,18 +28,18 @@ export USE_STATIC_ICU
 all: deps compile
 
 compile:
-	@$(BASE_DIR)/rebar compile
+	@$(BASE_DIR)/rebar -q compile
 
 deps: rebar
-	@$(BASE_DIR)/rebar get-deps
+	@$(BASE_DIR)/rebar -q get-deps
 
 clean: docclean
-	@$(BASE_DIR)/rebar clean
+	@$(BASE_DIR)/rebar -q clean
 
 distclean: clean rebarclean relclean
 
 generate:
-	@$(BASE_DIR)/rebar generate $(OVERLAY_VARS)
+	@$(BASE_DIR)/rebar -q generate $(OVERLAY_VARS)
 
 rel: generate
 
