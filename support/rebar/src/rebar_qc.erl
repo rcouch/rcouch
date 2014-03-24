@@ -67,7 +67,9 @@ info(help, qc) ->
        "Valid rebar.config options:~n"
        "  {qc_opts, [{qc_mod, module()}, Options]}~n"
        "  ~p~n"
-       "  ~p~n",
+       "  ~p~n"
+       "Valid command line options:~n"
+       "  compile_only=true (Compile but do not test properties)",
        [
         {qc_compile_opts, []},
         {qc_first_files, []}
@@ -142,8 +144,7 @@ run(Config, QC, QCOpts) ->
     ok = ensure_dirs(),
     CodePath = setup_codepath(),
 
-    CompileOnly = rebar_utils:get_experimental_global(Config, compile_only,
-                                                      false),
+    CompileOnly = rebar_config:get_global(Config, compile_only, false),
     %% Compile erlang code to ?QC_DIR, using a tweaked config
     %% with appropriate defines, and include all the test modules
     %% as well.

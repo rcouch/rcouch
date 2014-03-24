@@ -84,8 +84,7 @@ eunit(Config, _AppFile) ->
     ok = ensure_dirs(),
     %% Save code path
     CodePath = setup_code_path(),
-    CompileOnly = rebar_utils:get_experimental_global(Config, compile_only,
-                                                      false),
+    CompileOnly = rebar_config:get_global(Config, compile_only, false),
     {ok, SrcErls} = rebar_erlc_compiler:test_compile(Config, "eunit",
                                                      ?EUNIT_DIR),
     case CompileOnly of
@@ -126,7 +125,8 @@ info_help(Description) ->
        "  tests=\"baz\" (For every existing suite, run the first test whose~n"
        "               name starts with bar and, if no such test exists,~n"
        "               run the test whose name starts with bar in the~n"
-       "               suite's _tests module)~n",
+       "               suite's _tests module)~n"
+       "  compile_only=true (Compile but do not run tests)",
        [
         Description,
         {eunit_opts, []},
@@ -260,7 +260,7 @@ get_tests(Config, SuitesProvided, ModuleBeamFiles, FilteredModules) ->
     get_matching_tests(Config, Modules).
 
 get_matching_tests(Config, Modules) ->
-    RawFunctions = rebar_utils:get_experimental_global(Config, tests, ""),
+    RawFunctions = rebar_config:get_global(Config, tests, ""),
     Tests = [list_to_atom(F1) || F1 <- string:tokens(RawFunctions, ",")],
     case Tests of
         [] ->
