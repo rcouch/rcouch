@@ -13,7 +13,7 @@
 
 DepDescs = [
     %% third-parties applications
-    {ibrowse, "couchdb-ibrowse", {branch,  "1843-feature-bigcouch"}},
+    {ibrowse, "ibrowse", {branch,  "master"}},
     {jiffy, "couchdb-jiffy", {branch, "1843-feature-bigcouch"}},
     {mochiweb, "couchdb-mochiweb", {branch, "import-upstream"}},
     {oauth, "couchdb-oauth", {branch, "1843-feature-bigcouch"}},
