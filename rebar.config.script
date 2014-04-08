@@ -35,7 +35,7 @@ DepDescs = [
 ],
 
 MakeDep = fun({AppName, RepoName, Version}) ->
-    Url = "https://github.com/refuge/" ++ RepoName ++ ".git",
+    Url = "https://github.com/rcouch/" ++ RepoName ++ ".git",
     {AppName, ".*", {git, Url, Version}}
 end,
 
