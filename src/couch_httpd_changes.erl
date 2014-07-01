@@ -232,7 +232,7 @@ view_changes_cb({{Seq, _Key, DocId}, Val},
     Db = case Db0#db.update_seq >= Seq of
         true -> Db0;
         false ->
-            {ok, Db1} = couch_db:reopen_db(Db0),
+            {ok, Db1} = couch_db:reopen(Db0),
             Db1
     end,
 
