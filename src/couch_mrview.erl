@@ -94,7 +94,7 @@ query_view(Db, {Type, View}, Args, Callback, Acc) ->
 view_changes_since(Db, DDoc, VName, StartSeq, Fun, Acc) ->
     view_changes_since(Db, DDoc, VName, StartSeq, Fun, [], Acc).
 
-view_changes_since(Db, DDoc, VName, StartSeq, Fun, Options, Acc) ->
+view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
     Args0 = make_view_changes_args(Options),
     {ok, {_, View}, _, Args} = couch_mrview_util:get_view(Db, DDoc, VName,
                                                           Args0),
@@ -105,15 +105,39 @@ view_changes_since(Db, DDoc, VName, StartSeq, Fun, Options, Acc) ->
                 true -> View#mrview.key_byseq_btree;
                 _ -> View#mrview.seq_btree
             end,
-            AccOut = lists:foldl(fun(Opts, Acc0) ->
+
+            %% wrap the function to make sure we only return the results
+            %% we want when we get changes for a key.
+            #mrargs{direction=Dir}=Args,
+            EndSeq = case Dir of
+                fwd -> 16#10000000;
+                rev -> 0
+            end,
+
+            WrapperFun = fun
+                ({{Seq, _Key, _DocId}, _Val}=KV, {fwd, LastSeq, Acc2})
+                        when Seq > LastSeq, Seq =< EndSeq ->
+                    {Go, Acc3} = UserFun(KV, Acc2),
+                    {Go, {fwd, Seq, Acc3}};
+                ({Seq, _Key, _DocId}=KV, {D, LastSeq, Acc2})
+                        when Seq < LastSeq, Seq >= EndSeq ->
+                    {Go, Acc3} = UserFun(KV, Acc2),
+                    {Go, {D, Seq, Acc3}};
+                (_, Acc2) ->
+                    {ok, Acc2}
+            end,
+
+            {_, _, AccOut} = lists:foldl(fun(Opts, Acc0) ->
+                        Acc1 = {Dir, StartSeq, Acc0},
                         {ok, _R, A} = couch_mrview_util:fold_changes(
-                                    Btree, Fun, Acc0, Opts),
+                                    Btree, WrapperFun, Acc1, Opts),
                         A
                 end, Acc, OptList),
             {ok, AccOut};
         _ ->
             {error, seqs_not_indexed}
     end.
+
 
 
 count_view_changes_since(Db, DDoc, VName, SinceSeq) ->
