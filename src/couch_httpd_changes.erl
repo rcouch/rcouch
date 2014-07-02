@@ -176,13 +176,18 @@ handle_view_changes(#db{name=DbName}=Db0, DDocId, VName, ViewOptions,
     #changes_args{
         feed = ResponseType,
         since = Since,
-        db_open_options = DbOptions} = ChangesArgs,
+        db_open_options = DbOptions,
+        heartbeat=Heartbeat,
+        timeout=Timeout} = ChangesArgs,
 
     Refresh = refresh_option(Req),
 
     Options0 = [{since, Since},
                 {view_options, ViewOptions},
-                {refresh, Refresh}],
+                {refresh, Refresh},
+                {heartbeat, Heartbeat},
+                {timeout, Timeout}],
+
     Options = case ResponseType of
         "continuous" -> [stream | Options0];
         "eventsource" -> [stream | Options0];
