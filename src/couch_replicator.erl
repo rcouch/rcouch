@@ -635,8 +635,10 @@ spawn_changes_reader(StartSeq, Db, ChangesQueue, Options) ->
 
 read_changes(StartSeq, Db, ChangesQueue, Options) ->
     try
-        couch_replicator_api_wrap:changes_since(Db, all_docs, StartSeq,
-            fun(#doc_info{high_seq = Seq, id = Id} = DocInfo) ->
+        couch_replicator_api_wrap:changes_since(Db, all_docs, StartSeq, fun
+            (#doc_info{high_seq = Seq, revs = []}) ->
+                put(last_seq, Seq);
+            (#doc_info{high_seq = Seq, id = Id} = DocInfo) ->
                 case Id of
                 <<>> ->
                     % Previous CouchDB releases had a bug which allowed a doc

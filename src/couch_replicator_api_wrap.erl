@@ -810,12 +810,20 @@ parse_changes_line(object_start, UserFun) ->
     end.
 
 json_to_doc_info({Props}) ->
-    RevsInfo = lists:map(
-        fun({Change}) ->
-            Rev = couch_doc:parse_rev(get_value(<<"rev">>, Change)),
-            Del = (true =:= get_value(<<"deleted">>, Change)),
-            #rev_info{rev=Rev, deleted=Del}
-        end, get_value(<<"changes">>, Props)),
+    RevsInfo0 = lists:map(fun({Change}) ->
+                    Rev = couch_doc:parse_rev(get_value(<<"rev">>, Change)),
+                    Del = (true =:= get_value(<<"deleted">>, Change)),
+                    #rev_info{rev=Rev, deleted=Del}
+            end, get_value(<<"changes">>, Props)),
+
+    RevsInfo = case get_value(<<"removed">>, Props) of
+        true ->
+            [_ | RevsInfo1] = RevsInfo0,
+            RevsInfo1;
+        _ ->
+            RevsInfo0
+    end,
+
     #doc_info{
         id = get_value(<<"id">>, Props),
         high_seq = get_value(<<"seq">>, Props),
