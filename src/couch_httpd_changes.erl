@@ -137,17 +137,17 @@ handle_view_changes(ChangesArgs, Req, Db) ->
     {DDocId, VName} = parse_view_param(Req),
 
     %% get view options
-    {Query, NoIndex} = case Req of
+    {Query, NoIndex, JsonReq} = case Req of
         {json_req, {Props}} ->
             {Q} = couch_util:get_value(<<"query">>, Props, {[]}),
             NoIndex1 = (couch_util:get_value(<<"use_index">>, Q,
                                             <<"yes">>) =:= <<"no">>),
-            {Q, NoIndex1};
+            {Q, NoIndex1, true};
         _ ->
             NoIndex1 = couch_httpd:qs_value(Req, "use_index", "yes") =:= "no",
-            {couch_httpd:qs(Req), NoIndex1}
+            {couch_httpd:qs(Req), NoIndex1, false}
     end,
-    ViewOptions = parse_view_options(Query, []),
+    ViewOptions = parse_view_options(Query, JsonReq, []),
 
     {ok, Infos} = couch_mrview:get_info(Db, DDocId),
     IsIndexed = lists:member(<<"seq_indexed">>,
@@ -376,29 +376,29 @@ parse_view_param1(ViewParam) ->
             throw({bad_request, "Invalid `view` parameter."})
     end.
 
-parse_view_options([], Acc) ->
+parse_view_options([], JsonReq, Acc) ->
     Acc;
-parse_view_options([{K, V} | Rest], Acc) ->
+parse_view_options([{K, V} | Rest], JsonReq, Acc) ->
     Acc1 = case couch_util:to_binary(K) of
         <<"reduce">> ->
             [{reduce, couch_mrview_http:parse_boolean(V)}];
         <<"key">> ->
-            V1 = parse_json(V),
+            V1 = parse_json(V, JsonReq),
             [{start_key, V1}, {end_key, V1} | Acc];
         <<"keys">> ->
-            [{keys, parse_json(V)} | Acc];
+            [{keys, parse_json(V, JsonReq)} | Acc];
         <<"startkey">> ->
-            [{start_key, parse_json(V)} | Acc];
+            [{start_key, parse_json(V, JsonReq)} | Acc];
         <<"start_key">> ->
-            [{start_key, parse_json(V)} | Acc];
+            [{start_key, parse_json(V, JsonReq)} | Acc];
         <<"startkey_docid">> ->
             [{start_key_docid, couch_util:to_binary(V)} | Acc];
         <<"start_key_docid">> ->
             [{start_key_docid, couch_util:to_binary(V)} | Acc];
         <<"endkey">> ->
-            [{end_key, parse_json(V)} | Acc];
+            [{end_key, parse_json(V, JsonReq)} | Acc];
         <<"end_key">> ->
-            [{end_key, parse_json(V)} | Acc];
+            [{end_key, parse_json(V, JsonReq)} | Acc];
         <<"endkey_docid">> ->
             [{start_key_docid, couch_util:to_binary(V)} | Acc];
         <<"end_key_docid">> ->
@@ -436,7 +436,7 @@ parse_view_options([{K, V} | Rest], Acc) ->
         _ ->
             Acc
     end,
-    parse_view_options(Rest, Acc1).
+    parse_view_options(Rest, JsonReq, Acc1).
 
 refresh_option({json_req, {Props}}) ->
     {Query} = couch_util:get_value(<<"query">>, Props),
@@ -447,9 +447,11 @@ refresh_option(Req) ->
         _ -> true
     end.
 
-parse_json(V) when is_list(V) ->
+parse_json(V, true) when is_binary(V) ->
     ?JSON_DECODE(V);
-parse_json(V) ->
+parse_json(V, false) when is_list(V) ->
+    ?JSON_DECODE(V);
+parse_json(V, _) ->
     V.
 
 deleted_item(true) -> [{<<"deleted">>, true}];
