@@ -244,24 +244,17 @@ view_changes_cb({{Seq, _Key, DocId}, Val},
     case couch_db:get_doc_info(Db, DocId) of
         {ok, DocInfo} ->
             %% get change row
-            {Deleted, ChangeRow} = view_change_row(Db, DocInfo, Args),
+            ChangeRow = view_change_row(Db, DocInfo, Args, Removed),
 
-            case Removed of
-                true when Deleted /= true ->
-                    %% the key has been removed from the view but the
-                    %% document hasn't been deleted so ignore it.
-                    {ok, Acc};
-                _ ->
-                    %% emit change row
-                    Callback({change, ChangeRow, Prepend}, ResponseType),
+            %% emit change row
+            Callback({change, ChangeRow, Prepend}, ResponseType),
 
-                    %% if we achieved the limit, stop here, else continue.
-                    NewLimit = OldLimit + 1,
-                    if Limit > NewLimit ->
-                            {ok, {<<",\n">>, NewLimit, Db, Callback, Args}};
-                        true ->
-                            {stop, {<<"">>, NewLimit, Db, Callback, Args}}
-                    end
+            %% if we achieved the limit, stop here, else continue.
+            NewLimit = OldLimit + 1,
+            if Limit > NewLimit ->
+                    {ok, {<<",\n">>, NewLimit, Db, Callback, Args}};
+                true ->
+                    {stop, {<<"">>, NewLimit, Db, Callback, Args}}
             end;
         {error, not_found} ->
             %% doc not found, continue
@@ -271,9 +264,9 @@ view_changes_cb({{Seq, _Key, DocId}, Val},
     end.
 
 
-view_change_row(Db, DocInfo, Args) ->
+view_change_row(Db, DocInfo, Args, Removed) ->
     #doc_info{id = Id, high_seq = Seq, revs = Revs} = DocInfo,
-    [#rev_info{rev=Rev, deleted=Del} | _] = Revs,
+    [#rev_info{rev=Rev, deleted=Del0} | _] = Revs,
 
     #changes_args{style=Style,
                   include_docs=InDoc,
@@ -288,7 +281,13 @@ view_change_row(Db, DocInfo, Args) ->
                 || #rev_info{rev=R} <- Revs]
     end,
 
-    {Del, {[{<<"seq">>, Seq}, {<<"id">>, Id}, {<<"changes">>, Changes}] ++
+    Del = case {Removed, Del0} of
+        {true, _} -> true;
+        {false, true} -> true;
+        _ -> false
+    end,
+
+    {[{<<"seq">>, Seq}, {<<"id">>, Id}, {<<"changes">>, Changes}] ++
      deleted_item(Del) ++ case InDoc of
             true ->
                 Opts = case Conflicts of
@@ -304,7 +303,7 @@ view_change_row(Db, DocInfo, Args) ->
                 end;
             false ->
                 []
-    end}}.
+    end}.
 
 parse_changes_query(Req, Db) ->
     ChangesArgs = lists:foldl(fun({Key, Value}, Args) ->
