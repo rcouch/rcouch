@@ -281,9 +281,9 @@ view_change_row(Db, DocInfo, Args, Removed) ->
                 || #rev_info{rev=R} <- Revs]
     end,
 
-    Del = case {Removed, Del0} of
-        {true, _} -> true;
-        {false, true} -> true;
+    Del = case {Del0, Removed} of
+        {true, _} -> deleted;
+        {false, true} -> removed;
         _ -> false
     end,
 
@@ -454,5 +454,6 @@ parse_json(V, false) when is_list(V) ->
 parse_json(V, _) ->
     V.
 
-deleted_item(true) -> [{<<"deleted">>, true}];
+deleted_item(deleted) -> [{<<"deleted">>, true}];
+deleted_item(removed) -> [{<<"removed">>, true}];
 deleted_item(_) -> [].
