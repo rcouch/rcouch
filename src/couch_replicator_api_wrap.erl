@@ -817,11 +817,8 @@ json_to_doc_info({Props}) ->
             end, get_value(<<"changes">>, Props)),
 
     RevsInfo = case get_value(<<"removed">>, Props) of
-        true ->
-            [_ | RevsInfo1] = RevsInfo0,
-            RevsInfo1;
-        _ ->
-            RevsInfo0
+        true -> [];
+        _ -> RevsInfo0
     end,
 
     #doc_info{
