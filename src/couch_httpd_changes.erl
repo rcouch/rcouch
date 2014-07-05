@@ -132,22 +132,41 @@ handle_changes(ChangesArgs, Req, Db) ->
 %% while couch_mrview_changes:handle_changes/6 is returning tha view
 %% changes this function return docs corresponding to the changes
 %% instead so it can be used to replace the _view filter.
-handle_view_changes(ChangesArgs, Req, Db) ->
+handle_view_changes(ChangesArgs, #httpd{method=Method}=Req, Db) ->
     %% parse view parameter
     {DDocId, VName} = parse_view_param(Req),
 
     %% get view options
-    {Query, NoIndex, JsonReq} = case Req of
+    {Query, Queries, NoIndex, JsonReq} = case Req of
         {json_req, {Props}} ->
             {Q} = couch_util:get_value(<<"query">>, Props, {[]}),
+            Queries1 = couch_util:get_value(<<"queries">>, Props,
+                                            undefined),
             NoIndex1 = (couch_util:get_value(<<"use_index">>, Q,
                                             <<"yes">>) =:= <<"no">>),
-            {Q, NoIndex1, true};
+            {Q, Queries1, NoIndex1, true};
         _ ->
+            Q = couch_httpd:qs(Req),
+            Queries1 = case Method of
+                'POST' ->
+                    {Props} = couch_httpd:json_body_obj(Req),
+                    couch_util:get_value(<<"queries">>, Props, undefined);
+                _ -> undefined
+            end,
             NoIndex1 = couch_httpd:qs_value(Req, "use_index", "yes") =:= "no",
-            {couch_httpd:qs(Req), NoIndex1, false}
+            {Q, Queries1, NoIndex1, false}
     end,
     ViewOptions = parse_view_options(Query, JsonReq, []),
+
+
+    QueriesOptions = case Queries of
+        undefined -> undefined;
+        _ ->
+            lists:foldl(fun({Options}, Acc) ->
+                    ViewOpts = parse_view_options(Options, true, []),
+                    [ViewOpts | Acc]
+            end, [], lists:reverse(Queries))
+    end,
 
     {ok, Infos} = couch_mrview:get_info(Db, DDocId),
     IsIndexed = lists:member(<<"seq_indexed">>,
@@ -156,12 +175,12 @@ handle_view_changes(ChangesArgs, Req, Db) ->
 
     case {IsIndexed, NoIndex} of
         {true, false} ->
-            handle_view_changes(Db, DDocId, VName, ViewOptions, ChangesArgs,
-                                Req);
-        {true, true} when ViewOptions /= [] ->
+            handle_view_changes(Db, DDocId, VName, ViewOptions,
+                                QueriesOptions, ChangesArgs, Req);
+        {true, true} when ViewOptions /= [] orelse QueriesOptions /= [] ->
             ?LOG_ERROR("Tried to filter a non sequence indexed view~n",[]),
             throw({bad_request, seqs_not_indexed});
-        {false, _} when ViewOptions /= [] ->
+        {false, _} when ViewOptions /= [] orelse QueriesOptions /= [] ->
             ?LOG_ERROR("Tried to filter a non sequence indexed view~n",[]),
             throw({bad_request, seqs_not_indexed});
         {_, _} ->
@@ -172,7 +191,7 @@ handle_view_changes(ChangesArgs, Req, Db) ->
     end.
 
 handle_view_changes(#db{name=DbName}=Db0, DDocId, VName, ViewOptions,
-                    ChangesArgs, Req) ->
+                    QueriesOptions, ChangesArgs, Req) ->
     #changes_args{
         feed = ResponseType,
         since = Since,
@@ -184,6 +203,7 @@ handle_view_changes(#db{name=DbName}=Db0, DDocId, VName, ViewOptions,
 
     Options0 = [{since, Since},
                 {view_options, ViewOptions},
+                {queries, QueriesOptions},
                 {refresh, Refresh},
                 {heartbeat, Heartbeat},
                 {timeout, Timeout}],
@@ -376,7 +396,7 @@ parse_view_param1(ViewParam) ->
             throw({bad_request, "Invalid `view` parameter."})
     end.
 
-parse_view_options([], JsonReq, Acc) ->
+parse_view_options([], _JsonReq, Acc) ->
     Acc;
 parse_view_options([{K, V} | Rest], JsonReq, Acc) ->
     Acc1 = case couch_util:to_binary(K) of
