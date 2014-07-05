@@ -17,7 +17,7 @@ DepDescs = [
     {jiffy, "couchdb-jiffy", {branch, "1843-feature-bigcouch"}},
     {mochiweb, "couchdb-mochiweb", {branch, "import-upstream"}},
     {oauth, "couchdb-oauth", {branch, "1843-feature-bigcouch"}},
-    {snappy, "couchdb-snappy", {branch, "1994-merge-rcouch"}},
+    {snappy, "couchdb-snappy", {branch, "master"}},
     {lager, "couchdb-lager", {branch, "refuge"}},
 
     %% couchdb applications
