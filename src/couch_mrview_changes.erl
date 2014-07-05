@@ -20,6 +20,7 @@
               ddoc,
               view,
               view_options,
+              queries,
               since,
               callback,
               acc,
@@ -49,12 +50,14 @@ handle_changes(DbName, DDocId, View, Fun, Acc, Options) ->
     Since = proplists:get_value(since, Options, 0),
     Stream = proplists:get_value(stream, Options, false),
     ViewOptions = proplists:get_value(view_options, Options, []),
+    Queries = proplists:get_value(queries, Options),
     Refresh = proplists:get_value(refresh, Options, false),
 
     State0 = #vst{dbname=DbName,
                   ddoc=DDocId,
                   view=View,
                   view_options=ViewOptions,
+                  queries=Queries,
                   since=Since,
                   callback=Fun,
                   acc=Acc},
@@ -142,8 +145,8 @@ changes_timeout(Options) ->
     {UserTimeout, Timeout, Heartbeat}.
 
 view_changes_since(#vst{dbname=DbName, ddoc=DDocId, view=View,
-                        view_options=Options, since=Since,
-                        callback=Callback, acc=UserAcc}=State) ->
+                        view_options=ViewOptions, queries=Queries,
+                        since=Since, callback=Callback, acc=UserAcc}=State) ->
     Wrapper = fun ({{Seq, _Key, _DocId}, _Val}=KV, {_Go, Acc2, OldSeq}) ->
             LastSeq = if OldSeq < Seq -> Seq;
                 true -> OldSeq
@@ -154,10 +157,37 @@ view_changes_since(#vst{dbname=DbName, ddoc=DDocId, view=View,
     end,
 
     Acc0 = {ok, UserAcc, Since},
-    case couch_mrview:view_changes_since(DbName, DDocId, View, Since,
-                                         Wrapper, Options, Acc0) of
+    Res = case {Queries, ViewOptions} of
+        {Queries, []} when is_list(Queries) ->
+            Args = {DbName, DDocId, View, Wrapper, Since},
+            multi_view_changes(Queries, Args, Acc0);
+        {undefined, ViewOptions} when is_list(ViewOptions) ->
+             couch_mrview:view_changes_since(DbName, DDocId, View, Since,
+                                             Wrapper, ViewOptions, Acc0);
+        {[], []} ->
+            couch_mrview:view_changes_since(DbName, DDocId, View, Since,
+                                            Wrapper, [], Acc0);
+        _ ->
+            {error, badarg}
+    end,
+
+    case Res of
         {ok, {Go, UserAcc2, Since2}}->
             {Go, State#vst{since=Since2, acc=UserAcc2}};
+        Error ->
+            Error
+    end.
+
+multi_view_changes([], _Args, Acc) ->
+    {ok, Acc};
+multi_view_changes([Options | Rest], {DbName, DDocId, View, Wrapper, Since}=Args,
+                   Acc) ->
+    case couch_mrview:view_changes_since(DbName, DDocId, View, Since,
+                                         Wrapper, Options, Acc) of
+        {ok, {stop, _UserAcc2, _Since2}=Acc2} ->
+            {ok, Acc2};
+        {ok, Acc2} ->
+            multi_view_changes(Rest, Args, Acc2);
         Error ->
             Error
     end.

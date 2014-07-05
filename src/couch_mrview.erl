@@ -529,7 +529,7 @@ lookup_index(Key) ->
 is_key_byseq(Options) ->
     lists:any(fun({K, _}) ->
                 lists:member(K, [start_key, end_key, start_key_docid,
-                                 end_key_docid, keys])
+                                 end_key_docid, keys, queries])
         end, Options).
 
 make_view_changes_args(Options) ->

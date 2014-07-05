@@ -367,7 +367,8 @@ update_log(Btree, Log, UpdatedSeq, _) ->
             end, {[], [], []}, Log),
 
     RemValue = {[{<<"_removed">>, true}]},
-    {Log1, AddAcc, DelAcc} = walk_log(Btree, fun({DocId, VIdKeys}, {Log2, AddAcc2, DelAcc2}) ->
+    {Log1, AddAcc, DelAcc} = walk_log(Btree, fun({DocId, VIdKeys},
+                                                 {Log2, AddAcc2, DelAcc2}) ->
 
                 {Log3, AddAcc3, DelAcc3} = lists:foldl(fun({ViewId,{Key, Seq,_Op}},
                                                            {Log4, AddAcc4, DelAcc4}) ->
