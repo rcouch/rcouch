@@ -9,5 +9,7 @@ before_script: make
 script: make check
 language: erlang
 otp_release:
+   - 17.1
+   - 17.0
    - R16B03-1
    - R15B03
