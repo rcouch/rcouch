@@ -17,6 +17,7 @@
 -include("couch_db.hrl").
 
 -export([start/2, stop/1]).
+-export([get_app_env/2]).
 
 -define(CONF_FILES, ["couch.ini", "local.ini"]).
 
@@ -33,4 +34,10 @@ get_ini_files() ->
     Defaults = lists:map(fun(FName) ->
                     filename:join(DefaultConfDir, FName)
             end, ?CONF_FILES),
-    couch:get_app_env(config_files, Defaults).
+    get_app_env(config_files, Defaults).
+
+get_app_env(Env, Default) ->
+    case application:get_env(couch, Env) of
+        {ok, Val} -> Val;
+        undefined -> Default
+    end.
