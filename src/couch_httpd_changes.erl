@@ -177,10 +177,10 @@ handle_view_changes(ChangesArgs, #httpd{method=Method}=Req, Db) ->
         {true, false} ->
             handle_view_changes(Db, DDocId, VName, ViewOptions,
                                 QueriesOptions, ChangesArgs, Req);
-        {true, true} when ViewOptions /= [] orelse QueriesOptions /= [] ->
+        {true, true} when ViewOptions /= [] orelse QueriesOptions /= undefined ->
             ?LOG_ERROR("Tried to filter a non sequence indexed view~n",[]),
             throw({bad_request, seqs_not_indexed});
-        {false, _} when ViewOptions /= [] orelse QueriesOptions /= [] ->
+        {false, _} when ViewOptions /= [] orelse QueriesOptions /= undefined ->
             ?LOG_ERROR("Tried to filter a non sequence indexed view~n",[]),
             throw({bad_request, seqs_not_indexed});
         {_, _} ->
