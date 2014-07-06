@@ -12,7 +12,7 @@
 
 -module(couch).
 
--export([ version/0,
+-export([version/0,
          start/0,
          stop/0,
          restart/0,
