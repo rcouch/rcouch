@@ -26,7 +26,8 @@
 -export([start_chunked_response/3,send_chunk/2,log_request/2]).
 -export([start_response_length/4, start_response/3, send/2]).
 -export([start_json_response/2, start_json_response/3, end_json_response/1]).
--export([send_response/4,send_method_not_allowed/2,send_error/4, send_redirect/2,send_chunked_error/2]).
+-export([send_response/4,send_method_not_allowed/2,send_error/2,
+        send_error/4,send_error/5, send_error/6, send_redirect/2,send_chunked_error/2]).
 -export([send_json/2,send_json/3,send_json/4,last_chunk/1,parse_multipart_request/3]).
 -export([accepted_encodings/1,handle_request_int/5,validate_referer/1,validate_ctype/2]).
 -export([http_1_0_keep_alive/2]).
@@ -886,6 +887,16 @@ send_error(Req, Code, Headers, ErrorStr, ReasonStr) ->
     send_json(Req, Code, Headers,
         {[{<<"error">>,  ErrorStr},
          {<<"reason">>, ReasonStr}]}).
+
+
+send_error(Req, Code, Headers, ErrorStr, ReasonStr, Stack) ->
+    send_json(Req, Code, Headers,
+        {[{<<"error">>, ErrorStr},
+        {<<"reason">>, ReasonStr} |
+        case Stack of [] -> []; _ -> [{stack, Stack}] end
+    ]}).
+
+
 
 % give the option for list functions to output html or other raw errors
 send_chunked_error(Resp, {_Error, {[{<<"body">>, Reason}]}}) ->
