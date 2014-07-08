@@ -13,9 +13,10 @@
 -module(couch_httpd_misc_handlers).
 
 -export([handle_welcome_req/2,handle_favicon_req/2,handle_utils_dir_req/2,
-    handle_all_dbs_req/1,handle_restart_req/1,
-    handle_uuids_req/1,handle_config_req/1,handle_log_req/1,
-    handle_task_status_req/1, handle_file_req/2]).
+         handle_all_dbs_req/1,handle_restart_req/1,
+         handle_uuids_req/1,handle_config_req/1,handle_log_req/1,
+         handle_task_status_req/1, handle_file_req/2,
+         handle_up_req/1]).
 
 -export([increment_update_seq_req/2]).
 
@@ -316,3 +317,13 @@ handle_log_req(#httpd{method='POST'}=Req) ->
     end;
 handle_log_req(Req) ->
     send_method_not_allowed(Req, "GET,POST").
+
+handle_up_req(#httpd{method='GET'} = Req) ->
+    case couch_config:get("couchdb", "maintenance_mode") of
+        "true" ->
+            couch_httpd:send_json(Req, 404, {[{status, maintenance_mode}]});
+        _ ->
+            couch_httpd:send_json(Req, 200, {[{status, ok}]})
+    end;
+handle_up_req(Req) ->
+    couch_httpd:send_method_not_allowed(Req, "GET,HEAD").
