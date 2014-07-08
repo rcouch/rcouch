@@ -940,8 +940,18 @@ db_attachment_req(#httpd{method=Method,mochi_req=MochiReq}=Req, Db, DocId, FileN
                         exit({unknown_transfer_encoding, Unknown});
                     chunked ->
                         fun(MaxChunkSize, ChunkFun, InitState) ->
+                            ChunkFunWrapper = fun
+                                ({0, Footers}, Acc) ->
+                                    F = mochiweb_headers:from_binary(Footers),
+                                    Md5 = mochiweb_headers:get_value(
+                                            "Content-MD5", F),
+                                    ChunkFun(Md5, Acc);
+                                (Else, Acc) ->
+                                    ChunkFun(Else, Acc)
+                            end,
+
                             couch_httpd:recv_chunked(Req, MaxChunkSize,
-                                ChunkFun, InitState)
+                                ChunkFunWrapper, InitState)
                         end;
                     0 ->
                         <<"">>;

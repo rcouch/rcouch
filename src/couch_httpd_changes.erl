@@ -145,7 +145,7 @@ handle_view_changes(ChangesArgs, #httpd{method=Method}=Req, Db) ->
             NoIndex1 = (couch_util:get_value(<<"use_index">>, Q,
                                             <<"yes">>) =:= <<"no">>),
             {Q, Queries1, NoIndex1, true};
-        _ ->
+        #httpd{}=Req ->
             Q = couch_httpd:qs(Req),
             Queries1 = case Method of
                 'POST' ->
