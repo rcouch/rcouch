@@ -12,18 +12,11 @@
 
 -module(couch).
 
--export([get_app_env/2,
-         version/0,
+-export([version/0,
          start/0,
          stop/0,
          restart/0,
          reload/0]).
-
-get_app_env(Env, Default) ->
-    case application:get_env(couch, Env) of
-        {ok, Val} -> Val;
-        undefined -> Default
-    end.
 
 version() ->
     case application:get_key(couch, vsn) of

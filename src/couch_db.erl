@@ -938,16 +938,12 @@ flush_att(Fd, #att{data=Fun,att_len=undefined}=Att) when is_function(Fun) ->
             % WriterFun({0, _Footers}, State)
             % Called with Length == 0 on the last time.
             % WriterFun returns NewState.
-            fun({0, Footers}, _) ->
-                F = mochiweb_headers:from_binary(Footers),
-                case mochiweb_headers:get_value("Content-MD5", F) of
-                undefined ->
-                    ok;
-                Md5 ->
-                    {md5, base64:decode(Md5)}
-                end;
-            ({_Length, Chunk}, _) ->
-                couch_stream:write(OutputStream, Chunk)
+            fun({_Length, Chunk}, _) ->
+                couch_stream:write(OutputStream, Chunk);
+            (undefined, _) ->
+                ok;
+            (Md5, _) ->
+                {md5, base64:decode(Md5)}
             end, ok)
     end);
 
