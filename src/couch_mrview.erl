@@ -127,12 +127,13 @@ view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
                     {ok, Acc2}
             end,
 
-            {_, _, AccOut} = lists:foldl(fun(Opts, Acc0) ->
-                        Acc1 = {Dir, StartSeq, Acc0},
-                        {ok, _R, A} = couch_mrview_util:fold_changes(
+
+            Acc0 = {Dir, StartSeq, Acc},
+            {_, _, AccOut} = lists:foldl(fun(Opts, Acc1) ->
+                        {ok, _R, Acc2} = couch_mrview_util:fold_changes(
                                     Btree, WrapperFun, Acc1, Opts),
-                        A
-                end, Acc, OptList),
+                        Acc2
+                end, Acc0, OptList),
             {ok, AccOut};
         _ ->
             {error, seqs_not_indexed}
