@@ -140,7 +140,7 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
         {template, "../etc/rcouch/app.config", "etc/app.config"},
         {template, "../etc/rcouch/vm.args", "etc/vm.args"},
         {template, "../etc/rcouch/couch.ini", "etc/couch.ini"},
-        {template, "../etc/rcouch/local.ini", "etc/local.ini"},
+        {template, "../etc/rcouch/{{node_config}}", "etc/local.ini"},
 
         %% couchdb data files
         {mkdir, "share"},
