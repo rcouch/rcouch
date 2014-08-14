@@ -356,12 +356,14 @@ update_log(Btree, Log, UpdatedSeq, _) ->
                     {KeysAcc1, RemAcc1} = lists:foldl(fun
                                 ({ViewId, {Key, _Seq, Op}},
                                  {KeysAcc2, RemAcc2}) ->
-                                    KeysAcc3 = [{Id, ViewId, Key} | KeysAcc2],
-                                    RemAcc3 = case Op of
-                                        add -> RemAcc2;
-                                        del -> [{Id, ViewId, Key} | RemAcc2]
-                                    end,
-                                    {KeysAcc3, RemAcc3}
+                                    case Op of
+                                        add ->
+                                            {[{Id, ViewId, Key} | KeysAcc2],
+                                             RemAcc2};
+                                        del ->
+                                            {KeysAcc2,
+                                             [{Id, ViewId, Key} | RemAcc2]}
+                                    end
                             end, {KeysAcc, RemAcc}, DIKeys),
                     {[Id | IdsAcc], KeysAcc1, RemAcc1}
             end, {[], [], []}, Log),
@@ -385,18 +387,7 @@ update_log(Btree, Log, UpdatedSeq, _) ->
                                     DelAcc5 = dict:append(ViewId,
                                                           {Key, Seq, DocId},
                                                           DelAcc4),
-                                    %% check if the key has been deleted
-                                    %% and if true, update the view with a
-                                    %% removed record.
-                                    AddAcc5 = case IsRemoved of
-                                        false -> AddAcc4;
-                                        true ->
-                                            dict:append(ViewId,
-                                                        {{UpdatedSeq, Key},
-                                                         {DocId, RemValue}},
-                                                        AddAcc4)
-                                    end,
-                                    {Log4, AddAcc5, DelAcc5};
+                                    {Log4, AddAcc4, DelAcc5};
                                 false ->
                                     %% an update operation has been
                                     %% logged for this key. We must now
@@ -404,10 +395,14 @@ update_log(Btree, Log, UpdatedSeq, _) ->
                                     %% log, remove the old record in
                                     %% the view and update the view
                                     %% with a removed record.
-                                    Log5 = dict:append(DocId,
-                                                       {ViewId,
-                                                        {Key,UpdatedSeq, del}},
-                                                       Log4),
+                                    Log5 = case IsRemoved of
+                                        false ->
+                                            dict:append(
+                                                DocId, {ViewId,
+                                                {Key,UpdatedSeq, del}}, Log4);
+                                        true ->
+                                            Log4
+                                    end,
                                     DelAcc5 = dict:append(ViewId,
                                                           {Key, Seq, DocId},
                                                           DelAcc4),
