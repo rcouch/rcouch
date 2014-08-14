@@ -31,13 +31,13 @@ export USE_STATIC_ICU
 all: deps compile
 
 compile:
-	@$(REBAR_BIN) -q compile
+	@$(REBAR_BIN) compile
 
 deps: rebarbuild
-	@$(REBAR_BIN) -q get-deps
+	@$(REBAR_BIN) get-deps
 
 clean: docclean
-	@$(REBAR_BIN) -q clean
+	@$(REBAR_BIN) clean
 
 check: test testjs
 

@@ -14,7 +14,7 @@ include tools.mk
 
 rel:
 	@echo "==> generate rcouch release"
-	@$(REBAR_BIN) -q generate $(OVERLAY_VARS)
+	@$(REBAR_BIN) generate $(OVERLAY_VARS)
 
 relclean: reldocclean
 	@rm -rf rel/rcouch
