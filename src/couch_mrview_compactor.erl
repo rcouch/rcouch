@@ -42,6 +42,7 @@ compact(State) ->
         id_btree=IdBtree,
         log_btree=LogBtree,
         seq_indexed=SeqIndexed,
+        keyseq_indexed=KeySeqIndexed,
         views=Views
     } = State,
 
@@ -62,7 +63,7 @@ compact(State) ->
         views = EmptyViews
     } = EmptyState,
 
-    TotalChanges0 = case SeqIndexed of
+    TotalChanges0 = case SeqIndexed orelse KeySeqIndexed of
         true -> NumDocIds * 2;
         _ -> NumDocIds
     end,
@@ -70,10 +71,10 @@ compact(State) ->
     TotalChanges = lists:foldl(
         fun(View, Acc) ->
             {ok, Kvs} = couch_mrview_util:get_row_count(View),
-            case SeqIndexed of
+            case SeqIndexed orelse KeySeqIndexed of
                 true ->
                     {ok, SKvs} = couch_mrview_util:get_view_changes_count(View),
-                    Acc + Kvs + SKvs * 2;
+                    Acc + Kvs + SKvs;
                 false ->
                     Acc + Kvs
             end
@@ -157,7 +158,7 @@ recompact(State) ->
     end.
 
 compact_log(LogBtree, BufferSize, Acc0) ->
-    FoldFun = fun({DocId, _} = KV, Acc) ->
+    FoldFun = fun({_DocId, _} = KV, Acc) ->
         #acc{btree = Bt, kvs = Kvs, kvs_size = KvsSize} = Acc,
         KvsSize2 = KvsSize + ?term_size(KV),
         case KvsSize2 >= BufferSize of
@@ -186,18 +187,23 @@ compact_view(View, EmptyView, BufferSize, Acc0) ->
                                        BufferSize, Acc0),
 
     %% are we indexing changes by sequences?
-    {NewSeqBt, NewKeyBySeqBt, FinalAcc} = case View#mrview.seq_indexed of
+    {NewSeqBt, Acc2} = case View#mrview.seq_indexed of
         true ->
-            {SBt, Acc2} = compact_view_btree(View#mrview.seq_btree,
-                                             EmptyView#mrview.seq_btree,
-                                             BufferSize, Acc1),
-            {KSBt, Acc3} = compact_view_btree(View#mrview.key_byseq_btree,
-                                              EmptyView#mrview.key_byseq_btree,
-                                              BufferSize, Acc2),
-            {SBt, KSBt, Acc3};
+            compact_view_btree(View#mrview.seq_btree,
+                               EmptyView#mrview.seq_btree,
+                               BufferSize, Acc1);
         _ ->
-            {nil, nil, Acc1}
+            {nil, Acc1}
     end,
+    {NewKeyBySeqBt, FinalAcc} = case View#mrview.keyseq_indexed of
+        true ->
+            compact_view_btree(View#mrview.key_byseq_btree,
+                               EmptyView#mrview.key_byseq_btree,
+                               BufferSize, Acc2);
+        _ ->
+            {nil, Acc2}
+    end,
+
     {EmptyView#mrview{btree=NewBt,
                       seq_btree=NewSeqBt,
                       key_byseq_btree=NewKeyBySeqBt}, FinalAcc}.

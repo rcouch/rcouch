@@ -96,12 +96,13 @@ view_changes_since(Db, DDoc, VName, StartSeq, Fun, Acc) ->
 
 view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
     Args0 = make_view_changes_args(Options),
-    {ok, {_, View}, _, Args} = couch_mrview_util:get_view(Db, DDoc, VName,
-                                                          Args0),
-    case View#mrview.seq_indexed of
-        true ->
+    {ok, {_, View, _}, _, Args} = couch_mrview_util:get_view(Db, DDoc, VName,
+                                                             Args0),
+    #mrview{seq_indexed=SIndexed, keyseq_indexed=KSIndexed} = View,
+    IsKSQuery = is_key_byseq(Options),
+    if (SIndexed andalso not IsKSQuery) orelse (KSIndexed andalso IsKSQuery) ->
             OptList = make_view_changes_opts(StartSeq, Options, Args),
-            Btree = case is_key_byseq(Options) of
+            Btree = case IsKSQuery of
                 true -> View#mrview.key_byseq_btree;
                 _ -> View#mrview.seq_btree
             end,
@@ -134,7 +135,7 @@ view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
                         {Dir, StartSeq, Acc2}
                 end, Acc0, OptList),
             {ok, AccOut};
-        _ ->
+        true ->
             {error, seqs_not_indexed}
     end.
 
