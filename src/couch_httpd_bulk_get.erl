@@ -78,9 +78,7 @@ handle_req(#httpd{method='POST',path_parts=[_,<<"_bulk_get">>],
                         end,
 
                         %% get doc informations
-                        {ok, Results} = couch_db:open_doc_revs(Db, DocId,
-                                                               Revs, Options),
-
+                        {ok, Results} = couch_db:open_doc_revs(Db, DocId, Revs, Options),
                         case Boundary of
                             nil when Results /= [] ->
                                 send_docs(Resp, DocId, Results,
@@ -88,9 +86,8 @@ handle_req(#httpd{method='POST',path_parts=[_,<<"_bulk_get">>],
                             nil ->
                                 ok;
                             _  when Results /= [] ->
-                                couch_httpd:send_chunk(Resp, <<"--", Boundary/binary>>),
-                                send_docs_multipart(Resp, DocId, Results,
-                                                    Boundary, Options1);
+                               send_docs_multipart(Resp, DocId, Results,
+                                                   Boundary, Options1);
                             _ ->
                                 ok
                         end,
