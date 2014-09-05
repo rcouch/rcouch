@@ -76,7 +76,7 @@ esac
 fetch()
 {
     TARGET=$DISTDIR/$1
-    if ! t§est -f $TARGET; then
+    if ! test -f $TARGET; then
         echo "==> Fetch $1 to $TARGET"
         $CURLBIN --progress-bar -L $2/$1 -o $TARGET
     fi
