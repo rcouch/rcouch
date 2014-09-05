@@ -49,6 +49,9 @@ PATCH=patch
 case "$SYSTEM" in
     Linux)
         ARCH=`(uname -p) 2>/dev/null`
+        if [ "$ARCH" = "unknown" ]; then
+            ARCH=`(uname -m) 2>/dev/null`
+        fi
         ;;
     FreeBSD|OpenBSD|NetBSD)
         ARCH=`(uname -p) 2>/dev/null`
@@ -73,7 +76,7 @@ esac
 fetch()
 {
     TARGET=$DISTDIR/$1
-    if ! test -f $TARGET; then
+    if ! t§est -f $TARGET; then
         echo "==> Fetch $1 to $TARGET"
         $CURLBIN --progress-bar -L $2/$1 -o $TARGET
     fi
@@ -84,14 +87,12 @@ build_nspr()
     NSPR_CONFIGURE_ENV=""
     case "$SYSTEM" in
         Linux)
-            ARCH=`(uname -p) 2>/dev/null`
             if [ "$ARCH" = "x86_64" ]; then
                 NSPR_CONFIGURE_ENV="--enable-64bit"
             fi
             CFLAGS="$CFLAGS -lpthread"
             ;;
         FreeBSD|OpenBSD|NetBSD)
-            ARCH=`(uname -p) 2>/dev/null`
             if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
                 NSPR_CONFIGURE_ENV+=--enable-64bit
             fi
