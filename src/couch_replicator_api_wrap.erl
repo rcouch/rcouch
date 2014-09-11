@@ -125,7 +125,7 @@ get_db_info(#db{name = DbName, user_ctx = UserCtx}) ->
 
 get_view_info(#httpdb{} = Db, DDocId, ViewName) ->
     Path = iolist_to_binary([DDocId, "/_view/", ViewName, "/_info"]),
-    send_req(Db, [{path, Path}],
+    send_req(Db, [{path, binary_to_list(Path)}],
         fun(200, _, {Props}) ->
             {ok, Props}
         end);
