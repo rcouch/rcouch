@@ -67,11 +67,17 @@ db_open(Db, Options) ->
 
 db_open(#httpdb{} = Db1, _Options, Create) ->
     {ok, Db} = couch_replicator_httpc:setup(Db1),
+    try
     case Create of
     false ->
         ok;
     true ->
-        send_req(Db, [{method, put}], fun(_, _, _) -> ok end)
+        send_req(Db, [{method, put}],
+            fun(401, _, _) ->
+                throw({unauthorized, ?l2b(db_uri(Db))});
+            (_, _, _) ->
+                ok
+            end)
     end,
     send_req(Db, [{method, head}],
         fun(200, _, _) ->
@@ -80,7 +86,18 @@ db_open(#httpdb{} = Db1, _Options, Create) ->
             throw({unauthorized, ?l2b(db_uri(Db))});
         (_, _, _) ->
             throw({db_not_found, ?l2b(db_uri(Db))})
-        end);
+        end)
+    catch
+        throw:Error ->
+            db_close(Db),
+            throw(Error);
+        error:Error ->
+            db_close(Db),
+            erlang:error(Error);
+        exit:Error ->
+            db_close(Db),
+            erlang:exit(Error)
+    end;
 db_open(DbName, Options, Create) ->
     try
         case Create of
@@ -227,6 +244,8 @@ open_doc_revs(#httpdb{} = HttpDb, Id, Revs, Options, Fun, Acc) ->
     receive
         {'DOWN', Ref, process, Pid, {exit_ok, Ret}} ->
             Ret;
+        {'DOWN', Ref, process, Pid, {{nocatch, missing_doc}, _}} ->
+            throw(missing_doc);
         {'DOWN', Ref, process, Pid, {{nocatch, {missing_stub,_} = Stub}, _}} ->
             throw(Stub);
         {'DOWN', Ref, process, Pid, Else} ->
@@ -307,7 +326,7 @@ update_doc(#httpdb{} = HttpDb, #doc{id = DocId} = Doc, Options, Type) ->
         HttpDb#httpdb{retries = 0},
         [{method, put}, {path, encode_doc_id(DocId)},
             {qs, QArgs}, {headers, Headers}, {body, Body}],
-        fun(Code, _, {Props}) when Code =:= 200 orelse Code =:= 201 ->
+        fun(Code, _, {Props}) when Code =:= 200 orelse Code =:= 201 orelse Code =:= 202 ->
                 {ok, couch_doc:parse_rev(get_value(<<"rev">>, Props))};
             (409, _, _) ->
                 throw(conflict);

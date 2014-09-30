@@ -374,7 +374,10 @@ handle_info({'EXIT', Pid, Reason}, #rep_state{changes_queue=Pid} = State) ->
 handle_info({'EXIT', Pid, normal}, #rep_state{workers = Workers} = State) ->
     case Workers -- [Pid] of
     Workers ->
-        {stop, {unknown_process_died, Pid, normal}, State};
+        ?LOG_ERROR("unknown pid bit the dust ~p ~n",[Pid]),
+        {noreply, State#rep_state{workers = Workers}};
+        %% not clear why a stop was here before
+        %{stop, {unknown_process_died, Pid, normal}, State};
     [] ->
         catch unlink(State#rep_state.changes_manager),
         catch exit(State#rep_state.changes_manager, kill),
@@ -393,7 +396,6 @@ handle_info({'EXIT', Pid, Reason}, #rep_state{workers = Workers} = State) ->
         {stop, {worker_died, Pid, Reason}, State2}
     end.
 
-
 handle_call(get_details, _From, #rep_state{rep_details = Rep} = State) ->
     {reply, {ok, Rep}, State};
 
@@ -407,6 +409,8 @@ handle_call({report_seq_done, Seq, StatsInc}, From,
         current_through_seq = ThroughSeq, stats = Stats} = State) ->
     gen_server:reply(From, ok),
     {NewThroughSeq0, NewSeqsInProgress} = case SeqsInProgress of
+    [] ->
+        {Seq, []};
     [Seq | Rest] ->
         {Seq, Rest};
     [_ | _] ->
@@ -490,7 +494,21 @@ terminate(Reason, State) ->
         [BaseId ++ Ext, Source, Target, to_binary(Reason)]),
     terminate_cleanup(State),
     couch_replicator_notifier:notify({error, RepId, Reason}),
-    couch_replicator_manager:replication_error(Rep, Reason).
+    couch_replicator_manager:replication_error(Rep, Reason);
+terminate(shutdown, {error, Class, Error, Stack, InitArgs}) ->
+    #rep{id=RepId} = InitArgs,
+    ?LOG_ERROR("~p:~p: Replication failed to start for args ~p: ~p",
+               [Class, Error, InitArgs, Stack]),
+    case Error of
+    {unauthorized, DbUri} ->
+        NotifyError = {unauthorized, <<"unauthorized to access or create database ", DbUri/binary>>};
+    {db_not_found, DbUri} ->
+        NotifyError = {db_not_found, <<"could not open ", DbUri/binary>>};
+    _ ->
+        NotifyError = Error
+    end,
+    couch_replicator_notifier:notify({error, RepId, NotifyError}),
+    couch_replicator_manager:replication_error(InitArgs, NotifyError).
 
 
 terminate_cleanup(State) ->
