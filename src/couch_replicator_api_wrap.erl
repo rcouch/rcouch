@@ -541,7 +541,10 @@ changes_json_req(_Db, "", _QueryParams, _Options) ->
     {[]};
 changes_json_req(_Db, "_doc_ids", _QueryParams, Options) ->
     {[{<<"doc_ids">>, get_value(doc_ids, Options)}]};
-changes_json_req(Db, FilterName, {QueryParams}, _Options) ->
+changes_json_req(Db, FilterName, {QueryParams}, Options) ->
+    ChangeParams = get_value(change_params, Options, {[]}),
+    Channels = get_value("channels", ChangeParams, []),
+
     {ok, Info} = couch_db:get_db_info(Db),
     % simulate a request to db_name/_changes
     {[
@@ -549,7 +552,8 @@ changes_json_req(Db, FilterName, {QueryParams}, _Options) ->
         {<<"id">>, null},
         {<<"method">>, 'GET'},
         {<<"path">>, [couch_db:name(Db), <<"_changes">>]},
-        {<<"query">>, {[{<<"filter">>, FilterName} | QueryParams]}},
+        {<<"query">>, [{<<"filter">>, FilterName} | QueryParams]},
+        {<<"channels">>, Channels},
         {<<"headers">>, []},
         {<<"body">>, []},
         {<<"peer">>, <<"replicator">>},
