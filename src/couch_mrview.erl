@@ -127,12 +127,11 @@ view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
                     {ok, Acc2}
             end,
 
-
             Acc0 = {Dir, StartSeq, Acc},
             {_, _, AccOut} = lists:foldl(fun(Opts, Acc1) ->
-                        {ok, _R, Acc2} = couch_mrview_util:fold_changes(
+                        {ok, _R, {_, _, Acc2}} = couch_mrview_util:fold_changes(
                                     Btree, WrapperFun, Acc1, Opts),
-                        Acc2
+                        {Dir, StartSeq, Acc2}
                 end, Acc0, OptList),
             {ok, AccOut};
         _ ->
