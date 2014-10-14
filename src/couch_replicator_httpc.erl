@@ -90,6 +90,12 @@ send_ibrowse_req(#httpdb{headers = BaseHeaders} = HttpDb, Params) ->
     {Worker, Response, IsChanges}.
 
 
+process_response({error, req_timedout}, _Worker, HttpDb, Params, _Cb) ->
+    throw({retry, HttpDb, Params});
+
+process_response({error, connection_closing}, _Worker, HttpDb, Params, _Cb) ->
+     throw({retry, HttpDb, Params});
+
 process_response({error, sel_conn_closed}, _Worker, HttpDb, Params,  _Cb) ->
     throw({retry, HttpDb, Params});
 
