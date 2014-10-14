@@ -17,7 +17,7 @@
     oauth = nil,
     headers = [
         {"Accept", "application/json"},
-        {"User-Agent", "rcouch/" ++ couch_server:get_version() ++ " (replicator)")}
+        {"User-Agent", "rcouch/" ++ couch_server:get_version() ++ " (replicator)"}
     ],
     timeout,            % milliseconds
     ibrowse_options = [],
