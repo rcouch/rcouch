@@ -484,17 +484,6 @@ terminate(shutdown, #rep_state{rep_details = #rep{id = RepId}} = State) ->
     couch_replicator_notifier:notify({error, RepId, <<"cancelled">>}),
     terminate_cleanup(State);
 
-terminate(Reason, State) ->
-    #rep_state{
-        source_name = Source,
-        target_name = Target,
-        rep_details = #rep{id = {BaseId, Ext} = RepId} = Rep
-    } = State,
-    ?LOG_ERROR("Replication `~s` (`~s` -> `~s`) failed: ~s",
-        [BaseId ++ Ext, Source, Target, to_binary(Reason)]),
-    terminate_cleanup(State),
-    couch_replicator_notifier:notify({error, RepId, Reason}),
-    couch_replicator_manager:replication_error(Rep, Reason);
 terminate(shutdown, {error, Class, Error, Stack, InitArgs}) ->
     #rep{id=RepId} = InitArgs,
     ?LOG_ERROR("~p:~p: Replication failed to start for args ~p: ~p",
@@ -508,7 +497,18 @@ terminate(shutdown, {error, Class, Error, Stack, InitArgs}) ->
         NotifyError = Error
     end,
     couch_replicator_notifier:notify({error, RepId, NotifyError}),
-    couch_replicator_manager:replication_error(InitArgs, NotifyError).
+    couch_replicator_manager:replication_error(InitArgs, NotifyError);
+terminate(Reason, State) ->
+    #rep_state{
+        source_name = Source,
+        target_name = Target,
+        rep_details = #rep{id = {BaseId, Ext} = RepId} = Rep
+    } = State,
+    couch_log:error("Replication `~s` (`~s` -> `~s`) failed: ~s",
+        [BaseId ++ Ext, Source, Target, to_binary(Reason)]),
+    terminate_cleanup(State),
+    couch_replicator_notifier:notify({error, RepId, Reason}),
+    couch_replicator_manager:replication_error(Rep, Reason).
 
 
 terminate_cleanup(State) ->
