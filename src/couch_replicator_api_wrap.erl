@@ -200,17 +200,14 @@ open_doc_revs(#httpdb{} = HttpDb, Id, Revs, Options, Fun, Acc) ->
     QS = options_to_query_args(HttpDb, Path, [revs, {open_revs, Revs} | Options]),
     {Pid, Ref} = spawn_monitor(fun() ->
         Self = self(),
-        Callback = fun
-                       (200, Headers, StreamDataFun) ->
-                           remote_open_doc_revs_streamer_start(Self),
-                           {<<"--">>, _, _} = couch_httpd:parse_multipart_request(
-                                                get_value("Content-Type", Headers),
-                                                StreamDataFun,
-                                                fun mp_parse_mixed/1
-                                               );
-                       (404, _Headers, _StreamDataFun) ->
-                           exit(not_found)
-                   end,
+        Callback = fun(200, Headers, StreamDataFun) ->
+            remote_open_doc_revs_streamer_start(Self),
+            {<<"--">>, _, _} = couch_httpd:parse_multipart_request(
+                get_value("Content-Type", Headers),
+                StreamDataFun,
+                fun mp_parse_mixed/1
+            )
+        end,
         Streamer = spawn_link(fun() ->
             Params = [
                 {path, Path},
