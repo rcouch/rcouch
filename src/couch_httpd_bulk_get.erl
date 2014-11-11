@@ -135,11 +135,16 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
     InnerBoundary = couch_uuids:random(),
 
     lists:foreach(
-        fun({ok, #doc{atts=Atts}=Doc}) ->
+        fun({ok, #doc{id=Id, revs={Start, Revs}, atts=Atts}=Doc}) ->
                 JsonBytes = ?JSON_ENCODE(couch_doc:to_json_obj(Doc, Options)),
                 {ContentType, _Len} = couch_doc:len_doc_to_multi_part_stream(
                         InnerBoundary, JsonBytes, Atts, true, true),
-                Hdr = <<"\r\nContent-Type: ", ContentType/binary, "\r\n\r\n">>,
+
+                Hdr = iolist_to_binary([<<"\r\nContent-Type: ", ContentType/binary>>,
+                                        <<"\r\nX-Doc-Id: ", Id/binary >>,
+                                        hdr_rev(Start, Revs), <<"\r\n\r\n">>]),
+
+
                 couch_httpd:send_chunk(Resp, Hdr),
                 couch_doc:doc_to_multi_part_stream(InnerBoundary, JsonBytes,
                                                    Atts, fun(Data) ->
@@ -165,3 +170,10 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
                     end, true),
                 couch_httpd:send_chunk(Resp, <<"\r\n--", OuterBoundary/binary>>)
         end, Results).
+
+
+hdr_rev(0, []) ->
+    <<>>;
+hdr_rev(Start, [FirstRevId|_]) ->
+    RevStr = couch_doc:rev_to_str({Start, FirstRevId}),
+    << "\r\nX-Rev-Id: ", RevStr/binary >>.
