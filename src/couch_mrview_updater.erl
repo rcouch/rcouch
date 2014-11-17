@@ -254,13 +254,10 @@ insert_results(DocId, Seq, [KVs | RKVs], [{Id, {VKVs, SKVs}} | RVKVs], VKVAcc,
 log_removed([], _, Log) ->
     Log;
 log_removed([{ok, {DocId, VIdKeys}} | Rest], Seq, Log) ->
-    Log2 = lists:foldl(fun
-                ({Id, Keys}, Log1) when is_list(Keys) ->
+    Log2 = lists:foldl(fun({Id, Keys}, Log1) ->
                     lists:foldl(fun(Key, Log3) ->
                                 dict:append(DocId, {Id, {Key, Seq, del}}, Log3)
-                        end, Log1, Keys);
-                ({Id, Key}, Log1) ->
-                    dict:append(DocId, {Id, {Key, Seq, del}}, Log1)
+                        end, Log1, Keys)
             end, Log, VIdKeys),
     log_removed(Rest, Seq, Log2);
 log_removed([_ | Rest], Seq, Log) ->
@@ -370,7 +367,7 @@ update_log(Btree, Log, UpdatedSeq, _) ->
     {Log1, AddAcc, DelAcc} = walk_log(Btree, fun({DocId, VIdKeys},
                                                  {Log2, AddAcc2, DelAcc2}) ->
 
-                {Log3, AddAcc3, DelAcc3} = lists:foldl(fun({ViewId,{Key, Seq,_Op}},
+                {Log3, AddAcc3, DelAcc3} = lists:foldl(fun({ViewId,{Key, Seq, Op}},
                                                            {Log4, AddAcc4, DelAcc4}) ->
 
                             IsUpdated = lists:member({DocId, ViewId, Key},
@@ -397,7 +394,7 @@ update_log(Btree, Log, UpdatedSeq, _) ->
                                                         AddAcc4)
                                     end,
                                     {Log4, AddAcc5, DelAcc5};
-                                false ->
+                                false when Op /= del ->
                                     %% an update operation has been
                                     %% logged for this key. We must now
                                     %% record it as deleted in the
@@ -415,7 +412,16 @@ update_log(Btree, Log, UpdatedSeq, _) ->
                                                           {{UpdatedSeq, Key},
                                                            {DocId, RemValue}},
                                                           AddAcc4),
-                                    {Log5, AddAcc5, DelAcc5}
+                                    {Log5, AddAcc5, DelAcc5};
+                                false ->
+                                    %% the key has already been
+                                    %% registered in the view as
+                                    %% deleted, make sure to add it
+                                    %% to the new log.
+                                    Log5 = dict:append(DocId,
+                                                       {ViewId,
+                                                        {Key, Seq, del}}, Log4),
+                                    {Log5, AddAcc4, DelAcc4}
                             end
                     end, {Log2, AddAcc2, DelAcc2}, VIdKeys),
                     {ok, {Log3, AddAcc3, DelAcc3}}
