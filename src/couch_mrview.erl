@@ -544,7 +544,6 @@ make_view_changes_args(Options) ->
 make_view_changes_opts(StartSeq, Options, Args) ->
     case is_key_byseq(Options) of
         true ->
-            io:format("miaou~n", []),
             couch_mrview_util:changes_key_opts(StartSeq, Args);
         false ->
             [[{start_key, {StartSeq, <<>>}}] ++ Options]
