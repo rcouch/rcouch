@@ -60,6 +60,16 @@ handle_reindex_req(Req, _Db, _DDoc) ->
 
 
 handle_view_req(#httpd{method='GET',
+                       path_parts=[_, _, _, _, VName, <<"_last_seq">>]}=Req,
+                Db, DDoc) ->
+    Args0 = parse_qs(Req, undefined),
+    {ok, Info} = couch_mrview:get_view_info(Db, DDoc, VName),
+    LastSeq = proplists:get_value(update_seq, Info, 0),
+    couch_httpd:send_json(Req, 200, {[
+        {name, VName},
+        {last_seq, LastSeq}
+    ]});
+handle_view_req(#httpd{method='GET',
                       path_parts=[_, _, DDocName, _, VName, <<"_info">>]}=Req,
                 Db, _DDoc) ->
 
