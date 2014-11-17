@@ -133,31 +133,30 @@ handle_changes(ChangesArgs, Req, Db) ->
 %% changes this function return docs corresponding to the changes
 %% instead so it can be used to replace the _view filter.
 handle_view_changes(ChangesArgs, #httpd{method=Method}=Req, Db) ->
+    Query = couch_httpd:qs(Req),
+    Queries = case Method of
+                  'POST' ->
+                      {Props} = couch_httpd:json_body_obj(Req),
+                      couch_util:get_value(<<"queries">>, Props, undefined);
+                  _ -> undefined
+              end,
+    NoIndex = couch_httpd:qs_value(Req, "use_index", "yes") =:= "no",
+    ViewOptions = parse_view_options(Query, false, []),
+    handle_view_changes1(ChangesArgs, Req, Db, Queries, NoIndex, ViewOptions);
+handle_view_changes(ChangesArgs, {json_req, {Props}}=Req, Db) ->
+    {Query} = couch_util:get_value(<<"query">>, Props, {[]}),
+    Queries = couch_util:get_value(<<"queries">>, Props,
+                                    undefined),
+    NoIndex = (couch_util:get_value(<<"use_index">>, Query,
+                                     <<"yes">>) =:= <<"no">>),
+    ViewOptions = parse_view_options(Query, true, []),
+    handle_view_changes1(ChangesArgs, Req, Db, Queries, NoIndex, ViewOptions).
+
+
+handle_view_changes1(ChangesArgs, Req, Db, Queries, NoIndex, ViewOptions) ->
+
     %% parse view parameter
     {DDocId, VName} = parse_view_param(Req),
-
-    %% get view options
-    {Query, Queries, NoIndex, JsonReq} = case Req of
-        {json_req, {Props}} ->
-            {Q} = couch_util:get_value(<<"query">>, Props, {[]}),
-            Queries1 = couch_util:get_value(<<"queries">>, Props,
-                                            undefined),
-            NoIndex1 = (couch_util:get_value(<<"use_index">>, Q,
-                                            <<"yes">>) =:= <<"no">>),
-            {Q, Queries1, NoIndex1, true};
-        #httpd{}=Req ->
-            Q = couch_httpd:qs(Req),
-            Queries1 = case Method of
-                'POST' ->
-                    {Props} = couch_httpd:json_body_obj(Req),
-                    couch_util:get_value(<<"queries">>, Props, undefined);
-                _ -> undefined
-            end,
-            NoIndex1 = couch_httpd:qs_value(Req, "use_index", "yes") =:= "no",
-            {Q, Queries1, NoIndex1, false}
-    end,
-    ViewOptions = parse_view_options(Query, JsonReq, []),
-
 
     QueriesOptions = case Queries of
         undefined -> undefined;
@@ -189,6 +188,8 @@ handle_view_changes(ChangesArgs, #httpd{method=Method}=Req, Db) ->
             ?LOG_WARN("Filter without using a seq_indexed view.~n", []),
             couch_changes:handle_changes(ChangesArgs, Req, Db)
     end.
+
+
 
 handle_view_changes(#db{name=DbName}=Db0, DDocId, VName, ViewOptions,
                     QueriesOptions, ChangesArgs, Req) ->
@@ -239,15 +240,13 @@ view_changes_cb(stop, {LastSeq, {_, _, _, Callback, Args}}) ->
 view_changes_cb(heartbeat, {_, _, _, Callback, Args}=Acc) ->
     Callback(timeout, Args#changes_args.feed),
     {ok, Acc};
+view_changes_cb({{_Seq, _Key, _DocId}=Info, {Val, _Rev}=Raw}, Acc) ->
+    view_changes_cb({Info, Val}, Acc);
 view_changes_cb({{Seq, _Key, DocId}, Val},
                 {Prepend, OldLimit, Db0, Callback, Args}=Acc) ->
 
     %% is the key removed from the index?
-    Removed = case Val of
-        {[{<<"_removed">>, true}]} -> true;
-        _ -> false
-    end,
-
+    Removed = (Val =:= removed),
     #changes_args{
         feed = ResponseType,
         limit = Limit} = Args,
@@ -303,12 +302,14 @@ view_change_row(Db, DocInfo, Args, Removed) ->
 
     Del = case {Del0, Removed} of
         {true, _} -> deleted;
-        {false, true} -> removed;
+        {_, true} -> removed;
         _ -> false
     end,
+    couch_log:info("del ~p: ~p~n", [Id, Del]),
 
     {[{<<"seq">>, Seq}, {<<"id">>, Id}, {<<"changes">>, Changes}] ++
      deleted_item(Del) ++ case InDoc of
+            true when Removed =:= true -> [{doc, null}];
             true ->
                 Opts = case Conflicts of
                     true -> [deleted, conflicts];
