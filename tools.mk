@@ -123,6 +123,17 @@ verbose-test: testbuild
 	@echo "==> test couch_replicator"
 	@prove -v $(BASE_DIR)/src/couch_replicator/test/*.t
 
+
+view-tests: testbuild
+	@echo "==> test couch_mrview"
+	@prove -v $(BASE_DIR)/src/couch_mrview/test/*.t
+
+replicator-test: testbuild
+	@echo "==> test couch_replicator"
+	@prove -v $(BASE_DIR)/src/couch_replicator/test/*.t
+
+
+
 testjs: testbuild
 	@$(ESCRIPT) $(BASE_DIR)/test/javascript/test_js.escript
 
