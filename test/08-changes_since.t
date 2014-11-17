@@ -141,12 +141,12 @@ test_remove_key(Db) ->
     %% check new view key
     Result3 = run_query(Db2, 0, [{start_key, 11}, {end_key, 11}]),
     Expect2 = {ok, [
-                {{13, 11, <<"11">>}, {[{<<"_removed">>, true}]}}
+                {{13, 11, <<"11">>}, removed}
     ]},
     etap:is(Result3, Expect2, "removed key OK.").
 
 run_query(Db, Since, Opts) ->
-    Fun = fun(KV, Acc) -> {ok, [KV | Acc]} end,
+    Fun = fun({Info, {Val, _Rev}}, Acc) -> {ok, [{Info, Val} | Acc]} end,
     {ok, R} = couch_mrview:view_changes_since(Db, <<"_design/bar">>, <<"baz">>,
                                               Since, Fun, Opts, []),
     {ok, lists:reverse(R)}.

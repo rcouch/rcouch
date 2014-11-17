@@ -96,11 +96,11 @@ view_changes_since(Db, DDoc, VName, StartSeq, Fun, Acc) ->
 
 view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
     Args0 = make_view_changes_args(Options),
-    {ok, {_, View, _}, _, Args} = couch_mrview_util:get_view(Db, DDoc, VName,
-                                                             Args0),
+    {ok, {_, View}, _, Args} = couch_mrview_util:get_view(Db, DDoc, VName, Args0),
     #mrview{seq_indexed=SIndexed, keyseq_indexed=KSIndexed} = View,
     IsKSQuery = is_key_byseq(Options),
-    if (SIndexed andalso not IsKSQuery) orelse (KSIndexed andalso IsKSQuery) ->
+    case SIndexed of
+        true ->
             OptList = make_view_changes_opts(StartSeq, Options, Args),
             Btree = case IsKSQuery of
                 true -> View#mrview.key_byseq_btree;
@@ -124,7 +124,7 @@ view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
                         when Seq < LastSeq, Seq >= EndSeq ->
                     {Go, Acc3} = UserFun(KV, Acc2),
                     {Go, {D, Seq, Acc3}};
-                (_, Acc2) ->
+                (_Else, Acc2) ->
                     {ok, Acc2}
             end,
 
@@ -135,8 +135,8 @@ view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
                         {Dir, StartSeq, Acc2}
                 end, Acc0, OptList),
             {ok, AccOut};
-        true ->
-            {error, seqs_not_indexed}
+        false ->
+           {error, seqs_not_indexed}
     end.
 
 
@@ -176,7 +176,7 @@ get_info(Db, DDoc) ->
 
 %% get informations on a view
 get_view_info(Db, DDoc, VName) ->
-    {ok, {_, View, _}, _, _Args} = couch_mrview_util:get_view(Db, DDoc, VName,
+    {ok, {_, View}, _, _Args} = couch_mrview_util:get_view(Db, DDoc, VName,
                                                               #mrargs{}),
 
     %% get the total number of rows
@@ -544,7 +544,8 @@ make_view_changes_args(Options) ->
 make_view_changes_opts(StartSeq, Options, Args) ->
     case is_key_byseq(Options) of
         true ->
+            io:format("miaou~n", []),
             couch_mrview_util:changes_key_opts(StartSeq, Args);
         false ->
-            [[{start_key, {StartSeq+1, <<>>}}] ++ Options]
+            [[{start_key, {StartSeq, <<>>}}] ++ Options]
     end.

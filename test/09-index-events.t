@@ -36,7 +36,8 @@ test() ->
 
 test_info(Db) ->
     {ok, Info} = couch_mrview:get_info(Db, <<"_design/bar">>),
-    etap:is(getval(update_options, Info), [<<"seq_indexed">>],
+    etap:is(getval(update_options, Info), [<<"keyseq_indexed">>,
+                                           <<"seq_indexed">>],
             "update options OK"),
     ok.
 

@@ -25,7 +25,7 @@ main(_) ->
     timer:sleep(300),
     ok.
 
-sig() -> <<"fdf04ef29c4a471f150acad075bdf47f">>.
+sig() -> <<"3ded9de6885d60c9cc1189ba32f92c87">>.
 
 test() ->
     test_util:start_couch(),

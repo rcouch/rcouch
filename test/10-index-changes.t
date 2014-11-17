@@ -89,7 +89,7 @@ test_stream_once_since(Db) ->
 
     receive
         {result, Result} ->
-            etap:is(Result, Expect, "normal changes worked.")
+            etap:is(Result, Expect, "stream once since 11 worked.")
     after 5000 ->
             io:format("never got the change", [])
     end.
@@ -202,8 +202,8 @@ run_query(Db, Opts, Refresh) ->
             {ok, LastSeq, Acc};
         (heartbeat, Acc) ->
             {ok, [heartbeat | Acc]};
-        (Event, Acc) ->
-            {ok, [Event | Acc]}
+        ({Info, {Val, _Rev}}, Acc) ->
+            {ok, [{Info, Val} | Acc]}
     end,
     case Refresh of
         true ->

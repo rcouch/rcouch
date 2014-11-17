@@ -42,9 +42,10 @@ get(Property, State) ->
             %% if we index by seq keyseq_indexed is also true by default
             KeySeqDefault = case SeqIndexed of
                                 true -> true;
-                                _ -> false
+                                _Else -> false
                             end,
-            KeySeqIndexed = couch_util:get_value(<<"keyseq_indexed">>, Opts, KeySeqDefault),
+            KeySeqIndexed = couch_util:get_value(<<"keyseq_indexed">>, Opts,
+                                                 KeySeqDefault),
             if IncDesign -> [include_design]; true -> [] end
                 ++ if LocalSeq -> [local_seq]; true -> [] end
                 ++ if KeySeqIndexed -> [keyseq_indexed]; true -> [] end
@@ -70,7 +71,12 @@ get(Property, State) ->
             IncDesign = couch_util:get_value(<<"include_design">>, Opts, false),
             LocalSeq = couch_util:get_value(<<"local_seq">>, Opts, false),
             SeqIndexed = couch_util:get_value(<<"seq_indexed">>, Opts, false),
-            KeySeqIndexed = couch_util:get_value(<<"keyseq_indexed">>, Opts, false),
+            KeySeqDefault = case SeqIndexed of
+                                true -> true;
+                                Else -> false
+                            end,
+            KeySeqIndexed = couch_util:get_value(<<"keyseq_indexed">>, Opts,
+                                                 KeySeqDefault),
             UpdateOptions =
                 if IncDesign -> [<<"include_design">>]; true -> [] end
                 ++ if LocalSeq -> [<<"local_seq">>]; true -> [] end

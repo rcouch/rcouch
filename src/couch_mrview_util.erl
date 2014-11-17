@@ -90,7 +90,12 @@ ddoc_to_mrst(DbName, #doc{id=Id, body={Fields}}) ->
     end,
     {DesignOpts} = proplists:get_value(<<"options">>, Fields, {[]}),
     SeqIndexed = proplists:get_value(<<"seq_indexed">>, DesignOpts, false),
-    KeySeqIndexed = proplists:get_value(<<"keyseq_indexed">>, DesignOpts, false),
+    KeySeqDefault = case SeqIndexed of
+                                true -> true;
+                                _Else -> false
+                            end,
+    KeySeqIndexed = proplists:get_value(<<"keyseq_indexed">>, DesignOpts,
+                                        KeySeqDefault),
 
     {RawViews} = couch_util:get_value(<<"views">>, Fields, {[]}),
     BySrc = lists:foldl(MakeDict, dict:new(), RawViews),
@@ -355,7 +360,9 @@ get_view_changes_count(View) ->
     CountFun = fun(_SeqStart, PartialReds, 0) ->
         {ok, couch_btree:final_reduce(SBtree, PartialReds)}
     end,
-    {ok, Count} = case {SBtree, KSBtree} of
+    {ok, Count}  = case {SBtree, KSBtree} of
+        {#btree{}, #btree{}} ->
+            couch_btree:fold_reduce(SBtree, CountFun, 0, []);
         {nil, nil} ->
             {ok, 0};
         {#btree{}, nil} ->
@@ -363,6 +370,7 @@ get_view_changes_count(View) ->
         {nil, #btree{}} ->
             couch_btree:fold_reduce(KSBtree, CountFun, 0, [])
     end,
+
     case {SBtree, KSBtree} of
         {#btree{}, #btree{}} ->
             {ok, Count*2};
@@ -856,8 +864,8 @@ changes_expand_dups([{{Seq, Key}, {DocId, {dups, Vals}}} | Rest], Acc) ->
     changes_expand_dups(Rest, Expanded ++ Acc);
 changes_expand_dups([{{[Key, Seq], DocId}, Val} | Rest], Acc) ->
     changes_expand_dups(Rest, [{{Seq, Key, DocId}, Val} | Acc]);
-changes_expand_dups([{{Seq, Key}, {DocId, Val}} | Rest], Acc) ->
-    changes_expand_dups(Rest, [{{Seq, Key, DocId}, Val} | Acc]).
+changes_expand_dups([{{Seq, Key}, {DocId, Val, Rev}} | Rest], Acc) ->
+    changes_expand_dups(Rest, [{{Seq, Key, DocId}, {Val, Rev}} | Acc]).
 
 maybe_load_doc(_Db, _DI, #mrargs{include_docs=false}) ->
     [];

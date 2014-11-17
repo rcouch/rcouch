@@ -185,10 +185,9 @@ map_docs(Parent, State0) ->
                 ({nil, Seq, _, _}, {SeqAcc, Results}) ->
                     {erlang:max(Seq, SeqAcc), Results};
                 ({Id, Seq, Rev, deleted}, {SeqAcc, Results}) ->
+                    couch_log:info("got deleted ~p~n", [Id]),
                     {erlang:max(Seq, SeqAcc), [{Id, Seq, Rev, []} | Results]};
                 ({Id, Seq, Rev, Doc}, {SeqAcc, Results}) ->
-                    couch_stats:increment_counter([couchdb, mrview, map_docs],
-                                                  1),
                     {ok, Res} = couch_query_servers:map_doc_raw(QServer, Doc),
                     {erlang:max(Seq, SeqAcc), [{Id, Seq, Rev, Res} | Results]}
             end,
@@ -250,8 +249,8 @@ accumulate_writes(State, W, Acc0) ->
 
 accumulate_more(NumDocIds) ->
     % check if we have enough items now
-    MinItems = config:get("view_updater", "min_writer_items", "100"),
-    MinSize = config:get("view_updater", "min_writer_size", "16777216"),
+    MinItems = couch_config:get("view_updater", "min_writer_items", "100"),
+    MinSize = couch_config:get("view_updater", "min_writer_size", "16777216"),
     {memory, CurrMem} = process_info(self(), memory),
     NumDocIds < list_to_integer(MinItems)
         andalso CurrMem < list_to_integer(MinSize).
@@ -302,6 +301,21 @@ insert_results(DocId, Seq, Rev, [KVs | RKVs], [{Id, {VKVs, SKVs}} | RVKVs], VKVA
     insert_results(DocId, Seq, Rev, RKVs, RVKVs,
                   [{Id, {FinalKVs, FinalSKVs}} | VKVAcc], VIdKeys0, Log1).
 
+log_removed([], _, Log) ->
+    Log;
+log_removed([{ok, {DocId, VIdKeys}} | Rest], Seq, Log) ->
+    Log2 = lists:foldl(fun
+                ({Id, Keys}, Log1) when is_list(Keys) ->
+                    lists:foldl(fun(Key, Log3) ->
+                                dict:append(DocId, {Id, {Key, Seq, del}}, Log3)
+                        end, Log1, Keys);
+                ({Id, Key}, Log1) ->
+                    dict:append(DocId, {Id, {Key, Seq, del}}, Log1)
+            end, Log, VIdKeys),
+    log_removed(Rest, Seq, Log2);
+log_removed([_Else | Rest], Seq, Log) ->
+    io:format("got ~p~n", [_Else]),
+    log_removed(Rest, Seq, Log).
 
 write_kvs(State, UpdateSeq, ViewKVs, DocIdKeys, Seqs, Log0) ->
     #mrst{
@@ -310,18 +324,22 @@ write_kvs(State, UpdateSeq, ViewKVs, DocIdKeys, Seqs, Log0) ->
         first_build=FirstBuild
     } = State,
 
+    {ok, ToRemove, IdBtree2} = update_id_btree(IdBtree, DocIdKeys, FirstBuild),
+    ToRemByView = collapse_rem_keys(ToRemove, dict:new()),
+
+    couch_log:info("to remove: ~p~n", [ToRemove]),
+
     Revs = dict:from_list(dict:fetch_keys(Log0)),
 
     Log = dict:fold(fun({Id, _Rev}, DIKeys, Acc) ->
         dict:store(Id, DIKeys, Acc)
     end, dict:new(), Log0),
 
-    {ok, ToRemove, IdBtree2} = update_id_btree(IdBtree, DocIdKeys, FirstBuild),
-    ToRemByView = collapse_rem_keys(ToRemove, dict:new()),
+    Log1 =  log_removed(ToRemove, UpdateSeq, Log),
 
     {ok, SeqsToAdd, SeqsToRemove, LogBtree2} = case LogBtree of
         nil -> {ok, undefined, undefined, nil};
-        _ -> update_log(LogBtree, Log, Revs, Seqs, FirstBuild)
+        _ -> update_log(LogBtree, Log1, Revs, Seqs, FirstBuild)
     end,
 
     UpdateView = fun(#mrview{id_num=ViewId}=View, {ViewId, {KVs, SKVs}}) ->
@@ -382,7 +400,8 @@ update_id_btree(Btree, DocIdKeys, _) ->
     couch_btree:query_modify(Btree, ToFind, ToAdd, ToRem).
 
 
-update_log(Btree, Log, _Revs, _Seqs, true) ->
+update_log(Btree, Log, Revs, _Seqs, true) ->
+    couch_log:info("fuck ~p~n", [dict:to_list(Log)]),
     ToAdd = [{Id, DIKeys} || {Id, DIKeys} <- dict:to_list(Log),
                              DIKeys /= []],
     {ok, LogBtree2} = couch_btree:add_remove(Btree, ToAdd, []),
@@ -411,6 +430,8 @@ update_log(Btree, Log, Revs, Seqs, _) ->
             IsUpdated = lists:member({DocId, ViewId, Key}, Updated),
             IsRemoved = lists:member({DocId, ViewId, Key}, Removed),
 
+            couch_log:info("is updated ~p~n", [IsRemoved]),
+            couch_log:info("is removed ~p~n", [IsUpdated]),
             case IsUpdated of
                 true ->
                     % the log is updated, deleted old record from the view
