@@ -123,14 +123,15 @@ send_docs(Resp, DocId, Results, Options, Sep) ->
 send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
     Options = [attachments, follows, att_encoding_info | Options0],
 
-    lists:foreach(fun
-            ({ok, #doc{atts=[]}=Doc}) ->
+        lists:foldr(fun
+            ({ok, #doc{atts=[]}=Doc}, Pre) ->
                 JsonBytes = ?JSON_ENCODE(couch_doc:to_json_obj(Doc, Options)),
                 Headers = [{<<"Content-Type">>, <<"application/json">>}],
                 Part = hackney_multipart:part(JsonBytes, Headers,
                                               OuterBoundary),
-                couch_httpd:send_chunk(Resp, Part);
-            ({ok, #doc{id=Id, revs=Revs, atts=Atts}=Doc}) ->
+                couch_httpd:send_chunk(Resp, << Pre/binary, Part/binary >>),
+                <<"\r\n">>;
+            ({ok, #doc{id=Id, revs=Revs, atts=Atts}=Doc}, Pre) ->
                 %% create inner binary
                 InnerBoundary = hackney_multipart:boundary(),
 
@@ -138,7 +139,7 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
                 JsonBytes = ?JSON_ENCODE(couch_doc:to_json_obj(Doc, Options)),
                 Headers = mp_header(Revs, Id, InnerBoundary),
                 BinHeaders = hackney_headers:to_binary(Headers),
-                Bin = <<"\r\n--", OuterBoundary/binary, "\r\n", BinHeaders/binary >>,
+                Bin = <<Pre/binary, "--", OuterBoundary/binary, "\r\n", BinHeaders/binary >>,
                 couch_httpd:send_chunk(Resp, Bin),
 
                 %% send doc part
@@ -149,10 +150,11 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
 
                 %% send attachments
                 {ok, _} = atts_to_mp(Atts, InnerBoundary,
-                                     fun(Data) ->
-                                             couch_httpd:send_chunk(Resp, Data)
-                                     end);
-            ({{not_found, missing}, RevId}) ->
+                                fun(Data) ->
+                                        couch_httpd:send_chunk(Resp, Data)
+                                end),
+                <<"\r\n">>;
+            ({{not_found, missing}, RevId}, Pre) ->
                 RevStr = couch_doc:rev_to_str(RevId),
                 Body = {[{<<"id">>, DocId},
                          {<<"error">>, <<"not_found">>},
@@ -163,8 +165,9 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
 
                 Headers = [{<<"Content-Type">>, <<"application/json">>}],
                 Part = hackney_multipart:part(Json, Headers, OuterBoundary),
-                couch_httpd:send_chunk(Resp, Part)
-        end, Results).
+                couch_httpd:send_chunk(Resp, <<Pre/binary, Part/binary >>),
+                 <<"\r\n">>
+        end, <<"">>, Results).
 
 
 
