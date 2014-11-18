@@ -138,7 +138,7 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
                 JsonBytes = ?JSON_ENCODE(couch_doc:to_json_obj(Doc, Options)),
                 Headers = mp_header(Revs, Id, InnerBoundary),
                 BinHeaders = hackney_headers:to_binary(Headers),
-                Bin = <<"--", OuterBoundary/binary, "\r\n", BinHeaders/binary >>,
+                Bin = <<"\r\n--", OuterBoundary/binary, "\r\n", BinHeaders/binary >>,
                 couch_httpd:send_chunk(Resp, Bin),
 
                 %% send doc part
