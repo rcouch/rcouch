@@ -78,14 +78,15 @@ handle_req(#httpd{method='POST',path_parts=[_,<<"_bulk_get">>],
                         couch_httpd:send_chunk(Resp1, <<"]}">>),
                         couch_httpd:end_json_response(Resp);
                 _ ->
-                    lists:foreach(fun(Obj) ->
-                            {DocId, Results, Options1} = open_doc_revs(Obj, Db, Options),
-                            case Results of
-                                [] -> ok;
-                                _ -> send_docs_multipart(Resp, DocId, Results,
-                                                         Boundary, Options1)
-                            end
-                        end, DocsArray),
+                    lists:foldr(fun(Obj, Pre) ->
+                                {DocId, Results, Options1} = open_doc_revs(Obj, Db, Options),
+                                case Results of
+                                    [] -> Pre;
+                                    _ -> send_docs_multipart(Resp, Pre, DocId,
+                                                             Results, Boundary,
+                                                             Options1)
+                                end
+                        end, <<"">>, DocsArray),
                     %% send the end of the multipart if needed
                     case DocsArray of
                         [] -> ok;
@@ -120,18 +121,18 @@ send_docs(Resp, DocId, Results, Options, Sep) ->
     couch_httpd:send_chunk(Resp, "]}").
 
 
-send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
+send_docs_multipart(Resp, Pre, DocId, Results, OuterBoundary, Options0) ->
     Options = [attachments, follows, att_encoding_info | Options0],
 
         lists:foldr(fun
-            ({ok, #doc{atts=[]}=Doc}, Pre) ->
+            ({ok, #doc{atts=[]}=Doc}, Pre1) ->
                 JsonBytes = ?JSON_ENCODE(couch_doc:to_json_obj(Doc, Options)),
                 Headers = [{<<"Content-Type">>, <<"application/json">>}],
                 Part = hackney_multipart:part(JsonBytes, Headers,
                                               OuterBoundary),
-                couch_httpd:send_chunk(Resp, << Pre/binary, Part/binary >>),
+                couch_httpd:send_chunk(Resp, << Pre1/binary, Part/binary >>),
                 <<"\r\n">>;
-            ({ok, #doc{id=Id, revs=Revs, atts=Atts}=Doc}, Pre) ->
+            ({ok, #doc{id=Id, revs=Revs, atts=Atts}=Doc}, Pre1) ->
                 %% create inner binary
                 InnerBoundary = hackney_multipart:boundary(),
 
@@ -139,7 +140,7 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
                 JsonBytes = ?JSON_ENCODE(couch_doc:to_json_obj(Doc, Options)),
                 Headers = mp_header(Revs, Id, InnerBoundary),
                 BinHeaders = hackney_headers:to_binary(Headers),
-                Bin = <<Pre/binary, "--", OuterBoundary/binary, "\r\n", BinHeaders/binary >>,
+                Bin = <<Pre1/binary, "--", OuterBoundary/binary, "\r\n", BinHeaders/binary >>,
                 couch_httpd:send_chunk(Resp, Bin),
 
                 %% send doc part
@@ -154,7 +155,7 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
                                         couch_httpd:send_chunk(Resp, Data)
                                 end),
                 <<"\r\n">>;
-            ({{not_found, missing}, RevId}, Pre) ->
+            ({{not_found, missing}, RevId}, Pre1) ->
                 RevStr = couch_doc:rev_to_str(RevId),
                 Body = {[{<<"id">>, DocId},
                          {<<"error">>, <<"not_found">>},
@@ -165,9 +166,9 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
 
                 Headers = [{<<"Content-Type">>, <<"application/json">>}],
                 Part = hackney_multipart:part(Json, Headers, OuterBoundary),
-                couch_httpd:send_chunk(Resp, <<Pre/binary, Part/binary >>),
+                couch_httpd:send_chunk(Resp, <<Pre1/binary, Part/binary >>),
                  <<"\r\n">>
-        end, <<"">>, Results).
+        end, Pre, Results).
 
 
 
