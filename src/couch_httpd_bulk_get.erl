@@ -122,7 +122,6 @@ send_docs(Resp, DocId, Results, Options, Sep) ->
 
 send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
     Options = [attachments, follows, att_encoding_info | Options0],
-    InnerBoundary = couch_uuids:random(),
 
     lists:foreach(fun
             ({ok, #doc{atts=[]}=Doc}) ->
