@@ -143,10 +143,10 @@ send_docs_multipart(Resp, DocId, Results, OuterBoundary, Options0) ->
                 couch_httpd:send_chunk(Resp, Bin),
 
                 %% send attachments
-                ok = atts_to_mp(Atts, InnerBoundary,
-                                fun(Data) ->
-                                        couch_httpd:send_chunk(Resp, Data)
-                                end);
+                {ok, _} = atts_to_mp(Atts, InnerBoundary,
+                                     fun(Data) ->
+                                             couch_httpd:send_chunk(Resp, Data)
+                                     end);
             ({{not_found, missing}, RevId}) ->
                 RevStr = couch_doc:rev_to_str(RevId),
                 Body = {[{<<"id">>, DocId},
@@ -202,7 +202,6 @@ atts_to_mp([Att | RestAtts], Boundary, WriteFun)  ->
     #att{
         name=Name,
         att_len=AttLen,
-        disk_len=DiskLen,
         type=Type,
         encoding=Encoding
     } = Att,
