@@ -185,7 +185,6 @@ map_docs(Parent, State0) ->
                 ({nil, Seq, _, _}, {SeqAcc, Results}) ->
                     {erlang:max(Seq, SeqAcc), Results};
                 ({Id, Seq, Rev, deleted}, {SeqAcc, Results}) ->
-                    couch_log:info("got deleted ~p~n", [Id]),
                     {erlang:max(Seq, SeqAcc), [{Id, Seq, Rev, []} | Results]};
                 ({Id, Seq, Rev, Doc}, {SeqAcc, Results}) ->
                     {ok, Res} = couch_query_servers:map_doc_raw(QServer, Doc),
@@ -327,8 +326,6 @@ write_kvs(State, UpdateSeq, ViewKVs, DocIdKeys, Seqs, Log0) ->
     {ok, ToRemove, IdBtree2} = update_id_btree(IdBtree, DocIdKeys, FirstBuild),
     ToRemByView = collapse_rem_keys(ToRemove, dict:new()),
 
-    couch_log:info("to remove: ~p~n", [ToRemove]),
-
     Revs = dict:from_list(dict:fetch_keys(Log0)),
 
     Log = dict:fold(fun({Id, _Rev}, DIKeys, Acc) ->
@@ -401,7 +398,6 @@ update_id_btree(Btree, DocIdKeys, _) ->
 
 
 update_log(Btree, Log, Revs, _Seqs, true) ->
-    couch_log:info("fuck ~p~n", [dict:to_list(Log)]),
     ToAdd = [{Id, DIKeys} || {Id, DIKeys} <- dict:to_list(Log),
                              DIKeys /= []],
     {ok, LogBtree2} = couch_btree:add_remove(Btree, ToAdd, []),
@@ -430,8 +426,6 @@ update_log(Btree, Log, Revs, Seqs, _) ->
             IsUpdated = lists:member({DocId, ViewId, Key}, Updated),
             IsRemoved = lists:member({DocId, ViewId, Key}, Removed),
 
-            couch_log:info("is updated ~p~n", [IsRemoved]),
-            couch_log:info("is removed ~p~n", [IsUpdated]),
             case IsUpdated of
                 true ->
                     % the log is updated, deleted old record from the view
