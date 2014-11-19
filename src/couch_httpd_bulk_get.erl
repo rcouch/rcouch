@@ -78,7 +78,7 @@ handle_req(#httpd{method='POST',path_parts=[_,<<"_bulk_get">>],
                         couch_httpd:send_chunk(Resp1, <<"]}">>),
                         couch_httpd:end_json_response(Resp);
                 _ ->
-                    lists:foldr(fun(Obj, Pre) ->
+                    lists:foldl(fun(Obj, Pre) ->
                                 {DocId, Results, Options1} = open_doc_revs(Obj, Db, Options),
                                 case Results of
                                     [] -> Pre;
@@ -92,7 +92,7 @@ handle_req(#httpd{method='POST',path_parts=[_,<<"_bulk_get">>],
                         [] -> ok;
                         _Else ->
                             Eof = hackney_multipart:mp_eof(Boundary),
-                            couch_httpd:send_chunk(Resp, Eof)
+                            couch_httpd:send_chunk(Resp, <<"\r\n", Eof/binary >>)
                     end,
                     couch_httpd:last_chunk(Resp)
             end
