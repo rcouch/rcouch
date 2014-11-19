@@ -953,10 +953,10 @@ db_monitor(_HttpDb) ->
 
 source_cur_seq(#rep_state{source = #httpdb{} = Db, source_seq = Seq,
                           type = view, view = {DDoc, VName}}) ->
-    case (catch couch_replicator_api_wrap:get_view_info(
+    case (catch couch_replicator_api_wrap:get_view_lastseq(
                 Db#httpdb{retries = 3}, DDoc, VName)) of
     {ok, Info} ->
-        get_value(<<"update_seq">>, Info, Seq);
+        get_value(<<"last_seq">>, Info, Seq);
     _ ->
         Seq
     end;
@@ -964,7 +964,7 @@ source_cur_seq(#rep_state{source = #httpdb{} = Db, source_seq = Seq,
 source_cur_seq(#rep_state{source = Db, source_seq = Seq,
                           type = view, view = {DDoc, VName}}) ->
     {ok, Info} = couch_replicator_api_wrap:get_view_info(Db, DDoc, VName),
-    get_value(<<"update_seq">>, Info, Seq);
+    get_value(<<"last_seq">>, Info, Seq);
 
 source_cur_seq(#rep_state{source = #httpdb{} = Db, source_seq = Seq}) ->
     case (catch couch_replicator_api_wrap:get_db_info(Db#httpdb{retries = 3})) of

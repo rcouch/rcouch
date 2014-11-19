@@ -141,13 +141,14 @@ get_db_info(#db{name = DbName, user_ctx = UserCtx}) ->
 
 
 get_view_info(#httpdb{} = Db, DDocId, ViewName) ->
-    Path = iolist_to_binary([DDocId, "/_view/", ViewName, "/_info"]),
+    Path = iolist_to_binary([DDocId, "/_view/", ViewName, "/_last_seq"]),
     send_req(Db, [{path, binary_to_list(Path)}],
         fun(200, _, {Props}) ->
             {ok, Props}
         end);
 get_view_info(#db{name = DbName}, DDocId, ViewName) ->
-    couch_mrview:get_view_info(DbName, DDocId, ViewName).
+    {ok, Info} = ccouch_mrview:get_view_info(DbName, DDocId, ViewName),
+    {ok, [{<<"last_seq">>, get_value(<<"update_seq">>, Info)}]}.
 
 
 ensure_full_commit(#httpdb{} = Db) ->
