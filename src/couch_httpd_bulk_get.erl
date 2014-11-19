@@ -195,13 +195,13 @@ part(Content, Headers, Boundary) ->
 
 mp_header({0, []}, Id, Boundary) ->
     [{<<"X-Doc-Id">>, Id},
-     {<<"Content-Type">>, <<"multiparted/related; boundary=",
+     {<<"Content-Type">>, <<"multipart/related; boundary=",
                             Boundary/binary >>}];
 mp_header({Start, [FirstRevId|_]}, Id, Boundary) ->
     RevStr = couch_doc:rev_to_str({Start, FirstRevId}),
     [{<<"X-Doc-Id">>, Id},
      {<<"X-Rev-Id">>, RevStr},
-     {<<"Content-Type">>, <<"multiparted/related; boundary=",
+     {<<"Content-Type">>, <<"multipart/related; boundary=",
                             Boundary/binary >>}].
 
 
