@@ -123,7 +123,7 @@ send_docs(Resp, DocId, Results, Options, Sep) ->
 send_docs_multipart(Resp, Pre, DocId, Results, OuterBoundary, Options0) ->
     Options = [attachments, follows, att_encoding_info | Options0],
 
-        lists:foldr(fun
+        lists:foldl(fun
             ({ok, #doc{atts=[]}=Doc}, Pre1) ->
                 JsonBytes = ?JSON_ENCODE(couch_doc:to_json_obj(Doc, Options)),
                 Headers = [{<<"Content-Type">>, <<"application/json">>}],
