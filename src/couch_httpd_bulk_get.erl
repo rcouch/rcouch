@@ -92,8 +92,7 @@ handle_req(#httpd{method='POST',path_parts=[_,<<"_bulk_get">>],
                         [] -> ok;
                         _Else ->
                             Eof = hackney_multipart:mp_eof(Boundary),
-                            couch_httpd:send_chunk(Resp,
-                                                   <<"\r\n", Eof/binary>>)
+                            couch_httpd:send_chunk(Resp, Eof)
                     end,
                     couch_httpd:last_chunk(Resp)
             end
@@ -128,7 +127,7 @@ send_docs_multipart(Resp, Pre, DocId, Results, OuterBoundary, Options0) ->
             ({ok, #doc{atts=[]}=Doc}, Pre1) ->
                 JsonBytes = ?JSON_ENCODE(couch_doc:to_json_obj(Doc, Options)),
                 Headers = [{<<"Content-Type">>, <<"application/json">>}],
-                Part = hackney_multipart:part(JsonBytes, Headers,
+                Part = part(JsonBytes, Headers,
                                               OuterBoundary),
                 couch_httpd:send_chunk(Resp, << Pre1/binary, Part/binary >>),
                 <<"\r\n">>;
@@ -145,7 +144,7 @@ send_docs_multipart(Resp, Pre, DocId, Results, OuterBoundary, Options0) ->
 
                 %% send doc part
                 JsonHeaders = [{<<"Content-Type">>, <<"application/json">>}],
-                DocPart = hackney_multipart:part(JsonBytes, JsonHeaders,
+                DocPart = part(JsonBytes, JsonHeaders,
                                                  InnerBoundary),
                 couch_httpd:send_chunk(Resp, DocPart),
 
@@ -165,7 +164,7 @@ send_docs_multipart(Resp, Pre, DocId, Results, OuterBoundary, Options0) ->
                 Json = ?JSON_ENCODE(Body),
 
                 Headers = [{<<"Content-Type">>, <<"application/json">>}],
-                Part = hackney_multipart:part(Json, Headers, OuterBoundary),
+                Part = part(Json, Headers, OuterBoundary),
                 couch_httpd:send_chunk(Resp, <<Pre1/binary, Part/binary >>),
                  <<"\r\n">>
         end, Pre, Results).
@@ -188,6 +187,10 @@ open_doc_revs({Props}, Db, Options) ->
     %% get doc informations
     {ok, Results} = couch_db:open_doc_revs(Db, DocId, Revs, Options),
     {DocId, Results, Options1}.
+
+part(Content, Headers, Boundary) ->
+    BinHeaders = hackney_headers:to_binary(Headers),
+    <<"--", Boundary/binary, "\r\n", BinHeaders/binary, Content/binary >>.
 
 
 mp_header({0, []}, Id, Boundary) ->
