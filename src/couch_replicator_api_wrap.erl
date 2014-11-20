@@ -147,7 +147,7 @@ get_view_info(#httpdb{} = Db, DDocId, ViewName) ->
             {ok, Props}
         end);
 get_view_info(#db{name = DbName}, DDocId, ViewName) ->
-    {ok, Info} = ccouch_mrview:get_view_info(DbName, DDocId, ViewName),
+    {ok, Info} = couch_mrview:get_view_info(DbName, DDocId, ViewName),
     {ok, [{<<"last_seq">>, get_value(<<"update_seq">>, Info)}]}.
 
 
