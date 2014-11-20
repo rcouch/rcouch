@@ -553,7 +553,7 @@ changes_json_req(Db, FilterName, {QueryParams}, Options) ->
         {<<"id">>, null},
         {<<"method">>, 'GET'},
         {<<"path">>, [couch_db:name(Db), <<"_changes">>]},
-        {<<"query">>, [{<<"filter">>, FilterName} | QueryParams]},
+        {<<"query">>, {[{<<"filter">>, FilterName} | QueryParams]}},
         {<<"channels">>, Channels},
         {<<"headers">>, []},
         {<<"body">>, []},
