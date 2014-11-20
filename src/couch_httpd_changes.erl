@@ -17,6 +17,7 @@
          handle_view_changes/3]).
 
 -include_lib("couch/include/couch_db.hrl").
+-include_lib("couch_mrview/include/couch_mrview.hrl").
 
 handle_changes_req(#httpd{method='POST'}=Req, Db) ->
     couch_httpd:validate_ctype(Req, "application/json"),
@@ -399,6 +400,13 @@ parse_view_param1(ViewParam) ->
 
 parse_view_options([], _JsonReq, Acc) ->
     Acc;
+
+parse_view_options(Options, true, Acc) ->
+     %% get list of view attributes
+    ViewFields0 = [couch_util:to_binary(F) || F <- record_info(fields,  mrargs)],
+    ViewFields = [<<"key">> | ViewFields0],
+
+    [{K, V} || {K, V} <- Options, lists:member(K, ViewFields)];
 parse_view_options([{K, V} | Rest], JsonReq, Acc) ->
     Acc1 = case couch_util:to_binary(K) of
         <<"reduce">> ->
