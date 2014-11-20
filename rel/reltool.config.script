@@ -58,6 +58,7 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
                     runtime_tools,
                     mochiweb,
                     ibrowse,
+                    hackney,
                     couch,
                     couch_httpd,
                     couch_replicator
@@ -100,6 +101,8 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
             {app, ibrowse, [{incl_cond, include}]},
             {app, goldrush, [{incl_cond, include}]},
             {app, lager, [{incl_cond, include}]},
+            {app, idna, [{incl_cond, include}]},
+            {app, hackney, [{incl_cond, include}]},
 
             %% couchdb
             {app, couch, [{incl_cond, include}]},
