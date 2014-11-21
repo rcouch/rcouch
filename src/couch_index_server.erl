@@ -150,7 +150,10 @@ handle_info({'EXIT', Pid, Reason}, Server) ->
         _Else ->
             ok
     end,
-    {noreply, Server}.
+    {noreply, Server};
+handle_info(Msg, State) ->
+    couch_log:warn("~p did not expect ~p", [?MODULE, Msg]),
+    {noreply, State}.
 
 
 code_change(_OldVsn, State, _Extra) ->
