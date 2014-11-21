@@ -575,7 +575,7 @@ init_state(Rep) ->
             {DDoc, VName} = View,
             {ok, VInfo} = couch_replicator_api_wrap:get_view_info(Source, DDoc,
                                                                   VName),
-            get_value(<<"update_seq">>, VInfo, ?LOWEST_SEQ)
+            get_value(<<"last_seq">>, VInfo, ?LOWEST_SEQ)
     end,
 
 
