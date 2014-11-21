@@ -51,7 +51,12 @@ handle_changes(DbName, DDocId, View, Fun, Acc, Options) ->
     Stream = proplists:get_value(stream, Options, false),
     ViewOptions = proplists:get_value(view_options, Options, []),
     Queries = proplists:get_value(queries, Options),
-    Refresh = proplists:get_value(refresh, Options, false),
+
+    RefreshDefault = case couch_config:get("view_updater", "refresh_index", "true") of
+                         "true" -> true;
+                         _ -> false
+                     end,
+    Refresh = proplists:get_value(refresh, Options, RefreshDefault),
 
     State0 = #vst{dbname=DbName,
                   ddoc=DDocId,
