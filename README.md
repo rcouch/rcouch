@@ -1,4 +1,4 @@
-rcouch [![Build Status](https://secure.travis-ci.org/refuge/rcouch.png)](http://travis-ci.org/refuge/rcouch)
+rcouch [![Build Status](https://travis-ci.org/rcouch/rcouch.svg?branch=master)](https://travis-ci.org/rcouch/rcouch)
 ------------------------------------------------------------------------------------------------------------
 
 rcouch is a static distribution of couchdb using rebar. It is an
