@@ -123,6 +123,9 @@ verbose-test: testbuild
 	@echo "==> test couch_replicator"
 	@prove -v $(BASE_DIR)/src/couch_replicator/test/*.t
 
+core-tests:
+	@echo "==> test couch core"
+	@prove -v $(COUCHDB_ETAP_DIR)/*.t
 
 view-tests: testbuild
 	@echo "==> test couch_mrview"
