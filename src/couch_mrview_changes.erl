@@ -52,7 +52,7 @@ handle_changes(DbName, DDocId, View, Fun, Acc, Options) ->
     ViewOptions = proplists:get_value(view_options, Options, []),
     Queries = proplists:get_value(queries, Options),
 
-    RefreshDefault = case couch_config:get("view_updater", "refresh_index", "true") of
+    RefreshDefault = case couch_config:get("couch_index", "refresh_index", "true") of
                          "true" -> true;
                          _ -> false
                      end,
