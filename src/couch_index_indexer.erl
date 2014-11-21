@@ -138,7 +138,7 @@ handle_info({timeout, TRef, refresh_index}, #state{index=Index,
         false ->
             ok
     end,
-    {noreply, #state{db_updates=0}=State};
+    {noreply, State#state{db_updates=0}};
 
 handle_info({'DOWN', MRef, _, Pid, _}, #state{locks=Locks}=State) ->
     NLocks = case dict:find(Pid, Locks) of
