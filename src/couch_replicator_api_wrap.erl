@@ -415,16 +415,15 @@ changes_since(#httpdb{headers = Headers1} = HttpDb, Style, StartSeq,
         {"style", atom_to_list(Style)}, {"since", ?JSON_ENCODE(StartSeq)},
         {"heartbeat", integer_to_list(HeartBeat)}
     ],
-    BaseQArgs1 = maybe_add_changes_params(BaseQArgs, Options),
     DocIds = get_value(doc_ids, Options),
     {QArgs, Method, Body, Headers} = case DocIds of
     undefined ->
-        QArgs1 = maybe_add_changes_filter_q_args(BaseQArgs1, Options),
+        QArgs1 = maybe_add_changes_filter_q_args(BaseQArgs, Options),
         {QArgs1, get, [], Headers1};
     _ when is_list(DocIds) ->
         Headers2 = [{"Content-Type", "application/json"} | Headers1],
         JsonDocIds = ?JSON_ENCODE({[{<<"doc_ids">>, DocIds}]}),
-        {[{"filter", "_doc_ids"} | BaseQArgs1], post, JsonDocIds, Headers2}
+        {[{"filter", "_doc_ids"} | BaseQArgs], post, JsonDocIds, Headers2}
     end,
     send_req(
         HttpDb,
@@ -437,7 +436,7 @@ changes_since(#httpdb{headers = Headers1} = HttpDb, Style, StartSeq,
                 % CouchDB versions < 1.1.0 don't have the builtin _changes feed
                 % filter "_doc_ids" neither support POST
                 send_req(HttpDb, [{method, get}, {path, "_changes"},
-                    {qs, BaseQArgs1}, {headers, Headers1},
+                    {qs, BaseQArgs}, {headers, Headers1},
                     {ibrowse_options, [{stream_to, {self(), once}}]}],
                     fun(200, _, DataStreamFun2) ->
                         UserFun2 = fun(#doc_info{id = Id} = DocInfo) ->
@@ -511,21 +510,6 @@ maybe_add_changes_filter_q_args(BaseQS, Options) ->
             end,
             BaseQS, Params)]
     end.
-
-maybe_add_changes_params(QS, Options) ->
-    {Params} =  get_value(changes_params, Options, {[]}),
-    couch_log:info("changes params ~p~n", [Params]),
-    lists:foldl(
-            fun({K, V}, QSAcc) ->
-                    Ks = couch_util:to_list(K),
-                    case lists:keymember(Ks, 1, QSAcc) of
-                        true ->
-                            QSAcc;
-                         false ->
-                            [{Ks, couch_util:to_list(V)} | QSAcc]
-                    end
-            end,
-            QS, Params).
 
 parse_changes_feed(Options, UserFun, DataStreamFun) ->
     case get_value(continuous, Options, false) of
