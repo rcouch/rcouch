@@ -306,7 +306,6 @@ view_change_row(Db, DocInfo, Args, Removed) ->
         {_, true} -> removed;
         _ -> false
     end,
-    couch_log:info("del ~p: ~p~n", [Id, Del]),
 
     {[{<<"seq">>, Seq}, {<<"id">>, Id}, {<<"changes">>, Changes}] ++
      deleted_item(Del) ++ case InDoc of
