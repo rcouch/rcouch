@@ -98,21 +98,9 @@ handle_cast(config_refresh, #state{tref=TRef}=State) ->
     NTRef = erlang:start_timer(R, self(), refresh_index),
     {noreply, State#state{refresh_interval=R, tref=NTRef}};
 
-handle_cast(updated, #state{index=Index, dbname=DbName,
-                            threshold=Threshold,
-                            db_updates=Updates}=State) ->
-    NUpdates = Updates + 1,
-
-    %% we only update if the number of updates is greater than the
-    %% threshold.
-    case NUpdates =:= Threshold of
-        true ->
-            refresh_index(DbName, Index),
-            {noreply, State#state{db_updates=0}};
-        false ->
-             {noreply, State#state{db_updates=NUpdates}}
-
-    end;
+handle_cast(updated, State) ->
+    NState = do_update(State),
+    {noreply, NState};
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
@@ -125,7 +113,10 @@ handle_info(start_indexing, #state{dbname=DbName,
     %% start the timer
     TRef = erlang:start_timer(R, self(), refresh_index),
 
-    {noreply, State#state{tref=TRef, notifier=NotifierPid}};
+    %% start to index immediately
+    NState = do_update(State#state{tref=TRef, notifier=NotifierPid}),
+
+    {noreply, NState};
 
 handle_info({timeout, TRef, refresh_index}, #state{index=Index,
                                                    dbname=DbName,
@@ -219,3 +210,19 @@ start_db_notifier(DbName) ->
             (_) ->
                 ok
         end).
+
+do_update(#state{index=Index, dbname=DbName,
+                 threshold=Threshold,
+                 db_updates=Updates}=State) ->
+    NUpdates = Updates + 1,
+
+    %% we only update if the number of updates is greater than the
+    %% threshold.
+    case NUpdates =:= Threshold of
+        true ->
+            refresh_index(DbName, Index),
+            State#state{db_updates=0};
+        false ->
+            State#state{db_updates=NUpdates}
+
+    end.
