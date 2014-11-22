@@ -91,11 +91,11 @@ handle_cast(config_refresh, #state{tref=TRef}=State) ->
     R = get_refresh_interval(),
     %% stop the old timee
     if TRef /= nil ->
-            erlang:cancel_timer(TRef);
+            timer:cancel(TRef);
         true -> ok
     end,
     %% start the new timer
-    NTRef = erlang:start_timer(R, self(), refresh_index),
+    {ok, NTRef}  = timer:send_interval(R, self(), refresh_index),
     {noreply, State#state{refresh_interval=R, tref=NTRef}};
 
 handle_cast(updated, State) ->
@@ -105,23 +105,23 @@ handle_cast(updated, State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-handle_info(start_indexing, #state{dbname=DbName,
+handle_info(start_indexing, #state{index=Index,
+                                   dbname=DbName,
                                    refresh_interval=R}=State) ->
     %% start the db notifier to watch db update events
     {ok, NotifierPid} = start_db_notifier(DbName),
 
     %% start the timer
-    TRef = erlang:start_timer(R, self(), refresh_index),
+    {ok, TRef} = timer:send_interval(R, self(), refresh_index),
 
     %% start to index immediately
-    NState = do_update(State#state{tref=TRef, notifier=NotifierPid}),
+    refresh_index(DbName, Index),
+    {noreply, State#state{tref=TRef, notifier=NotifierPid}};
 
-    {noreply, NState};
+handle_info(refresh_index, #state{index=Index,
+                                  dbname=DbName,
+                                  db_updates=N}=State) ->
 
-handle_info({timeout, TRef, refresh_index}, #state{index=Index,
-                                                   dbname=DbName,
-                                                   tref=TRef,
-                                                   db_updates=N}=State) ->
     %% only refresh the index if an update happened
     case N > 0 of
         true ->
@@ -155,7 +155,7 @@ code_change(_OldVsn, State, _Extra) ->
 
 terminate(_Reason, #state{tref=TRef, notifier=Pid}) ->
     if TRef /= nil ->
-            erlang:cancel_timer(TRef);
+            timer:cancel(TRef);
         true -> ok
     end,
 
@@ -214,6 +214,7 @@ start_db_notifier(DbName) ->
 do_update(#state{index=Index, dbname=DbName,
                  threshold=Threshold,
                  db_updates=Updates}=State) ->
+
     NUpdates = Updates + 1,
 
     %% we only update if the number of updates is greater than the
