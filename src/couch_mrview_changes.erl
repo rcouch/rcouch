@@ -137,7 +137,11 @@ changes_timeout(Options) ->
     DefaultTimeout = list_to_integer(
             couch_config:get("httpd", "changes_timeout", "60000")
     ),
-    UserTimeout = proplists:get_value(timeout, Options, DefaultTimeout),
+    UserTimeout = case proplists:get_value(timeout, Options) of
+                      undefined -> DefaultTimeout;
+                      Timeout1 -> Timeout1
+                  end,
+
     {Timeout, Heartbeat} = case proplists:get_value(heartbeat, Options) of
         undefined -> {UserTimeout, false};
         true ->
