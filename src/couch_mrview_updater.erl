@@ -313,7 +313,6 @@ log_removed([{ok, {DocId, VIdKeys}} | Rest], Seq, Log) ->
             end, Log, VIdKeys),
     log_removed(Rest, Seq, Log2);
 log_removed([_Else | Rest], Seq, Log) ->
-    io:format("got ~p~n", [_Else]),
     log_removed(Rest, Seq, Log).
 
 write_kvs(State, UpdateSeq, ViewKVs, DocIdKeys, Seqs, Log0) ->
