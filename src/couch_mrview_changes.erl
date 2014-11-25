@@ -121,10 +121,10 @@ loop(#vst{since=Since, callback=Callback, acc=Acc,
             case UserTimeout =< TimeoutAcc2 of
                 true ->
                     Callback(stop, {Since, Acc});
-                false when Heartbeat =:= true ->
+                false when Heartbeat /= false ->
                     case Callback(heartbeat, Acc) of
                         {ok, Acc2} ->
-                            loop(State#vst{acc=Acc2, timeout_acc=TimeoutAcc2});
+                            loop(State#vst{acc=Acc2, timeout_acc=0});
                         {stop, Acc2} ->
                             Callback(stop, {Since, Acc2})
                     end;
@@ -146,10 +146,10 @@ changes_timeout(Options) ->
         undefined -> {UserTimeout, false};
         true ->
             T = erlang:min(DefaultTimeout, UserTimeout),
-            {T, true};
+            {T, T};
         H ->
             T = erlang:min(H, UserTimeout),
-            {T, true}
+            {T, H}
     end,
     {UserTimeout, Timeout, Heartbeat}.
 
