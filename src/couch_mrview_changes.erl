@@ -102,7 +102,8 @@ start_loop(#vst{dbname=DbName, ddoc=DDocId}=State, Options) ->
 
 loop(#vst{since=Since, callback=Callback, acc=Acc,
           user_timeout=UserTimeout, timeout=Timeout,
-          heartbeat=Heartbeat, stream=Stream}=State) ->
+          heartbeat=Heartbeat, timeout_acc=TimeoutAcc,
+          stream=Stream}=State) ->
     receive
         index_update ->
             case view_changes_since(State) of
@@ -116,11 +117,14 @@ loop(#vst{since=Since, callback=Callback, acc=Acc,
         index_delete ->
             Callback(stop, {Since, Acc})
     after Timeout ->
-            case Heartbeat of
+            TimeoutAcc2 = TimeoutAcc + Timeout,
+            case UserTimeout =< TimeoutAcc2 of
                 true ->
+                    Callback(stop, {Since, Acc});
+                false when Heartbeat =:= true ->
                     case Callback(heartbeat, Acc) of
                         {ok, Acc2} ->
-                            loop(State#vst{acc=Acc2});
+                            loop(State#vst{acc=Acc2, timeout_acc=TimeoutAcc2});
                         {stop, Acc2} ->
                             Callback(stop, {Since, Acc2})
                     end;
