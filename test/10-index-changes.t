@@ -14,7 +14,7 @@
 % the License.
 
 main(_) ->
-    etap:plan(8),
+    etap:plan(9),
     case (catch test()) of
         ok ->
             etap:end_tests();
@@ -35,6 +35,7 @@ test() ->
     test_stream_once_heartbeat(Db),
     test_stream(Db),
     test_indexer(Db),
+    test_infinity_timeout(Db),
     test_util:stop_couch(),
     ok.
 
@@ -187,6 +188,31 @@ test_indexer(Db) ->
     ok.
 
 
+test_infinity_timeout(Db) ->
+    Self = self(),
+    spawn(fun() ->
+                  Result = run_infinity_query(Db, [{since, 16},
+                                                   stream,
+                                                   {timeout, infinity}], true),
+                  Self ! {result, Result}
+          end),
+
+    spawn(fun() ->
+                timer:sleep(1000),
+                {ok, Db1} = save_doc(Db, 16),
+                couch_mrview:refresh(Db1, <<"_design/bar">>)
+        end),
+
+    Expect = {ok, 17,[{{17, 16, <<"16">>}, 16}]},
+
+    receive
+        {result, Result} ->
+            etap:is(Result, Expect, "infinity timeout OK.")
+    after 5000 ->
+            io:format("never got the change", [])
+    end.
+
+
 save_doc(Db, Id) ->
     Doc = couch_mrview_test_util:doc(Id),
     {ok, _Rev} = couch_db:update_doc(Db, Doc, []),
@@ -204,6 +230,26 @@ run_query(Db, Opts, Refresh) ->
             {ok, [heartbeat | Acc]};
         ({Info, {Val, _Rev}}, Acc) ->
             {ok, [{Info, Val} | Acc]}
+    end,
+    case Refresh of
+        true ->
+            couch_mrview:refresh(Db, <<"_design/bar">>);
+        false ->
+            ok
+    end,
+    {ok, LastSeq, R} = couch_mrview_changes:handle_changes(Db, <<"_design/bar">>,
+                                                  <<"baz">>, Fun, [], Opts),
+    {ok, LastSeq, lists:reverse(R)}.
+
+
+run_infinity_query(Db, Opts, Refresh) ->
+    Fun = fun
+        (stop, {LastSeq, Acc}) ->
+            {ok, LastSeq, Acc};
+        (heartbeat, Acc) ->
+            {ok, [heartbeat | Acc]};
+        ({Info, {Val, _Rev}}, Acc) ->
+            {stop, [{Info, Val} | Acc]}
     end,
     case Refresh of
         true ->

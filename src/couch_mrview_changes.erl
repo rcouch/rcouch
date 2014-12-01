@@ -137,25 +137,24 @@ changes_timeout(Options) ->
                       undefined -> DefaultTimeout;
                       Timeout1 -> Timeout1
                   end,
-    UserHeartbeat = proplists:get_value(heartbeat, Options),
-    Stream = proplists:get_value(stream, Options, false),
 
-    {Timeout, Heartbeat} = case {UserHeartbeat, Stream} of
-                               {undefined, true} ->
-                                   T = erlang:min(DefaultTimeout, UserTimeout),
-                                   {T, T};
-                               {undefined, _}  ->
-                                   {UserTimeout, false};
-                               {true, true} ->
-                                   T = erlang:min(DefaultTimeout, UserTimeout),
-                                   {T, T};
-                               {H, true} ->
-                                   T = erlang:min(H, UserTimeout),
-                                   {T, H};
-                               {_, _} ->
-                                   {UserTimeout, false}
-                           end,
-    {UserTimeout, Timeout, Heartbeat}.
+    case UserTimeout of
+        infinity -> {infinity, infinity, false};
+        T ->
+            UserHeartbeat = proplists:get_value(heartbeat, Options),
+            {Timeout, Heartbeat} = case UserHeartbeat of
+                                       H when is_integer(H) ->
+                                           T1 = erlang:min(H, T),
+                                           {T1, H};
+                                       true ->
+                                           T1 = erlang:min(DefaultTimeout,
+                                                           UserTimeout),
+                                           {T1, T1};
+                                       _ ->
+                                           {UserTimeout, false}
+                                   end,
+            {T, Timeout, Heartbeat}
+    end.
 
 view_changes_since(#vst{dbname=DbName, ddoc=DDocId, view=View,
                         view_options=ViewOptions, queries=Queries,
