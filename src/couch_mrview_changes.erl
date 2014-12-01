@@ -137,16 +137,24 @@ changes_timeout(Options) ->
                       undefined -> DefaultTimeout;
                       Timeout1 -> Timeout1
                   end,
+    Heartbeat = proplists:get_value(heartbeat, Options),
+    Stream = proplists:get_value(stream, Options, false),
 
-    {Timeout, Heartbeat} = case proplists:get_value(heartbeat, Options) of
-        undefined -> {UserTimeout, false};
-        true ->
-            T = erlang:min(DefaultTimeout, UserTimeout),
-            {T, T};
-        H ->
-            T = erlang:min(H, UserTimeout),
-            {T, H}
-    end,
+    {Timeout, Heartbeat} = case {Heartbeat, Stream} of
+                               {undefined, true} ->
+                                   T = erlang:min(DefaultTimeout, UserTimeout),
+                                   {T, T};
+                               {undefined, _}  ->
+                                   {UserTimeout, false};
+                               {true, true} ->
+                                   T = erlang:min(DefaultTimeout, UserTimeout),
+                                   {T, T};
+                               {H, true} ->
+                                   T = erlang:min(H, UserTimeout),
+                                   {T, H};
+                               {_, _} ->
+                                   {UserTimeout, false}
+                           end,
     {UserTimeout, Timeout, Heartbeat}.
 
 view_changes_since(#vst{dbname=DbName, ddoc=DDocId, view=View,
