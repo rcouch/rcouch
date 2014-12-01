@@ -137,10 +137,10 @@ changes_timeout(Options) ->
                       undefined -> DefaultTimeout;
                       Timeout1 -> Timeout1
                   end,
-    Heartbeat = proplists:get_value(heartbeat, Options),
+    UserHeartbeat = proplists:get_value(heartbeat, Options),
     Stream = proplists:get_value(stream, Options, false),
 
-    {Timeout, Heartbeat} = case {Heartbeat, Stream} of
+    {Timeout, Heartbeat} = case {UserHeartbeat, Stream} of
                                {undefined, true} ->
                                    T = erlang:min(DefaultTimeout, UserTimeout),
                                    {T, T};
