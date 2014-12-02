@@ -97,7 +97,7 @@ view_changes_since(Db, DDoc, VName, StartSeq, Fun, Acc) ->
 view_changes_since(Db, DDoc, VName, StartSeq, UserFun, Options, Acc) ->
     Args0 = make_view_changes_args(Options),
     {ok, {_, View}, _, Args} = couch_mrview_util:get_view(Db, DDoc, VName, Args0),
-    #mrview{seq_indexed=SIndexed, keyseq_indexed=KSIndexed} = View,
+    #mrview{seq_indexed=SIndexed} = View,
     IsKSQuery = is_key_byseq(Options),
     case SIndexed of
         true ->
@@ -546,5 +546,5 @@ make_view_changes_opts(StartSeq, Options, Args) ->
         true ->
             couch_mrview_util:changes_key_opts(StartSeq, Args);
         false ->
-            [[{start_key, {StartSeq+1, <<>>}}] ++ Options]
+            [[{start_key, {StartSeq + 1, <<>>}}] ++ Options]
     end.

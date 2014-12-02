@@ -286,7 +286,8 @@ open_view(Db, Fd, Lang, {BTState, SeqBTState, KSeqBTState, USeq, PSeq}, View) ->
 
     BySeqReduceFun = fun couch_db_updater:btree_by_seq_reduce/2,
     {ok, SeqBtree} = if View#mrview.seq_indexed ->
-        ViewSeqBtOpts = [{reduce, BySeqReduceFun},
+        ViewSeqBtOpts = [{less, fun less_json_seqs/2},
+                         {reduce, BySeqReduceFun},
                          {compression, couch_db:compression(Db)}],
 
         couch_btree:open(SeqBTState, Fd, ViewSeqBtOpts);
