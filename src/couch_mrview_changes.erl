@@ -90,6 +90,7 @@ handle_changes(DbName, DDocId, View, Fun, Acc, Options) ->
 
 start_loop(#vst{dbname=DbName, ddoc=DDocId}=State, Options) ->
     {UserTimeout, Timeout, Heartbeat} = changes_timeout(Options),
+    process_flag(trap_exit, true),
     Notifier = index_update_notifier(DbName, DDocId),
     try
         loop(State#vst{notifier=Notifier,
@@ -100,8 +101,8 @@ start_loop(#vst{dbname=DbName, ddoc=DDocId}=State, Options) ->
         couch_index_event:stop(Notifier)
     end.
 
-loop(#vst{since=Since, callback=Callback, acc=Acc,
-          timeout=Timeout, heartbeat=Heartbeat,
+loop(#vst{notifier=Pid, since=Since, callback=Callback,
+          acc=Acc, timeout=Timeout, heartbeat=Heartbeat,
           stream=Stream}=State) ->
     receive
         index_update ->
@@ -114,7 +115,15 @@ loop(#vst{since=Since, callback=Callback, acc=Acc,
                     Callback(stop, {LastSeq, Acc2})
             end;
         index_delete ->
-            Callback(stop, {Since, Acc})
+            Callback(stop, {Since, Acc});
+        {'EXIT', Pid, _Reason} ->
+            %% notifier exited relaunch it
+            Notifier = index_update_notifier(State#vst.dbname,
+                                             State#vst.ddoc),
+            loop(State#vst{notifier=Notifier});
+        Message ->
+            couch_log:info("got unexpected message ~p~n", [Message]),
+            loop(State)
     after Timeout ->
               if
                   Heartbeat /= false ->
@@ -215,7 +224,7 @@ index_update_notifier(DbName, DDocId) ->
                 ({index_delete, {Name, Id, couch_mrview_index}})
                         when Name =:= DbName, Id =:= DDocId ->
                     Self ! index_delete;
-                (_) ->
+                (_Else) ->
                     ok
             end),
     NotifierPid.
