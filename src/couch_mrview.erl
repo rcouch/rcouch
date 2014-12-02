@@ -546,5 +546,5 @@ make_view_changes_opts(StartSeq, Options, Args) ->
         true ->
             couch_mrview_util:changes_key_opts(StartSeq, Args);
         false ->
-            [[{start_key, {StartSeq, <<>>}}] ++ Options]
+            [[{start_key, {StartSeq+1, <<>>}}] ++ Options]
     end.
