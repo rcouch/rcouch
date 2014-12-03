@@ -116,7 +116,9 @@ loop(#vst{notifier=Pid, since=Since, callback=Callback,
             end;
         index_delete ->
             Callback(stop, {Since, Acc});
-        {'EXIT', Pid, _Reason} ->
+        {'EXIT', Pid, Reason} ->
+            couch_log:info("~p notifier exited with reason ~p~n",
+                           [?MODULE, Reason]),
             %% notifier exited relaunch it
             Notifier = index_update_notifier(State#vst.dbname,
                                              State#vst.ddoc),
