@@ -12,6 +12,7 @@
 
 -module(couch_httpd).
 -include_lib("couch/include/couch_db.hrl").
+-include("couch_httpd.hrl").
 
 -export([start_link/1,  handle_request/5]).
 
@@ -936,8 +937,7 @@ negotiate_content_type1(#httpd{mochi_req=MochiReq}) ->
     end.
 
 server_header() ->
-    [{"Server", "CouchDB/" ++ couch_server:get_version() ++
-                " (Erlang OTP/" ++ erlang:system_info(otp_release) ++ ")"}].
+    [{"Server", ?SERVER_VERSION}].
 
 
 -record(mp, {boundary, buffer, data_fun, callback}).

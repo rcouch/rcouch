@@ -11,6 +11,8 @@
 % the License.
 %
 
+-define(SERVER_VERSION, "RCOUCH/1.0").
+
 -record(doc_query_args, {
     options = [],
     rev = nil,
