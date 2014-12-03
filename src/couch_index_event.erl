@@ -43,7 +43,7 @@ handle_event(Event, Consumer) ->
 handle_call(_Req, Consumer) ->
     {reply, ok, Consumer}.
 
-handle_info({'EXIT', _, _}, _Consumer) ->
+handle_info({'EXIT', _, Consumer}, Consumer) ->
     remove_handler;
 handle_info(_Info, Consumer)->
     {ok, Consumer}.
