@@ -256,14 +256,14 @@ function $$(node) {
                       $(".userAdmin").removeAttr('disabled');
                     }
                     else {
-                      for (var i=0; i<userCtx.roles.length; i++) { 
+                      for (var i=0; i<userCtx.roles.length; i++) {
                         if ($.inArray(userCtx.roles[i], resp.admins.roles)>=0) { // user has role that is an admin
                           $(".userAdmin").removeAttr('disabled');
                         }
                       }
                     }
-                  } 
-                }); 
+                  }
+                });
               }
             }
           } else if (userCtx.roles.indexOf("_admin") != -1) {
@@ -588,7 +588,8 @@ function $$(node) {
 
       $.couch.info({
         success: function(info, status) {
-          $("#version").text(info.version);
+          var vendor = info.vendor;
+          $("#version").text(vendor.version);
         }
       });
     });
