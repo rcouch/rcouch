@@ -102,9 +102,6 @@ ERL_FLAGS=-pa $(BASE_DIR)/src/*/ebin -pa $(COUCHDB_ETAP_DIR)
 export ERL_FLAGS
 
 test: testbuild
-	@echo "==> test couch_collate"
-	@cd $(BASE_DIR)/src/couch_collate && \
-		prove $(BASE_DIR)/src/couch_collate/t/*.t
 	@echo "==> test couch core"
 	@prove $(COUCHDB_ETAP_DIR)/*.t
 	@echo "==> test couch_mrview"
