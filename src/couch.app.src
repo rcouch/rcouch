@@ -16,7 +16,7 @@
 
 {application, couch, [
     {description, "Apache CouchDB"},
-    {vsn, "1.6.1"},
+    {vsn, "1.6.2"},
     {registered, [
         couch_config,
         couch_db_update,
