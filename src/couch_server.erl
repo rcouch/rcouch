@@ -203,82 +203,45 @@ all_databases(Fun, Acc0) ->
     end,
     {ok, FinalAcc}.
 
-open_async(Server, From, DbName, Filepath, Options) ->
-    Parent = self(),
-    Opener = spawn_link(fun() ->
-            Res = couch_db:start_link(DbName, Filepath, Options),
-            gen_server:call(
-                Parent, {open_result, DbName, Res, Options}, infinity
-            ),
-            unlink(Parent),
-            case Res of
-            {ok, DbReader} ->
-                unlink(DbReader);
-            _ ->
-                ok
-            end
-        end),
-    true = ets:insert(couch_dbs_by_name, {DbName, {opening, Opener, [From]}}),
-    true = ets:insert(couch_dbs_by_pid, {Opener, DbName}),
-    DbsOpen = case lists:member(sys_db, Options) of
-    true ->
-        true = ets:insert(couch_sys_dbs, {DbName, true}),
-        Server#server.dbs_open;
-    false ->
-        Server#server.dbs_open + 1
-    end,
-    Server#server{dbs_open = DbsOpen}.
+do_open_db(DbName, Server, Options, {FromPid, _}) ->
+    DbNameList = binary_to_list(DbName),
+    case check_dbname(Server, DbNameList) of
+    ok ->
+        Filepath = get_full_filename(Server, DbNameList),
+        case couch_db:start_link(DbName, Filepath, Options) of
+        {ok, DbPid} ->
+            true = ets:insert(couch_dbs_by_name, {DbName, {opened, DbPid}}),
+            true = ets:insert(couch_dbs_by_pid, {DbPid, DbName}),
+            case lists:member(create, Options) of
+            true ->
+                couch_db_update_notifier:notify({created, DbName});
+            false ->
+                 ok
+            end,
+            DbsOpen = Server#server.dbs_open + 1,
+            NewServer = Server#server{dbs_open = DbsOpen},
+            Reply = (catch couch_db:open_ref_counted(DbPid, FromPid)),
+            {reply, Reply, NewServer};
+        Error ->
+            {reply, Error, Server}
+        end;
+     Error ->
+        {reply, Error, Server}
+     end.
 
 handle_call(get_server, _From, Server) ->
     {reply, {ok, Server}, Server};
-handle_call({open_result, DbName, {ok, OpenedDbPid}, Options}, _From, Server) ->
-    link(OpenedDbPid),
-    [{DbName, {opening,Opener,Froms}}] = ets:lookup(couch_dbs_by_name, DbName),
-    lists:foreach(fun({FromPid,_}=From) ->
-        gen_server:reply(From,
-                catch couch_db:open_ref_counted(OpenedDbPid, FromPid))
-    end, Froms),
-    true = ets:insert(couch_dbs_by_name, {DbName, {opened, OpenedDbPid}}),
-    true = ets:delete(couch_dbs_by_pid, Opener),
-    true = ets:insert(couch_dbs_by_pid, {OpenedDbPid, DbName}),
-    case lists:member(create, Options) of
-    true ->
-        couch_db_update_notifier:notify({created, DbName});
-    false ->
-        ok
-    end,
-    {reply, ok, Server};
-handle_call({open_result, DbName, {error, eexist}, Options}, From, Server) ->
-    handle_call({open_result, DbName, file_exists, Options}, From, Server);
-handle_call({open_result, DbName, Error, Options}, _From, Server) ->
-    [{DbName, {opening,Opener,Froms}}] = ets:lookup(couch_dbs_by_name, DbName),
-    lists:foreach(fun(From) ->
-        gen_server:reply(From, Error)
-    end, Froms),
-    true = ets:delete(couch_dbs_by_name, DbName),
-    true = ets:delete(couch_dbs_by_pid, Opener),
-    DbsOpen = case lists:member(sys_db, Options) of
-    true ->
-        true = ets:delete(couch_sys_dbs, DbName),
-        Server#server.dbs_open;
-    false ->
-        Server#server.dbs_open - 1
-    end,
-    {reply, ok, Server#server{dbs_open = DbsOpen}};
 handle_call({open, DbName, Options}, {FromPid,_}=From, Server) ->
     case ets:lookup(couch_dbs_by_name, DbName) of
     [] ->
-        open_db(DbName, Server, Options, From);
-    [{_, {opening, Opener, Froms}}] ->
-        true = ets:insert(couch_dbs_by_name, {DbName, {opening, Opener, [From|Froms]}}),
-        {noreply, Server};
+        do_open_db(DbName, Server, Options, From);
     [{_, {opened, MainPid}}] ->
         {reply, couch_db:open_ref_counted(MainPid, FromPid), Server}
     end;
 handle_call({create, DbName, Options}, From, Server) ->
     case ets:lookup(couch_dbs_by_name, DbName) of
     [] ->
-        open_db(DbName, Server, [create | Options], From);
+        do_open_db(DbName, Server, [create | Options], From);
     [_AlreadyRunningDb] ->
         {reply, file_exists, Server}
     end;
@@ -290,12 +253,6 @@ handle_call({delete, DbName, _Options}, _From, Server) ->
         UpdateState =
         case ets:lookup(couch_dbs_by_name, DbName) of
         [] -> false;
-        [{_, {opening, Pid, Froms}}] ->
-            couch_util:shutdown_sync(Pid),
-            true = ets:delete(couch_dbs_by_name, DbName),
-            true = ets:delete(couch_dbs_by_pid, Pid),
-            [gen_server:reply(F, not_found) || F <- Froms],
-            true;
         [{_, {opened, Pid}}] ->
             couch_util:shutdown_sync(Pid),
             true = ets:delete(couch_dbs_by_name, DbName),
@@ -387,13 +344,3 @@ handle_info({'EXIT', Pid, Reason}, Server) ->
 handle_info(Error, _Server) ->
     ?LOG_ERROR("Unexpected message, restarting couch_server: ~p", [Error]),
     exit(kill).
-
-open_db(DbName, Server, Options, From) ->
-    DbNameList = binary_to_list(DbName),
-    case check_dbname(Server, DbNameList) of
-    ok ->
-        Filepath = get_full_filename(Server, DbNameList),
-        {noreply, open_async(Server, From, DbName, Filepath, Options)};
-    Error ->
-        {reply, Error, Server}
-     end.
