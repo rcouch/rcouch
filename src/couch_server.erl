@@ -74,6 +74,8 @@ create(DbName, Options0) ->
     {ok, Db} ->
         Ctx = couch_util:get_value(user_ctx, Options, #user_ctx{}),
         {ok, Db#db{user_ctx=Ctx}};
+    {error, eexist} ->
+        file_exists;
     Error ->
         Error
     end.
@@ -298,20 +300,11 @@ code_change(_OldVsn, State, _Extra) ->
 
 handle_info({'EXIT', Pid, Reason}, Server) ->
     Server2 = case ets:lookup(couch_dbs_by_pid, Pid) of
+    [] -> Server;
     [{Pid, DbName}] ->
+        couch_log:info("db ~s died with reason ~p", [DbName, Reason]),
 
-        % If the Pid is known, the name should be as well.
-        % If not, that's an error, which is why there is no [] clause.
-        case ets:lookup(couch_dbs_by_name, DbName) of
-        [] -> ok;
-        [{_, Pid}] ->
-            ?LOG_ERROR(
-                "Unexpected exit of database process ~p [~p]: ~p",
-                [Pid, DbName, Reason]
-            )
-        end,
-
-        true = ets:delete(couch_dbs_by_pid, DbName),
+        true = ets:delete(couch_dbs_by_pid, Pid),
         true = ets:delete(couch_dbs_by_name, DbName),
 
         case ets:lookup(couch_sys_dbs, DbName) of
@@ -323,6 +316,5 @@ handle_info({'EXIT', Pid, Reason}, Server) ->
         end
     end,
     {noreply, Server2};
-handle_info(Error, _Server) ->
-    ?LOG_ERROR("Unexpected message, restarting couch_server: ~p", [Error]),
-    exit(kill).
+handle_info(Info, Server) ->
+    {stop, {unknown_message, Info}, Server}.
