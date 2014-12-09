@@ -162,7 +162,7 @@ init([]) ->
             spawn(fun() -> hash_admin_passwords(Persist) end)
         end, false),
     {ok, RegExp} = re:compile("^[a-z][a-z0-9\\_\\$()\\+\\-\\/]*$"),
-    ets:new(couch_dbs_by_name, [set, private, named_table]),
+    ets:new(couch_dbs_by_name, [ordered_set, protected, named_table]),
     ets:new(couch_dbs_by_pid, [set, private, named_table]),
     ets:new(couch_sys_dbs, [set, private, named_table]),
     process_flag(trap_exit, true),
@@ -296,8 +296,6 @@ handle_cast(Msg, _Server) ->
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
-handle_info({'EXIT', _Pid, config_change}, Server) ->
-    {noreply, shutdown, Server};
 handle_info({'EXIT', Pid, Reason}, Server) ->
     Server2 = case ets:lookup(couch_dbs_by_pid, Pid) of
     [{Pid, DbName}] ->
@@ -305,11 +303,12 @@ handle_info({'EXIT', Pid, Reason}, Server) ->
         % If the Pid is known, the name should be as well.
         % If not, that's an error, which is why there is no [] clause.
         case ets:lookup(couch_dbs_by_name, DbName) of
+        [] -> ok;
         [{_, Pid}] ->
             ?LOG_ERROR(
                 "Unexpected exit of database process ~p [~p]: ~p",
                 [Pid, DbName, Reason]
-            ),
+            )
         end,
 
         true = ets:delete(couch_dbs_by_pid, DbName),
