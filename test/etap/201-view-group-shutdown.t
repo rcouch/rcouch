@@ -53,7 +53,7 @@ main_db_name() -> <<"couch_test_view_group_shutdown">>.
 
 
 main(_) ->
-    etap:plan(17),
+    etap:plan(13),
     case (catch test()) of
         ok ->
             etap:end_tests();
@@ -66,7 +66,6 @@ main(_) ->
 
 test() ->
     test_util:start_couch(),
-    ok = couch_config:set("couchdb", "max_dbs_open", "3", false),
     ok = couch_config:set("couchdb", "delayed_commits", "false", false),
     crypto:start(),
 
@@ -110,10 +109,6 @@ test_view_group_compaction() ->
     % Assuming the view compaction takes more than 50ms to complete
     ok = timer:sleep(50),
     Writer3 = spawn_writer(DbWriter3#db.name),
-    etap:is(is_process_alive(Writer3), true, "Spawned writer 3"),
-
-    etap:is(get_writer_status(Writer3), {error, all_dbs_active},
-        "Writer 3 got {error, all_dbs_active} when opening his database"),
 
     etap:is(is_process_alive(Writer1), true, "Writer 1 still alive"),
     etap:is(is_process_alive(Writer2), true, "Writer 2 still alive"),
@@ -126,13 +121,6 @@ test_view_group_compaction() ->
     {'DOWN', MonRef, process, _, _Reason} ->
          etap:bail("Failure compacting view group")
     end,
-
-    ok = timer:sleep(2000),
-
-    etap:is(writer_try_again(Writer3), ok,
-        "Told writer 3 to try open his database again"),
-    etap:is(get_writer_status(Writer3), ok,
-        "Writer 3 was able to open his database"),
 
     etap:is(is_process_alive(Writer1), true, "Writer 1 still alive"),
     etap:is(is_process_alive(Writer2), true, "Writer 2 still alive"),
