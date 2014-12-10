@@ -61,7 +61,6 @@
                accum_tab, remote}).
 
 -import(etop,[loadinfo/1,meminfo/2]).
--import(etop_gui,[formatmfa/1,to_list/1]).
 
 -define(PROCFORM,"~-20w~-25s~8w~11w~11w~11w ~-40s~n").
 
@@ -132,3 +131,14 @@ writepinfo(Fd,[#etop_proc_info{pid=Pid,
     writepinfo(Fd,T);
 writepinfo(_Fd,[]) ->
     ok.
+
+
+formatmfa({M, F, A}) ->
+    io_lib:format("~w:~w/~w",[M, F, A]);
+formatmfa(Other) ->
+    %% E.g. when running hipe - the current_function for some
+    %% processes will be 'undefined'
+    io_lib:format("~w",[Other]).
+
+to_list(Name) when is_atom(Name) -> atom_to_list(Name);
+to_list({_M,_F,_A}=MFA) -> formatmfa(MFA).
