@@ -28,6 +28,8 @@
     start_json_response/2,send_chunk/2,last_chunk/1,end_json_response/1,
     start_chunked_response/3, send_error/4]).
 
+-define(DEFAULT_LIMIT, 16#10000000).
+
 % httpd global handlers
 
 handle_welcome_req(#httpd{method='GET'}=Req, WelcomeMessage) ->
@@ -81,11 +83,24 @@ handle_utils_dir_req(Req, _) ->
     send_method_not_allowed(Req, "GET,HEAD").
 
 handle_all_dbs_req(#httpd{method='GET'}=Req) ->
-    {ok, DbNames} = couch_server:all_databases(),
-    send_json(Req, DbNames);
+    Limit0 = couch_util:to_integer(couch_httpd:qs_value(Req, "limit",
+                                                        ?DEFAULT_LIMIT)),
+    Skip0 = couch_util:to_integer(couch_httpd:qs_value(Req, "skip", -1)),
+    {ok, {DbNames, _, _}} = couch_server:all_databases(fun all_dbs_fun/2,
+                                                       {[], Skip0, Limit0}),
+    send_json(Req, lists:usort(DbNames));
 handle_all_dbs_req(Req) ->
     send_method_not_allowed(Req, "GET,HEAD").
 
+
+all_dbs_fun(DbName, {Acc, Skip, 0}) ->
+    {stop, {Acc, Skip, 0}};
+all_dbs_fun(DbName, {Acc, 0, Limit}) ->
+    {ok, {[DbName | Acc], 0, Limit - 1}};
+all_dbs_fun(_DbName, {Acc, Skip, Limit}) when Skip > 0 ->
+    {ok, {Acc, Skip - 1, Limit}};
+all_dbs_fun (DbName, {Acc, Skip, Limit}) ->
+    {ok, {[DbName | Acc], Skip, Limit - 1}}.
 
 handle_task_status_req(#httpd{method='GET'}=Req) ->
     ok = couch_httpd:verify_is_server_admin(Req),
