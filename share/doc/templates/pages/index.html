@@ -15,44 +15,18 @@ specific language governing permissions and limitations under the License.
 
 {% extends "defindex.html" %}
 {% block tables %}
-<h2>Meet CouchDB</h2>
-<table class="contentstable" align="center">
-  <tr>
-    <td width="50%">
-      <p class="biglink">
-        <a class="biglink" href="{{ pathto("whatsnew/" + version) }}">
-          What's new in CouchDB {{ version }}?
-        </a>
-        <br />
-        <span class="linkdescr">
-          or browse <a href="{{ pathto("whatsnew/index") }}">all "What's new" documents</a>
-        </span>
-      </p>
-      <p class="biglink">
-        <a class="biglink" href="{{ pathto("intro/why") }}">
-          Why CouchDB?
-        </a>
-        <br />
-        <span class="linkdescr">why you might want to use CouchDB</span>
-      </p>
-    <td width="50%">
-      <p class="biglink">
-        <a class="biglink" href="{{ pathto("intro/overview") }}">
-          Technical Overview
-        </a>
-        <br />
-        <span class="linkdescr">a quick overview of technology used</span>
-      </p>
-      <p class="biglink">
-        <a class="biglink" href="{{ pathto("intro/consistency") }}">
-          Eventual Consistency
-        </a>
-        <br />
-        <span class="linkdescr">how CouchDB handles synchronization</span>
-      </p>
-    </td>
-  </tr>
-</table>
+
+<h2>Meet RCOUCH</h2>
+<p class="biglink">
+<a class="biglink" href="{{ pathto("whatsnew/" + version) }}">
+  What's new in RCOUCH {{ version }}?
+</a>
+<br />
+<span class="linkdescr">
+  or browse <a href="{{ pathto("whatsnew/index") }}">all "What's new" documents</a>
+</span>
+</p>
+
 
 <h2>Getting started</h2>
 <table class="contentstable" align="center">
@@ -165,11 +139,9 @@ specific language governing permissions and limitations under the License.
   <td width="50%">
     <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Documentation Contents</a></p>
     <p class="biglink"><a class="biglink" href="{{ pathto("http-api") }}">HTTP API Index</a></p>
-    <p class="biglink"><a class="biglink" href="{{ pathto("contributing") }}">Contributing to this Documentation</a></p>
   </td><td width="50%">
-    <p class="biglink"><a class="biglink" href="http://couchdb.org/">CouchDB Web site</a></p>
-    <p class="biglink"><a class="biglink" href="http://couchdb.org/#download">Download</a></p>
-    <p class="biglink"><a class="biglink" href="http://couchdb.org/#mailing-list">Mailing Lists</a></p>
+    <p class="biglink"><a class="biglink" href="http://rcouch.org/">Rcouch website</a></p>
+    <p class="biglink"><a class="biglink" href="http://rcouch.org/#download">Download</a></p>
   </td></tr>
 </table>
 {% endblock %}
