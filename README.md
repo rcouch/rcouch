@@ -14,16 +14,27 @@ embed couchdb in your own applications.
 
 RCouch is brought you by the [Refuge project](http://refuge.io).
 
-## Contribute
 
-For issues, comments or feedback please [create an issue](https://jira.refuge.io/browse/RCOUCH).
+## Usage
+
+Look at the [`rcouch`](http://docs.rcouch.org/en/latest/intro/api.html) module for the API usage.
+
+Full documentation is available here:
+https://docs.rcouch.org
+
+main RCOUCH website is http://rcouch.org
+
+
+
+
 
 ## Features:
 
 - Apache CouchDB based
-- Geocouch integrated
-- rebar
-- relocatable
+- View Changes & view based replication
+- Optimised for Mobile usage.
+- Geospatial queries
+- Easily customizable for your usage
 - Fully opensource. All the sources are on refuge GIT repository
   (http://github.com/refuge) under Apache License 2.
 
@@ -100,3 +111,30 @@ package named lxc or similar to obtain this command).
 On FreeBSD all ports can be made accessible to all users by issuing:
 
 $ sysctl net.inet.ip.portrange.reservedhigh=0
+
+
+## Ownership and License
+
+The contributors are listed in AUTHORS. This project uses the Apache License 2
+license, see LICENSE.
+
+rcouch uses the [C4.1 (Collective Code Construction
+Contract)](http://rfc.zeromq.org/spec:22) process for contributions.
+
+## Development
+
+Under C4.1 process, you are more than welcome to help us by:
+
+* join the discussion over anything from design to code style try out
+* and [submit issue reports](https://github.com/rcouch/rcouch/issues/new)
+* or feature requests pick a task in
+* [issues](https://github.com/rcouch/rcouch/issues) and get it done fork
+* the repository and have your own fixes send us pull requests and even
+* star this project ^_^
+
+To  run the test suite:
+
+```
+    $ make test
+```
+
