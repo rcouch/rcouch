@@ -19,7 +19,7 @@ RCOUCH_ |release| Documentation
     :numbered: 3
 
     intro/index
-    install/index
+    install
     config/index
     replication/index
     maintenance/index
