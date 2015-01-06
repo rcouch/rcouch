@@ -1,5 +1,9 @@
 # RCOUCH Changelog
 
+## 1.0.1 / 2015/01/06
+
+- make the possibility to set the run_dir via a template
+
 ## 1.0.0 / 2014/12/14
 
 This is the first stable and long term supported release of rcouch.

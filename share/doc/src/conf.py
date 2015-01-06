@@ -24,11 +24,11 @@ extensions = ["sphinx.ext.todo", "sphinx.ext.extlinks", 'github',
 nitpicky = True
 
 version = '1.0'
-release = '1.0.0'
+release = '1.0.1'
 
 # General information about the project.
 project = u'rcouch'
-copyright = u'2014, The refuge project'
+copyright = u'2014-2015, The refuge project'
 
 
 highlight_language = "json"
