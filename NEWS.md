@@ -1,6 +1,6 @@
 # RCOUCH Changelog
 
-## 1.0.1 / 2015/01/08
+## 1.0.2 / 2015/01/08
 
 - fix view changes timeout issue with large databases.
 
