@@ -1,5 +1,9 @@
 # RCOUCH Changelog
 
+## 1.0.1 / 2015/01/08
+
+- fix view changes timeout issue with large databases.
+
 ## 1.0.1 / 2015/01/06
 
 - make the possibility to set the run_dir via a template
