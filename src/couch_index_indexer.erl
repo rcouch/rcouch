@@ -21,6 +21,7 @@
                 dbname,
                 threshold,
                 refresh_interval,
+                refresh_pid=nil,
                 db_updates=0,
                 tref=nil,
                 notifier=nil,
@@ -115,9 +116,12 @@ handle_info(start_indexing, #state{index=Index,
     {ok, TRef} = timer:send_interval(R, self(), refresh_index),
 
     %% start to index immediately
-    refresh_index(DbName, Index),
-    {noreply, State#state{tref=TRef, notifier=NotifierPid}};
-
+    Pid = spawn_link(fun() ->
+                             refresh_index(DbName, Index)
+                     end),
+    {noreply, State#state{refresh_pid=Pid, tref=TRef, notifier=NotifierPid}};
+handle_info(refresh_index, #state{refresh_pid=Pid}=State) when is_pid(Pid) ->
+    {noreply, State};
 handle_info(refresh_index, #state{index=Index,
                                   dbname=DbName,
                                   db_updates=N}=State) ->
@@ -130,7 +134,11 @@ handle_info(refresh_index, #state{index=Index,
             ok
     end,
     {noreply, State#state{db_updates=0}};
-
+handle_info({'EXIT', Pid, normal}, #state{refresh_pid=Pid}=State) ->
+    {noreply, State#state{refresh_pid=nil}};
+handle_info({'EXIT', Pid, Reason}, #state{refresh_pid=Pid}=State) ->
+    couch_log:info("Unexpected exit while refreshing index: ~p~n", [Reason]),
+    {noreply, State#state{refresh_pid=nil}};
 handle_info({'DOWN', MRef, _, Pid, _}, #state{locks=Locks}=State) ->
     NLocks = case dict:find(Pid, Locks) of
         {ok, {MRef, _}} ->
@@ -153,7 +161,7 @@ handle_info({'EXIT', Pid, _Reason}, #state{notifier=Pid}=State) ->
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
-terminate(_Reason, #state{tref=TRef, notifier=Pid}) ->
+terminate(_Reason, #state{refresh_pid=RPid, tref=TRef, notifier=Pid}) ->
     if TRef /= nil ->
             timer:cancel(TRef);
         true -> ok
@@ -161,6 +169,11 @@ terminate(_Reason, #state{tref=TRef, notifier=Pid}) ->
 
     case is_pid(Pid) of
         true -> couch_util:shutdown_sync(Pid);
+        _ -> ok
+    end,
+
+    case is_pid(RPid) of
+        true -> couch_util:shutdown_sync(RPid);
         _ -> ok
     end,
     ok.
