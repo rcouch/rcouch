@@ -24,14 +24,7 @@ init([]) ->
             permanent,
             infinity,
             supervisor,
-            [couch_db_update_notifier_sup]},
-
-        {couch_plugin_event,
-            {gen_event, start_link, [{local, couch_plugin}]},
-            permanent,
-            brutal_kill,
-            worker,
-            dynamic}
+            [couch_db_update_notifier_sup]}
     ],
     Children = SecondarySupervisors ++ [
         begin
