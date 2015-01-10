@@ -585,7 +585,7 @@ log_request(#httpd{mochi_req=MochiReq,peer=Peer}=Req, Code) ->
         MochiReq:get(raw_path),
         Code
     ]),
-    gen_event:notify(couch_plugin, {log_request, Req, Code}).
+    ok.
 
 
 start_response_length(#httpd{mochi_req=MochiReq}=Req, Code, Headers, Length) ->
