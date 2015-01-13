@@ -1,9 +1,5 @@
 # RCOUCH Changelog
 
-## 1.0.3 / 2015/01/12
-
-- improve defaults settings to handle more concurrency
-
 ## 1.0.2 / 2015/01/08
 
 - fix view changes timeout issue with large databases.
