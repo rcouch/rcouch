@@ -68,7 +68,6 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
             {profile, embedded},
             {relocatable, true},
 
-            {incl_cond, exclude},
             {excl_sys_filters, ["^bin/.*",
                                 "^erts.*/bin/(dialyzer|typer)",
                                 "^erts.*/doc",
