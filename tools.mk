@@ -108,20 +108,20 @@ test: testbuild
 	@echo "==> test couch core"
 	@prove $(COUCHDB_ETAP_DIR)/*.t
 	@echo "==> test couch_mrview"
-	@prove $(BASE_DIR)/src/couch_mrview/test/*.t
+	@prove $(BASE_DIR)/deps/couch_mrview/test/*.t
 	@echo "==> test couch_replicator"
-	@prove $(BASE_DIR)/src/couch_replicator/test/*.t
+	@prove $(BASE_DIR)/deps/couch_replicator/test/*.t
 
 verbose-test: testbuild
 	@echo "==> test couch_collate"
-	@cd $(BASE_DIR)/src/couch_collate && \
-		prove -v $(BASE_DIR)/src/couch_collate/t/*.t
+	@cd $(BASE_DIR)/deps/couch_collate && \
+		prove -v $(BASE_DIR)/deps/couch_collate/t/*.t
 	@echo "==> test couch core"
 	@prove -v $(COUCHDB_ETAP_DIR)/*.t
 	@echo "==> test couch_mrview"
-	@prove -v $(BASE_DIR)/src/couch_mrview/test/*.t
+	@prove -v $(BASE_DIR)/deps/couch_mrview/test/*.t
 	@echo "==> test couch_replicator"
-	@prove -v $(BASE_DIR)/src/couch_replicator/test/*.t
+	@prove -v $(BASE_DIR)/deps/couch_replicator/test/*.t
 
 core-tests:
 	@echo "==> test couch core"
@@ -129,11 +129,11 @@ core-tests:
 
 view-tests: testbuild
 	@echo "==> test couch_mrview"
-	@prove -v $(BASE_DIR)/src/couch_mrview/test/*.t
+	@prove -v $(BASE_DIR)/deps/couch_mrview/test/*.t
 
 replicator-test: testbuild
 	@echo "==> test couch_replicator"
-	@prove -v $(BASE_DIR)/src/couch_replicator/test/*.t
+	@prove -v $(BASE_DIR)/deps/couch_replicator/test/*.t
 
 
 
@@ -152,7 +152,7 @@ testbuild: testclean
 	@mkdir -p $(BASE_DIR)/test/out/bin
 	@mkdir -p $(BASE_DIR)/test/out/share
 	@mkdir -p $(BASE_DIR)/test/out/log
-	@cp $(BASE_DIR)/src/couch/priv/couchjs $(BASE_DIR)/test/out/bin/
+	@cp $(BASE_DIR)/deps/couch/priv/couchjs $(BASE_DIR)/test/out/bin/
 	@cp -r $(BASE_DIR)/share/server $(BASE_DIR)/test/out/share
 	@cp -r $(BASE_DIR)/share/www $(BASE_DIR)/test/out/share
 	@cp $(BASE_DIR)/etc/rcouch/local.ini $(BASE_DIR)/test/out/
