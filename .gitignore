@@ -29,6 +29,12 @@ support/rebar/inttest/rt.work
 rt.work
 /rebar
 support/rebar/.test
+deps/
+
+# package
+distdir/
+package/
+package
 
 # couch_collate
 src/couch_collate/ebin

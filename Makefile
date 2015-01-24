@@ -1,10 +1,13 @@
+REPO            ?= rcouch
+PKG_REVISION    ?= $(shell git describe --tags)
+PKG_BUILD        = 1
 OVERLAY_VARS ?=
 PACKAGE_NAME=rcouch
 RELDIR=$(BASE_DIR)/rel/$(PACKAGE_NAME)
 BASE_DIR = $(shell pwd)
-REBAR_BIN := $(shell which rebar)
-ifeq ($(REBAR_BIN),)
-REBAR_BIN = $(BASE_DIR)/rebar
+REBAR := $(shell which rebar)
+ifeq ($(REBAR),)
+REBAR = $(BASE_DIR)/rebar
 endif
 
 .PHONY: rel deps rebar
@@ -12,9 +15,9 @@ endif
 include tools.mk
 
 
-rel:
+rel: compile
 	@echo "==> generate rcouch release"
-	@$(REBAR_BIN) generate $(OVERLAY_VARS)
+	@$(REBAR) generate $(OVERLAY_VARS)
 
 relclean: reldocclean
 	@rm -rf rel/rcouch

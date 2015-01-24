@@ -43,7 +43,7 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
 
 [
     {sys, [
-            {lib_dirs, ["../src"]},
+            {lib_dirs, ["../deps"]},
             {rel, "rcouch", Vsn,
                 [
                     kernel,
@@ -133,11 +133,16 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
         {copy, "../etc/rcouch/empty", "data/KEEP"},
 
         %% Copy base files for starting and interacting w/ node
-        {copy, "files/erl", "{{erts_vsn}}/bin/erl"},
-        {copy, "files/nodetool", "{{erts_vsn}}/bin/nodetool"},
-        {template, "files/runner", "bin/rcouch"},
-        {template, "files/env.sh", "lib/env.sh"},
-        {template, "files/app_epath.sh", "lib/app_epath.sh"},
+        {copy, "../deps/node_package/priv/base/erl",
+         "{{erts_vsn}}/bin/erl"},
+        {copy, "../deps/node_package/priv/base/nodetool",
+         "{{erts_vsn}}/bin/nodetool"},
+        {template, "../deps/node_package/priv/base/runner",
+         "bin/rcouch"},
+        {template, "../deps/node_package/priv/base/env.sh",
+         "lib/env.sh"},
+        {template, "../deps/node_package/priv/base/app_epath.sh",
+         "lib/app_epath.sh"},
 
         %% config files
         {template, "../etc/rcouch/app.config", "etc/app.config"},
@@ -151,14 +156,14 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
         {copy, "../share/server/main.js", "share/server"},
         {copy, "../share/server/main-coffee.js", "share/server"},
         {copy, "../share/www", "share"},
-        {copy, "../src/couch/priv/" ++ CouchJSName, "bin/" ++ CouchJSName},
+        {copy, "../deps/couch/priv/" ++ CouchJSName, "bin/" ++ CouchJSName},
 
         %% misc
         {mkdir, "lib/rcouch-patches"},
         {copy, "../support/couch_rel/ebin/etop_txt.beam", "lib/rcouch-patches"},
 
         %% geocouch
-        {copy, "../src/geocouch/share/www/script/test/*", "share/www/script/test/"}
+        {copy, "../deps/geocouch/share/www/script/test/*", "share/www/script/test/"}
 
     ]}
 ].
