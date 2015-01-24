@@ -136,3 +136,13 @@ To  run the test suite:
     $ make test
 ```
 
+## Packaging
+
+RCOUCH allows you to buid a package on your platform by running the following
+command line:
+
+```
+$ make package
+```
+
+Following packages systems are supported: RPM, DEB, Solaris, Freebsd, MacOSX
