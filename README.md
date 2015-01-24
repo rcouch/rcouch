@@ -51,7 +51,6 @@ main RCOUCH website is http://rcouch.org
 
 Installation is pretty simple. Just run the command line:
 
-    $ make 
     $ make rel
 
 and it will generate a couch folder in rel/couch. This release is
