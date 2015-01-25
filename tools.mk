@@ -8,9 +8,6 @@ ESCRIPT ?= $(shell which escript)
 OVERLAY_VARS    ?=
 
 REBAR := $(shell which rebar)
-ifeq ($(REBAR),)
-REBAR = $(BASE_DIR)/rebar
-endif
 
 $(if $(ERLC),,$(warning "Warning: No Erlang found in your path, this will probably not work"))
 
@@ -36,28 +33,13 @@ all: compile
 compile: deps
 	@$(REBAR) compile
 
-deps: rebarbuild
+deps:
 	@$(REBAR) get-deps
 
 clean: docclean
 	@$(REBAR) clean
 
 check: test testjs
-
-#
-# rebar
-#
-
-rebarbuild:
-	@(test ! -e $(BASE_DIR)/support/rebar/rebar && \
-		echo "==> build rebar" && \
-		cd $(BASE_DIR)/support/rebar && \
-		$(ESCRIPT) bootstrap || true)
-	@cp $(BASE_DIR)/support/rebar/rebar $(BASE_DIR)/rebar
-
-rebarclean:
-	@(cd $(BASE_DIR)/support/rebar && \
-		rm -rf rebar ebin/*.beam inttest/rt.work rt.work .test)
 
 #
 # DOCS
