@@ -5,15 +5,12 @@ OVERLAY_VARS ?=
 PACKAGE_NAME=rcouch
 RELDIR=$(BASE_DIR)/rel/$(PACKAGE_NAME)
 BASE_DIR = $(shell pwd)
-REBAR := $(shell which rebar)
-ifeq ($(REBAR),)
-REBAR = $(BASE_DIR)/rebar
-endif
+REBAR ?= $(shell which rebar)
 
 .PHONY: rel deps rebar
 
 include tools.mk
-
+export REBAR
 
 rel: compile
 	@echo "==> generate rcouch release"

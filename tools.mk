@@ -7,7 +7,7 @@ ERLC ?= $(shell which erlc)
 ESCRIPT ?= $(shell which escript)
 OVERLAY_VARS    ?=
 
-REBAR := $(shell which rebar)
+REBAR ?= $(shell which rebar)
 
 $(if $(ERLC),,$(warning "Warning: No Erlang found in your path, this will probably not work"))
 
