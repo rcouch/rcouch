@@ -41,6 +41,8 @@ clean: docclean
 
 check: test testjs
 
+distclean: pkgclean clean
+
 #
 # DOCS
 #
