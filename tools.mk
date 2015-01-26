@@ -28,7 +28,7 @@ export USE_STATIC_ICU
 
 .PHONY: rel deps rebar
 
-all: compile
+all: deps compile
 
 compile: deps
 	@$(REBAR) compile
