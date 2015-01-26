@@ -95,7 +95,7 @@ PortEnv = case os:getenv("COUCHDB_STATIC") of
             {"CFLAGS", "$CFLAGS -Wall -c -g -O2 " ++ CFLAGS1},
             {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1 ++ " -lstdc++"},
             {"linux.*", "LDFLAGS", "$LDFLAGS " ++ LDFLAGS1 ++
-                                   " -lstdc++ -lpthread -lm"},
+                                   " -ldl -lstdc++ -lpthread -lm"},
 
             %% Prevent the make->gmake transition from infecting
             %% MAKEFLAGS with bad flags that confuse gmake
