@@ -178,6 +178,8 @@
                    - :mimetype:`text/plain`
   :>header Content-Type: - :mimetype:`application/json`
                          - :mimetype:`text/plain; charset=utf-8`
+  :query number limit: limit the number of databases in the list
+  :query number skip: skip N elements from the list
   :code 200: Request completed successfully
 
   **Request**:
