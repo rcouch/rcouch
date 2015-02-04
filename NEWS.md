@@ -7,12 +7,12 @@
 - couch_httpd 1.1: paginate databases
 - couch 1.6.4:
   - fix couchjs build under centos 7
-  - remove couch_plugin_event handler which using too much CPU for nothing.
+  - remove couch_plugin_event handler which was using too much CPU for nothing.
 
 ### BREAKING CHANGES
 
-- rebar is now not included in the release 
-- By default view_index_dir and database_dir settings are now identical.
+- rebar is now not included in the release
+- By default view_index_dir and database_dir settings in couch.ini are now identical.
 
 ## 1.0.3 / 2015/01/12
 
