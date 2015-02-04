@@ -41,6 +41,8 @@ Installation is pretty simple. Just run the command line::
 and it will generate a couch folder in rel/couch. This release is
 fully relocatable, so you can put it where you want on your system.
 
+.. note:: make sure to install rebar_ first on your system
+
 To create package for your system run ``make package`` . For now we build
 packages for OSX, Debian, Redhat & Solaris.
 

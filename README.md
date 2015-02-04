@@ -44,7 +44,7 @@ main RCOUCH website is http://rcouch.org
 - Curl
 - zip (during build)
 - ICU (if not built statically)
-- Latest version of [rebar](http://github.com/basho/rebar) installed on
+- Latest version of [rebar](http://github.com/rebar/rebar) installed on
   your system.
 
 ## Installation
@@ -55,6 +55,9 @@ Installation is pretty simple. Just run the command line:
 
 and it will generate a couch folder in rel/couch. This release is
 fully relocatable, so you can put it where you want on your system.
+:w
+
+> *NOTE*: make sur to install [rebar](https://github.com/rebar/rebar) somewhere in your `PATH` first.
 
 
 To create package for your system run `make package` . For now we build

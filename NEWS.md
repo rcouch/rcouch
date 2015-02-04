@@ -1,5 +1,23 @@
 # RCOUCH Changelog
 
+
+## 1.1.0 / 2014/02/04
+
+- add `make package` target to build packages on your platform
+- couch_httpd 1.1: paginate databases
+- couch 1.6.4:
+  - fix couchjs build under centos 7
+  - remove couch_plugin_event handler which using too much CPU for nothing.
+
+### BREAKING CHANGES
+
+- rebar is now not included in the release 
+- By default view_index_dir and database_dir settings are now identical.
+
+## 1.0.3 / 2015/01/12
+
+- improve defaults settings to handle more concurrency
+
 ## 1.0.2 / 2015/01/08
 
 - fix view changes timeout issue with large databases.
