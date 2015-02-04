@@ -11,10 +11,10 @@
 .. the License.
 
 
-.. _release/1.0.x:
+.. _release/1.1.x:
 
 ============
-1.0.x Branch
+1.1.x Branch
 ============
 
 .. contents::
@@ -22,67 +22,35 @@
    :local:
 
 
-.. _release/1.0.x/upgrade:
+.. _release/1.1.x/upgrade:
 
 
-.. _release/1.0.0:
+.. _release/1.1.0:
 
-Version 1.0.0
+Version 1.1.0
 =============
 
-Initial stable version
+Release
+-------
 
-
-Couchdb compatibility
----------------------
-
-- Compatible with Apache COUCHDB 1.6.0
-
-
-HTTP Interface
---------------
-
-* ``_bulk_get`` API support.
-
-Views
------
-
-* Major improvements in view changes indexing
-* Possibility to include deleted docs
-* Handle deleted keys in changes
-
-Replicator
-----------
-
-* Support Replication using a view
-* Fix Replication freezes (improve pooling)
-
+- Add `make package` target to build RPM/DEBS/OX/Freebsd/Solaris packages on
+  their respectives platforms.
 
 Core
 ----
 
-- Get ride of max_dbs settings
-- Create databases synchronously
-- UTF8 collation is using a `ucol_nif`_
-- Add validate_doc_read property to design documents
-- JSON encoding using Jiffy
-- Major improvements in supervision tree
+- fix couchjs build under centos 7
+- remove couch_plugin event handler which causing too much CPU usage
 
+HTTP Interface
+--------------
 
-Logging
--------
+- Allow pagination in ``_all_dbs``
 
-- Usage of `Lager`_ for logging
+Breaking changes
+----------------
 
+- `rebar`_ is now not included in the release
+- By default view_index_dir and database_dir settings in couch.ini are now identical.
 
-Extensions
-----------
-
-* Support `random doc`_ fetching using the ``_random_doc`` handler
-* Support `Geocouch`_ 1.3, a spatial indexer
-
-
-.. _`ucol_nif`: https://github.com/refuge/ucol_nif
-.. _Lager: http://github.com/basho/lager
-.. _Geocouch: https://github.com/rcouch/geocouch
-.. _`random doc`: https://github.com/rcouch/couch_randomdoc
+.. _`rebar`: https://github.com/rebar/rebar
