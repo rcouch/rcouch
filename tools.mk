@@ -85,7 +85,7 @@ COUCHDB_ETAP_DIR=$(BASE_DIR)/test/etap
 export COUCHDB_ETAP_DIR
 
 
-ERL_FLAGS=-pa $(BASE_DIR)/deps/*/ebin -pa $(COUCHDB_ETAP_DIR)
+ERL_FLAGS=-pa $(BASE_DIR)/deps/*/ebin -pa $(BASE_DIR)/apps/*/ebin -pa $(COUCHDB_ETAP_DIR)
 export ERL_FLAGS
 
 test: testbuild

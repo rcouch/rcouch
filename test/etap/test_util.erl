@@ -30,6 +30,9 @@ srcdir() ->
 depsdir() ->
     filename:join([builddir(), "deps"]).
 
+appsdir() ->
+    filename:join([builddir(), "apps"]).
+
 testdir() ->
     filename:join([builddir(), "test", "out"]).
 
@@ -114,6 +117,10 @@ init_code_path() ->
     lists:foreach(fun(Name) ->
                 code:add_patha(filename:join([srcdir(), Name, "ebin"]))
         end, filelib:wildcard("*", srcdir())),
+
+     lists:foreach(fun(Name) ->
+                code:add_patha(filename:join([appsdir(), Name, "ebin"]))
+        end, filelib:wildcard("*", appsdir())),
 
     code:add_patha(filename:join([builddir(), "test", "etap"])),
 
