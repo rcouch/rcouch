@@ -1,0 +1,155 @@
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ft=erlang ts=4 sw=4 et
+
+%% Licensed under the Apache License, Version 2.0 (the "License"); you may not
+%% use this file except in compliance with the License. You may obtain a copy of
+%% the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing, software
+%% distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+%% WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+%% License for the specific language governing permissions and limitations under
+%% the License.
+
+
+Cfg = case file:consult("../../pkg.vars.config") of
+          {ok, Terms} ->
+              Terms;
+          _Err ->
+              []
+      end,
+
+%% get version infos
+MajorVersion = integer_to_list(proplists:get_value(version_major, Cfg, 0)),
+MinorVersion = integer_to_list(proplists:get_value(version_minor, Cfg, 0)),
+RevVersion = integer_to_list(proplists:get_value(version_revision, Cfg, 0)),
+
+%% build the version
+BaseVersion = MajorVersion ++ "." ++ MinorVersion ++ "." ++ RevVersion,
+
+Version = case os:getenv("RELEASE_TAG") of
+    false ->
+        BaseVersion;
+    "git" ->
+        {0, Ret} = eunit_lib:command("git describe --always"),
+        Tag = [C||C <- Ret, C =/= $\n],
+        BaseVersion ++ "+build." ++ Tag;
+    Tag ->
+        BaseVersion ++ Tag
+end,
+
+%% couchjs name
+CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
+
+%% build config.h
+ConfigH = [{package_name, proplists:get_value(vendor_name, Cfg, "")},
+           {package_string, proplists:get_value(vendor_name, Cfg, "")
+                            ++ " " ++ Version },
+           {package_bugreport, proplists:get_value(package_bugreport, Cfg, "")},
+           {package_version, Version},
+           {couchjs_name, CouchJSName}],
+
+%% write config.h
+ConfigHStr = lists:foldl(fun({K, V}, Acc) ->
+            K1 = string:to_upper(atom_to_list(K)),
+            case K1 of
+                "VERSION_" ++ _ -> Acc;
+                _ ->
+                    ["#define ", K1, " ", $", V, $", $\n | Acc]
+            end
+        end, [], ConfigH),
+ok = file:write_file("c_src/couch_js/config.h", iolist_to_binary(ConfigHStr)),
+
+GetFlag = fun(Name, Default) ->
+        case os:getenv(Name) of
+            false -> Default;
+            Val -> Val
+        end
+    end,
+
+
+
+PortEnv = case os:getenv("COUCHDB_STATIC") of
+    "1" ->
+        {ok, Cwd} = file:get_cwd(),
+        IncJs = filename:join([Cwd, ".libs", "js", "include"]),
+        IncNspr= filename:join([Cwd, ".libs", "nsprpub", "include"]),
+        StaticJs = filename:join([Cwd, ".libs", "js", "lib",
+                                 "libjs_static.a"]),
+        StaticNspr = filename:join([Cwd, ".libs", "nsprpub", "lib",
+                                    "libnspr4.a"]),
+
+
+        CFLAGS = GetFlag("JS_CFLAGS", "-I" ++ IncJs ++
+                                      " -I" ++ IncNspr ++ " -DXP_UNIX -Wall"),
+        LDFLAGS = GetFlag("JS_LIBS", StaticJs ++ " " ++ StaticNspr),
+
+        {CFLAGS1, LDFLAGS1} = case os:getenv("WITHOUT_CURL") of
+            "1" -> {"-DWITHOUT_CURL " ++ CFLAGS, LDFLAGS};
+            _ -> {CFLAGS, LDFLAGS ++ " -lcurl"}
+        end,
+
+        [
+            {"CFLAGS", "$CFLAGS -Wall -c -g -O2 " ++ CFLAGS1},
+            {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1 ++ " -lstdc++"},
+            {"linux.*", "LDFLAGS", "$LDFLAGS " ++ LDFLAGS1 ++
+                                   " -ldl -lstdc++ -lpthread -lm"},
+
+            %% Prevent the make->gmake transition from infecting
+            %% MAKEFLAGS with bad flags that confuse gmake
+            {"freebsd.*", "MAKEFLAGS", ""},
+            {"freebsd.*","LDFLAGS", "$LDFLAGS " ++ LDFLAGS1 ++
+                                     " -lstdc++ -lpthread"}
+        ];
+    _ ->
+        JSLIBS = GetFlag("JS_LIBS", "-lmozjs185"),
+
+        {CFLAGS, LDFLAGS}  = case os:type() of
+            {unix, darwin} ->
+                JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/local/include/js"),
+                {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS};
+            {unix, linux} ->
+                %% generally linux install in /usr/include
+                JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/include/js"),
+                {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS ++ " -lm"};
+            {unix, _} ->
+                %% most likely a bsd
+                JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/local/include/js"),
+                {"-DXP_UNIX " ++ JSCFLAGS, JSLIBS ++ " -lm"};
+            _ ->
+                JSCFLAGS = GetFlag("JS_CFLAGS", "-I/usr/include/js"),
+                {"-DXP_WIN " ++ JSCFLAGS, JSLIBS}
+        end,
+
+        {CFLAGS1, LDFLAGS1} = case os:getenv("WITHOUT_CURL") of
+            "1" -> {"-DWITHOUT_CURL " ++ CFLAGS, LDFLAGS};
+            _ -> {CFLAGS, LDFLAGS ++ " -lcurl"}
+        end,
+
+        [
+            {"CFLAGS",  "$CFLAGS -Wall -c -g -O2 " ++ CFLAGS1},
+            {"LDFLAGS", "$LDFLAGS " ++ LDFLAGS1}
+        ]
+end,
+
+PortSpecs0 = [{filename:join(["priv", CouchJSName]), ["c_src/couch_js/*.c"]}],
+
+PortSpecs = case os:type() of
+    {win32, _} ->
+        PortSpecs0 ++ [{filename:join(["priv", "couchspawnkillable"]),
+            ["c_src/spawnkillable/*.c"]}];
+    _ ->
+        {ok, _} = file:copy("priv/couchspawnkillable.sh",
+                            "priv/couchspawnkillable"),
+        os:cmd("chmod +x priv/couchspawnkillable"),
+        PortSpecs0
+    end,
+
+PortInfo = [{port_env, PortEnv},
+            {port_specs, PortSpecs},
+            {pre_hooks, [{compile, "./build_spidermonkey.sh"}]},
+            {post_hooks, [{clean, "./build_spidermonkey.sh clean"}]}],
+
+lists:keymerge(1,lists:keysort(1, PortInfo), lists:keysort(1, CONFIG)).
