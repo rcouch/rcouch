@@ -55,7 +55,7 @@ exec_loop(Port, Verbose, Acc) ->
     end.
 
 exec(Path, Verbose) ->
-    COUCHJS = filename:join([test_util:builddir(), "deps", "couch", "priv",
+    COUCHJS = filename:join([test_util:builddir(), "apps", "couch", "priv",
                              "couchjs"]),
     CouchUri = filename:join([test_util:testdir(), "data", "couch.uri"]),
     Cmd = string:join([COUCHJS, "-H", "-u", CouchUri,
