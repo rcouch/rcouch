@@ -37,28 +37,24 @@ package/
 package
 
 # couch_collate
-src/couch_collate/ebin
-src/couch_collate/priv
-src/couch_collate/c_src/*.o
-src/couch_collate/.libs
-src/couch_collate/.dists
-
-src/couch/ebin
-src/couch_replicator/ebin
-src/couch_mrview/ebin
-src/couch_index/ebin
-src/couch_dbupdates/ebin
-src/couch_plugins/ebin
-src/couch_rel/ebin/*.beam
+apps/couch/ebin
+apps/couch_replicator/ebin
+apps/couch_mrview/ebin
+apps/couch_index/ebin
+apps/couch_dbupdates/ebin
+support/couch_rel/ebin/*.beam
+apps/couch_randomdoc/ebin
+apps/geocouch/ebin
+apps/couch_httpd/ebin
 
 # couchjs
-src/couch/c_src/couch_js/*.o
-src/couch/c_src/couch_js/config.h
-src/couch/priv/couchjs
-src/couch/c_src/spawnkillable/*.o
-src/couch/priv/couchspawnkillable
-src/couch/.libs
-src/couch/.dists
+apps/couch/c_src/couch_js/*.o
+apps/c_src/couch_js/config.h
+apps/couch/priv/couchjs
+apps/couch/c_src/spawnkillable/*.o
+apps/couch/priv/couchspawnkillable
+apps/couch/.libs
+apps/couch/.dists
 
 share/server/main-coffee.js
 share/server/main.js

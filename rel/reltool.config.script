@@ -43,7 +43,7 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
 
 [
     {sys, [
-            {lib_dirs, ["../deps"]},
+            {lib_dirs, ["../apps", "../deps"]},
             {rel, "rcouch", Vsn,
                 [
                     kernel,
@@ -156,14 +156,14 @@ CouchJSName = proplists:get_value(couchjs_name, Cfg, "couchjs"),
         {copy, "../share/server/main.js", "share/server"},
         {copy, "../share/server/main-coffee.js", "share/server"},
         {copy, "../share/www", "share"},
-        {copy, "../deps/couch/priv/" ++ CouchJSName, "bin/" ++ CouchJSName},
+        {copy, "../apps/couch/priv/" ++ CouchJSName, "bin/" ++ CouchJSName},
 
         %% misc
         {mkdir, "lib/rcouch-patches"},
         {copy, "../support/couch_rel/ebin/etop_txt.beam", "lib/rcouch-patches"},
 
         %% geocouch
-        {copy, "../deps/geocouch/share/www/script/test/*", "share/www/script/test/"}
+        {copy, "../apps/geocouch/share/www/script/test/*", "share/www/script/test/"}
 
     ]}
 ].
