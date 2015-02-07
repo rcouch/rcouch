@@ -64,7 +64,7 @@ run(Hook, DbName, Args) ->
     end.
 
 run_fold(Hook, DbName, Acc, Args) ->
-    case lookup({Hook, DbName}, ?HOOKS) of
+    case lookup(Hook, DbName) of
         [{_, Hooks}] ->
             run1_fold(lists:sort(Hooks), Acc, Args);
         [] ->
@@ -112,31 +112,32 @@ code_change(_OldVsn, State, _Extra) ->
 lookup(Hook, global) ->
     ets:lookup(?HOOKS, {Hook, global});
 lookup(Hook, DbName) ->
-    ets:select(?HOOKS,[{{{'$1', '$2'}, '$3'},
-                        [{'==', '$1', Hook}, %% match hook
-                         {'orelse',  {'==', '$2', '*'}, %% match wildcards
-                          {'==', '$2', DbName}}], %% match dbname
-                        [{{{'$1', $2}, '$3'}}]}]).
+    lists:merge(ets:lookup(?HOOKS, {Hook, DbName}),
+                ets:lookup(?HOOKS, {Hook, '*'})).
+ %   ets:select(?HOOKS, [{{{'$1', '$2'}, '$3'},
+ %                        [{'==', '$1', Hook},
+ %                         {'orelse', {'==', '$2', '*'}, {'==', '$2', DbName}}],
+ %                        ['$_']}]).
 
 run1([], _Args) ->
     ok;
 run1([{_, Mod, Fun} | Rest], Args) ->
     case Mod of
-        undefined -> Fun(Args);
-        _ -> apply(Mod, Fun, Args)
+        undefined -> catch erlang:apply(Fun, Args);
+        _ -> catch erlang:apply(Mod, Fun, Args)
     end,
     run1(Rest, Args).
 
 
 run1_fold([], Acc, _Args) ->
-    lists:reverse(Acc);
+    Acc;
 run1_fold([{_Seq, Mod, Fun} | Rest], Acc, Args) ->
     Res = case Mod of
-        undefined -> Fun(Acc, Args);
-        _ -> erlang:apply(Mod, Fun, [Acc, Args])
+        undefined -> catch erlang:apply(Fun, [Acc | Args]);
+        _ -> catch erlang:apply(Mod, Fun, [Acc | Args])
     end,
     case Res of
-        stop -> {stopped, Acc};
+        stop -> Acc;
         ok -> run1_fold(Rest, Acc, Args);
         _ -> run1_fold(Rest, Res, Args)
     end.

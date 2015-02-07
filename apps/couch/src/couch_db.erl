@@ -883,14 +883,13 @@ prepare_doc_summaries(Db, BucketList) ->
         end,
         Bucket) || Bucket <- BucketList].
 
-
-before_docs_update(#db{before_doc_update = nil}, BucketList) ->
-    BucketList;
-before_docs_update(#db{before_doc_update = Fun} = Db, BucketList) ->
+before_docs_update(#db{name=DbName} = Db, BucketList) ->
     [lists:map(
         fun({Doc, Ref}) ->
-            NewDoc = Fun(couch_doc:with_ejson_body(Doc), Db),
-            {NewDoc, Ref}
+                NewDoc = couch_hooks:run_fold(before_doc_update, DbName,
+                                              couch_doc:with_ejson_body(Doc),
+                                              [Db]),
+                {NewDoc, Ref}
         end,
         Bucket) || Bucket <- BucketList].
 
@@ -1323,12 +1322,9 @@ make_doc(#db{updater_fd = Fd} = Db, Id, Deleted, Bp, RevisionPath) ->
     ok = validate_doc_read(Db, Doc1),
     Doc1.
 
-
-after_doc_read(#db{after_doc_read = nil}, Doc) ->
-    Doc;
-after_doc_read(#db{after_doc_read = Fun} = Db, Doc) ->
-    Fun(couch_doc:with_ejson_body(Doc), Db).
-
+after_doc_read(#db{name = DbName} = Db, Doc) ->
+    couch_hooks:run_fold(after_doc_read, DbName,
+                         couch_doc:with_ejson_body(Doc), [Db]).
 
 validate_doc_read(#db{validate_doc_read_funs=[]}, _Doc) ->
     ok;

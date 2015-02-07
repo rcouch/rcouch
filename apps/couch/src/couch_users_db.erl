@@ -31,14 +31,14 @@
 
 start(_) ->
     UserDb = couch_config:get("couch_httpd_auth",  "authentication_db",
-                              "users"),
+                              "_users"),
     couch_hooks:add(before_doc_update, UserDb, ?MODULE, before_doc_update, 0),
     couch_hooks:add(after_doc_read, UserDb, ?MODULE, after_doc_read,  0),
     ok.
 
 stop() ->
     UserDb = couch_config:get("couch_httpd_auth",  "authentication_db",
-                              "users"),
+                              "_users"),
     couch_hooks:del(before_doc_update, UserDb, ?MODULE, before_doc_update, 0),
     couch_hooks:del(after_doc_read, UserDb, ?MODULE, after_doc_read,  0),
     ok.
