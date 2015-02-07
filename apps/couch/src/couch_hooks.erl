@@ -72,14 +72,14 @@ run_fold(Hook, DbName, Acc, Args) ->
     end.
 
 start_link() ->
-    gen_server:start_link(?MODULE, [], []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init(_) ->
     ?HOOKS = ets:new(?HOOKS, [set, named_table, {read_concurrency, true}]),
     {ok, nil}.
 
 handle_call({add, Hook, DbName, Module, Function, Seq}, _From, State) ->
-    NewEls = case ets:lookup({Hook, DbName}, ?HOOKS) of
+    NewEls = case ets:lookup(?HOOKS, {Hook, DbName}) of
               [] ->
                   [{Seq, Module, Function}];
               [{_, Els}] ->
@@ -88,7 +88,7 @@ handle_call({add, Hook, DbName, Module, Function, Seq}, _From, State) ->
     ets:insert(?HOOKS, {{Hook, DbName}, NewEls}),
     {reply, ok, State};
 handle_call({del, Hook, DbName, Module, Function, Seq}, _From, State) ->
-    case ets:lookup({Hook, DbName}, ?HOOKS) of
+    case ets:lookup(?HOOKS, {Hook, DbName}) of
         [] -> ok;
         [{_, Els}] ->
             NewEls = lists:delete({Seq, Module, Function}, Els),
@@ -105,7 +105,6 @@ handle_info(_Msg, State) ->
 
 terminate(_Reason, _State) ->
     ok.
-
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.

@@ -48,7 +48,11 @@ init([]) ->
              permanent,
              infinity,
              supervisor,
-             [couch_index_sup]}
+             [couch_index_sup]},
+        {couch_mods,
+         {couch_mods, start_link, []},
+         permanent, brutal_kill, worker, [couch_mods]}
+
     ],
     {ok, {{one_for_one, 10, 3600}, Children}}.
 

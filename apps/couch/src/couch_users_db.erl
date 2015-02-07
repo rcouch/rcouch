@@ -11,6 +11,10 @@
 % the License.
 
 -module(couch_users_db).
+-behaviour(couch_mods).
+
+%% couch_mods funtion
+-export([start/1, stop/0]).
 
 -export([before_doc_update/2, after_doc_read/2, strip_non_public_fields/1]).
 
@@ -24,6 +28,20 @@
 -define(ITERATIONS, <<"iterations">>).
 -define(SALT, <<"salt">>).
 -define(replace(L, K, V), lists:keystore(K, 1, L, {K, V})).
+
+start(_) ->
+    UserDb = couch_config:get("couch_httpd_auth",  "authentication_db",
+                              "users"),
+    couch_hooks:add(before_doc_update, UserDb, ?MODULE, before_doc_update, 0),
+    couch_hooks:add(after_doc_read, UserDb, ?MODULE, after_doc_read,  0),
+    ok.
+
+stop() ->
+    UserDb = couch_config:get("couch_httpd_auth",  "authentication_db",
+                              "users"),
+    couch_hooks:del(before_doc_update, UserDb, ?MODULE, before_doc_update, 0),
+    couch_hooks:del(after_doc_read, UserDb, ?MODULE, after_doc_read,  0),
+    ok.
 
 % If the request's userCtx identifies an admin
 %   -> save_doc (see below)
