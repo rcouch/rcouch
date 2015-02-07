@@ -58,7 +58,7 @@ delete(Hook, DbName, Mod, Fun, Seq) ->
 run(Hook, DbName, Args) ->
     case lookup(Hook, DbName) of
         [{_, Hooks}] ->
-            run1(Hooks, Args);
+            run1(lists:sort(Hooks), Args);
         [] ->
             ok
     end.
@@ -66,7 +66,7 @@ run(Hook, DbName, Args) ->
 run_fold(Hook, DbName, Acc, Args) ->
     case lookup({Hook, DbName}, ?HOOKS) of
         [{_, Hooks}] ->
-            run1_fold(Hooks, Acc, Args);
+            run1_fold(lists:sort(Hooks), Acc, Args);
         [] ->
             Acc
     end.
