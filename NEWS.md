@@ -1,5 +1,10 @@
 # RCOUCH Changelog
 
+## 1.2.0 / 2014/02/07
+
+- refactor the source tree
+- preview of the new
+  [rcouch_hooks](https://github.com/rcouch/rcouch/wiki/rcouch-hooks) feature
 
 ## 1.1.0 / 2014/02/04
 

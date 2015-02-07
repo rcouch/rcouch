@@ -23,8 +23,8 @@ extensions = ["sphinx.ext.todo", "sphinx.ext.extlinks", 'github',
 
 nitpicky = True
 
-version = '1.1'
-release = '1.1.0'
+version = '1.2'
+release = '1.2.0'
 
 # General information about the project.
 project = u'rcouch'

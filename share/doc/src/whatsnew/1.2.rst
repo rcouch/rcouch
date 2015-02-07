@@ -11,14 +11,31 @@
 .. the License.
 
 
-.. _releases:
+.. _release/1.2.x:
 
-Release History
-===============
+============
+1.2.x Branch
+============
 
-.. toctree::
-   :glob:
+.. contents::
+   :depth: 1
+   :local:
 
-   1.2
-   1.1
-   1.0
+
+.. _release/1.2.x/upgrade:
+
+
+.. _release/1.2.0:
+
+Version 1.2.0
+=============
+
+Release
+-------
+
+- refactor the source tree.
+
+Core
+---
+
+- Preview of the new `rcouch hooks <https://github.com/rcouch/rcouch/wiki/rcouch-hooks>`_ mechanism
