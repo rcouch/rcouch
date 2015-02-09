@@ -15,6 +15,7 @@
 
 %% couch_mods funtion
 -export([start/1, stop/0]).
+-export([config_changes/2]).
 
 -export([before_doc_update/2, after_doc_read/2, strip_non_public_fields/1]).
 
@@ -30,17 +31,47 @@
 -define(replace(L, K, V), lists:keystore(K, 1, L, {K, V})).
 
 start(_) ->
-    UserDb = couch_config:get("couch_httpd_auth",  "authentication_db",
-                              "_users"),
+    UserDb = couch_config:get("couch_httpd_auth", "authentication_db", "_users"),
+    %% cache the user db to reuse it on stop during a config change.
+    application:set_env(couch, users_db, UserDb),
     couch_hooks:add(before_doc_update, UserDb, ?MODULE, before_doc_update, 0),
     couch_hooks:add(after_doc_read, UserDb, ?MODULE, after_doc_read,  0),
+    %% register for config changes
+    couch_config:register(fun ?MODULE:config_changes/2),
     ok.
 
 stop() ->
-    UserDb = couch_config:get("couch_httpd_auth",  "authentication_db",
-                              "_users"),
-    couch_hooks:del(before_doc_update, UserDb, ?MODULE, before_doc_update, 0),
-    couch_hooks:del(after_doc_read, UserDb, ?MODULE, after_doc_read,  0),
+    case application:get_env(couch, users_db) of
+        {ok, UserDb} ->
+            application:unset_env(couch, users_db),
+            couch_hooks:delete(before_doc_update, UserDb, ?MODULE,
+                               before_doc_update, 0),
+            couch_hooks:delete(after_doc_read, UserDb, ?MODULE,
+                               after_doc_read, 0);
+        _ ->
+            ok
+    end,
+    ok.
+
+restart() ->
+    case application:get_env(couch, users_db) of
+        {ok, OldUserDb} ->
+            couch_hooks:delete(before_doc_update, OldUserDb, ?MODULE,
+                               before_doc_update, 0),
+            couch_hooks:delete(after_doc_read, OldUserDb, ?MODULE,
+                               after_doc_read,  0);
+        _ ->
+            ok
+    end,
+    UserDb = couch_config:get("couch_httpd_auth", "authentication_db", "_users"),
+    application:set_env(couch, users_db, UserDb),
+    couch_hooks:add(before_doc_update, UserDb, ?MODULE, before_doc_update, 0),
+    couch_hooks:add(after_doc_read, UserDb, ?MODULE, after_doc_read,  0).
+
+
+config_changes("couch_httpd_auth", "authentication_db") ->
+    restart();
+config_changes(_,_) ->
     ok.
 
 % If the request's userCtx identifies an admin
@@ -56,6 +87,7 @@ stop() ->
 % Else
 %   -> save_doc
 before_doc_update(Doc, #db{user_ctx = UserCtx} = Db) ->
+    couch_log:info("we are here in user ibefore doc update yes. ~n", []),
     #user_ctx{name=Name} = UserCtx,
     DocName = get_doc_name(Doc),
     case (catch couch_db:check_is_admin(Db)) of
@@ -75,13 +107,17 @@ before_doc_update(Doc, #db{user_ctx = UserCtx} = Db) ->
 %    newDoc.salt = salt
 %    newDoc.password = null
 save_doc(#doc{body={Body}} = Doc) ->
+    couch_log:info("we are updating user before doc update yes. ~n", []),
+
     case couch_util:get_value(?PASSWORD, Body) of
     null -> % server admins don't have a user-db password entry
         Doc;
     undefined ->
         Doc;
     ClearPassword ->
-        Iterations = list_to_integer(couch_config:get("couch_httpd_auth", "iterations", "1000")),
+        Iterations = list_to_integer(
+                       couch_config:get("couch_httpd_auth", "iterations", "1000")
+        ),
         Salt = couch_uuids:random(),
         DerivedKey = couch_passwords:pbkdf2(ClearPassword, Salt, Iterations),
         Body0 = [{?PASSWORD_SCHEME, ?PBKDF2}, {?ITERATIONS, Iterations}|Body],
@@ -113,6 +149,7 @@ after_doc_read(#doc{id = <<?DESIGN_DOC_PREFIX, _/binary>>} = Doc, Db) ->
 after_doc_read(Doc, #db{user_ctx = UserCtx} = Db) ->
     #user_ctx{name=Name} = UserCtx,
     DocName = get_doc_name(Doc),
+    couch_log:info("we are here in user after_doc_read yes. ~n", []),
     case (catch couch_db:check_is_admin(Db)) of
     ok ->
         Doc;

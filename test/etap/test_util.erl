@@ -153,6 +153,8 @@ start_couch(IniFiles) ->
     %% start couch
     application:load(couch),
     application:set_env(couch, config_files, IniFiles),
+    application:set_env(couch, mods, [{couch_users_db, []},
+                                      {couch_replicator_db, []}]),
     couch_util:start_app_deps(couch),
     application:start(couch),
 

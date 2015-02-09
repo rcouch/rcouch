@@ -93,6 +93,7 @@ test(TestDir, Files, Verbose) ->
 
     io:format("==> run javascript tests.~n~n", []),
     {Failed, Success} = lists:foldl(fun(Name, {FAILs, OKs}) ->
+                timer:sleep(100),
                 Path = filename:join([TestDir, Name]),
                 Result = exec(Path, Verbose),
                 case Result of

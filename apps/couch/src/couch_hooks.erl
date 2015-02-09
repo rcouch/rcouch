@@ -78,20 +78,20 @@ init(_) ->
     ?HOOKS = ets:new(?HOOKS, [set, named_table, {read_concurrency, true}]),
     {ok, nil}.
 
-handle_call({add, Hook, DbName, Module, Function, Seq}, _From, State) ->
+handle_call({add, Hook, DbName, Mod, Fun, Seq}, _From, State) ->
     NewEls = case ets:lookup(?HOOKS, {Hook, DbName}) of
               [] ->
-                  [{Seq, Module, Function}];
+                  [{Seq, Mod, Fun}];
               [{_, Els}] ->
-                  lists:umerge([{Seq, Module, Function}], Els)
+                  lists:umerge([{Seq, Mod, Fun}], Els)
            end,
     ets:insert(?HOOKS, {{Hook, DbName}, NewEls}),
     {reply, ok, State};
-handle_call({del, Hook, DbName, Module, Function, Seq}, _From, State) ->
+handle_call({del, Hook, DbName, Mod, Fun, Seq}, _From, State) ->
     case ets:lookup(?HOOKS, {Hook, DbName}) of
         [] -> ok;
         [{_, Els}] ->
-            NewEls = lists:delete({Seq, Module, Function}, Els),
+            NewEls = lists:delete({Seq, Mod, Fun}, Els),
             ets:insert(?HOOKS, {{Hook, DbName}, NewEls}),
             ok
     end,
@@ -114,30 +114,25 @@ lookup(Hook, global) ->
 lookup(Hook, DbName) ->
     lists:merge(ets:lookup(?HOOKS, {Hook, DbName}),
                 ets:lookup(?HOOKS, {Hook, '*'})).
- %   ets:select(?HOOKS, [{{{'$1', '$2'}, '$3'},
- %                        [{'==', '$1', Hook},
- %                         {'orelse', {'==', '$2', '*'}, {'==', '$2', DbName}}],
- %                        ['$_']}]).
 
 run1([], _Args) ->
     ok;
 run1([{_, Mod, Fun} | Rest], Args) ->
     case Mod of
-        undefined -> catch erlang:apply(Fun, Args);
-        _ -> catch erlang:apply(Mod, Fun, Args)
+        undefined -> erlang:apply(Fun, Args);
+        _ -> erlang:apply(Mod, Fun, Args)
     end,
     run1(Rest, Args).
 
 
-run1_fold([], Acc, _Args) ->
-    Acc;
-run1_fold([{_Seq, Mod, Fun} | Rest], Acc, Args) ->
+run1_fold([], Val, _Args) ->
+    Val;
+run1_fold([{_Seq, Mod, Fun} | Rest], Val, Args) ->
     Res = case Mod of
-        undefined -> catch erlang:apply(Fun, [Acc | Args]);
-        _ -> catch erlang:apply(Mod, Fun, [Acc | Args])
+        undefined -> erlang:apply(Fun, [Val | Args]);
+        _ -> erlang:apply(Mod, Fun, [Val | Args])
     end,
     case Res of
-        stop -> Acc;
-        ok -> run1_fold(Rest, Acc, Args);
+        stop -> Val;
         _ -> run1_fold(Rest, Res, Args)
     end.

@@ -13,6 +13,7 @@
 -behavior(couch_mods).
 
 -export([before_doc_update/2, after_doc_read/2]).
+-export([config_changes/2]).
 
 %% couch_mods funtion
 -export([start/1, stop/0]).
@@ -23,15 +24,45 @@
 -define(replace(L, K, V), lists:keystore(K, 1, L, {K, V})).
 
 start(_) ->
-    ReplicatorDb = couch_config:get("replicator", "db", "_replicator"),
-    couch_hooks:add(before_doc_update, ReplicatorDb, ?MODULE, before_doc_update, 0),
-    couch_hooks:add(after_doc_read, ReplicatorDb, ?MODULE, after_doc_read,  0),
+    RepDb = couch_config:get("replicator", "db", "_replicator"),
+    %% cache the replicator db to reuse it on stop during a config change.
+    application:set_env(couch, replicator_db, RepDb),
+    couch_hooks:add(before_doc_update, RepDb, ?MODULE, before_doc_update, 0),
+    couch_hooks:add(after_doc_read, RepDb, ?MODULE, after_doc_read, 0),
+    couch_config:register(fun ?MODULE:config_changes/2),
     ok.
 
 stop() ->
-    UserDb = couch_config:get("replicator", "db", "_replicator"),
-    couch_hooks:del(before_doc_update, UserDb, ?MODULE, before_doc_update, 0),
-    couch_hooks:del(after_doc_read, UserDb, ?MODULE, after_doc_read,  0),
+    case application:get_env(couch, replicator_db) of
+        {ok, RepDb} ->
+            application:unset_env(couch, replicator_db),
+            couch_hooks:delete(before_doc_update, RepDb, ?MODULE,
+                               before_doc_update, 0),
+            couch_hooks:delete(after_doc_read, RepDb, ?MODULE,
+                               after_doc_read,  0);
+        _ ->
+            ok
+    end,
+    ok.
+
+restart() ->
+    case application:get_env(couch, replicator_db) of
+        {ok, OldRepDb} ->
+            couch_hooks:delete(before_doc_update, OldRepDb, ?MODULE,
+                               before_doc_update, 0),
+            couch_hooks:delete(after_doc_read, OldRepDb, ?MODULE,
+                               after_doc_read, 0);
+        _ ->
+            ok
+    end,
+    RepDb = couch_config:get("replicator",  "db", "_replicator"),
+    application:set_env(couch, replicator_db, RepDb),
+    couch_hooks:add(before_doc_update, RepDb, ?MODULE, before_doc_update, 0),
+    couch_hooks:add(after_doc_read, RepDb, ?MODULE, after_doc_read,  0).
+
+config_changes("replicator",  "db") ->
+    restart();
+config_changes(_, _) ->
     ok.
 
 before_doc_update(#doc{id = <<?DESIGN_DOC_PREFIX, _/binary>>} = Doc, _Db) ->
