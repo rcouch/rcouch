@@ -23,12 +23,44 @@
 -behaviour(gen_event).
 
 -export([start_link/1, notify/1]).
--export([init/1, terminate/2, handle_event/2, handle_call/2, handle_info/2, code_change/3,stop/1]).
+
+%% gen_server api
+-export([init/1, terminate/2, handle_event/2, handle_call/2, handle_info/2,
+         code_change/3,stop/1]).
+
+%% db changes hooks.
+-export([db_created/1, db_deleted/1, db_updated/1, db_compacted/1,
+         ddoc_updated/2]).
+
 
 -include("couch_db.hrl").
 
+%%%%%%%%%%%%%%%%%
+%%% db hookks %%%
+%%%%%%%%%%%%%%%%%
+
+db_created(DbName) ->
+    notify({created, DbName}).
+
+db_deleted(DbName) ->
+    notify({deleted, DbName}).
+
+db_updated(DbName) ->
+    notify({updated, DbName}).
+
+db_compacted(DbName) ->
+    notify({compacted, DbName}).
+
+ddoc_updated(DbName, DDocId) ->
+    notify({ddoc_updated, {DbName, DDocId}}).
+
+%%%%%%%%%%%%%%%%%%
+%%% gen_server %%%
+%%%%%%%%%%%%%%%%%%
+
 start_link(Exec) ->
-    couch_event_sup:start_link(couch_db_update, {couch_db_update_notifier, make_ref()}, Exec).
+    couch_event_sup:start_link(couch_db_update, {couch_db_update_notifier,
+                                                 make_ref()}, Exec).
 
 notify(Event) ->
     gen_event:notify(couch_db_update, Event).

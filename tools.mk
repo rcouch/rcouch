@@ -104,7 +104,7 @@ verbose-test: testbuild
 	@echo "==> test couch_replicator"
 	@prove -v $(BASE_DIR)/apps/couch_replicator/test/*.t
 
-core-tests:
+core-tests: testbuild
 	@echo "==> test couch core"
 	@prove -v $(COUCHDB_ETAP_DIR)/*.t
 

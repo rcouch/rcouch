@@ -163,12 +163,19 @@ init([]) ->
     ets:new(couch_dbs_by_name, [ordered_set, protected, named_table]),
     ets:new(couch_dbs_by_pid, [set, private, named_table]),
     ets:new(couch_sys_dbs, [set, private, named_table]),
+
+    %% ADD db hooks
+    ok = add_db_hooks(),
+
     process_flag(trap_exit, true),
     {ok, #server{root_dir=RootDir,
                 dbname_regexp=RegExp,
                 start_time=couch_util:rfc1123_date()}}.
 
 terminate(_Reason, _Srv) ->
+    %% remove db hooks
+    ok = remove_db_hooks(),
+    %% close opened databases
     lists:foreach(
         fun({_, Pid}) ->
                 couch_util:shutdown_sync(Pid)
@@ -212,7 +219,7 @@ do_open_db(DbName, Server, Options, {FromPid, _}) ->
             true = ets:insert(couch_dbs_by_pid, {DbPid, DbName}),
             case lists:member(create, Options) of
             true ->
-                couch_db_update_notifier:notify({created, DbName});
+                couch_hooks:run(db_created, DbName, [DbName]);
             false ->
                  ok
             end,
@@ -277,7 +284,7 @@ handle_call({delete, DbName, _Options}, _From, Server) ->
 
         case couch_file:delete(Server#server.root_dir, FullFilepath) of
         ok ->
-            couch_db_update_notifier:notify({deleted, DbName}),
+            couch_hooks:run(db_deleted, DbName, [DbName]),
             {reply, ok, Server2};
         {error, enoent} ->
             {reply, not_found, Server2};
@@ -314,3 +321,29 @@ handle_info({'EXIT', Pid, Reason}, Server) ->
     {noreply, Server2};
 handle_info(Info, Server) ->
     {stop, {unknown_message, Info}, Server}.
+
+
+
+add_db_hooks() ->
+    couch_hooks:add(db_created, '*', couch_db_update_notifier, db_created, 0),
+    couch_hooks:add(db_deleted, '*', couch_db_update_notifier, db_deleted, 0),
+    couch_hooks:add(db_updated, '*', couch_db_update_notifier, db_updated, 0),
+    couch_hooks:add(db_compacted, '*', couch_db_update_notifier,
+                    db_compacted, 0),
+    couch_hooks:add(ddoc_updated, '*', couch_db_update_notifier,
+                    ddoc_updated, 0),
+    ok.
+
+
+remove_db_hooks() ->
+    couch_hooks:delete(db_created, '*', couch_db_update_notifier,
+                       db_created, 0),
+    couch_hooks:delete(db_deleted, '*', couch_db_update_notifier,
+                       db_deleted, 0),
+    couch_hooks:delete(db_updated, '*', couch_db_update_notifier,
+                       db_updated, 0),
+    couch_hooks:delete(db_compacted, '*', couch_db_update_notifier,
+                       db_compacted, 0),
+    couch_hooks:delete(ddoc_updated, '*', couch_db_update_notifier,
+                       ddoc_updated, 0),
+    ok.
