@@ -32,6 +32,7 @@ all: deps compile
 
 compile: deps
 	@$(REBAR) compile
+	@$(REBAR) compile
 
 deps:
 	@$(REBAR) get-deps
