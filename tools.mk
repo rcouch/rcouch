@@ -44,41 +44,6 @@ check: test testjs
 distclean: pkgclean clean
 
 #
-# DOCS
-#
-
-DOC_SRCDIR=$(BASE_DIR)/share/doc/src
-DOC_BUILDDIR=$(BASE_DIR)/share/doc/build
-SPHINXOPTS = -n -c $(DOC_SRCDIR) \
-			 -A local=1 \
-			 $(DOC_SRCDIR)
-
-doc: html pdf texinfo
-
-html:
-	@mkdir -p $(DOC_BUILDDIR)
-	$(SUPPORT_DIR)/doc/sphinx-build \
-		-b html $(SPHINXOPTS) $(DOC_BUILDDIR)/html
-
-pdf:
-	@mkdir -p $(DOC_BUILDDIR)
-	$(SUPPORT_DIR)/doc/sphinx-build \
-		-b latex $(SPHINXOPTS) $(DOC_BUILDDIR)/latex
-	$(MAKE) -C $(DOC_BUILDDIR)/latex all-pdf
-
-texinfo:
-	@mkdir -p $(DOC_BUILDDIR)
-	$(SUPPORT_DIR)/doc/sphinx-build \
-		-b texinfo $(SPHINXOPTS) $(DOC_BUILDDIR)/texinfo
-	$(MAKE) -C $(DOC_BUILDDIR)/texinfo info
-
-docclean:
-	rm -rf $(DOC_BUILDDIR)/textinfo
-	rm -rf $(DOC_BUILDDIR)/latex
-	rm -rf $(DOC_BUILDDIR)/html
-	rm -rf $(DOC_BUILDDIR)/doctrees
-
-#
 # TESTS
 #
 COUCHDB_ETAP_DIR=$(BASE_DIR)/test/etap
