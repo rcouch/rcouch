@@ -1,0 +1,6 @@
+-name rcouch
+
+-setcookie rcouch_cookie
+
++K true
++A30
