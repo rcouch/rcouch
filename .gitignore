@@ -70,3 +70,6 @@ test/etap/*.o
 test/etap/temp.*
 
 share/doc/build
+
+_build
+_checkouts
