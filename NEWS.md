@@ -1,7 +1,13 @@
 # RCOUCH Changelog
 
+## 2.0.0-rc1 / 2015/06/13
 
-## 1.1.0 / 2014/02/04
+- build is now using [rebar3](http://rebar3.org) instead of rebar
+- new code to improve the view changes in `couch_mrview`
+- build is now using shared libraries on the system to make the release
+  smaller an deasier to maintain
+
+## 1.1.0 / 2015/02/04
 
 - add `make package` target to build packages on your platform
 - couch_httpd 1.1: paginate databases
