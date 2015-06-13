@@ -1,16 +1,26 @@
+BASEDIR = $(shell pwd)
+LIBDIR = $(BASEDIR)/_build/default/lib
+ERLC ?= $(shell which erlc)
+ESCRIPT ?= $(shell which escript)
+
 REBAR ?= ./rebar3
 
 
 all: compile
 
 compile:
-	@$(REBAR) compile	
+	@$(REBAR) compile
 
-rel: compile
-	@$(REBAR) release 
+devrel:
+	@$(REBAR) release
 
-clean: 
+rel: clean
+	@$(REBAR) as prod release
+
+clean:
 	@$(REBAR) clean
 
-dist: 
-	@$(REBAR) tar
+tar: rel
+	@$(REBAR) as prod tar
+
+.PHONY: tar
