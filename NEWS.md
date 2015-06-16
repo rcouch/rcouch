@@ -7,6 +7,10 @@
 - build is now using shared libraries on the system to make the release
   smaller an deasier to maintain
 
+** BREAKING CHANGES **
+
+- view indexes format has changed. All indexes will be rebuilt from 0.
+
 ## 1.1.0 / 2015/02/04
 
 - add `make package` target to build packages on your platform
