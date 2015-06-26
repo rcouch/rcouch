@@ -1,5 +1,17 @@
 # RCOUCH Changelog
 
+## 2.0.0-rc2 / 2015/06/26
+
+- use latest version of [hackney](http://github.com/benoit/hackney)
+- new couch_event module. replacing gen_event call and using gproc. Now
+  database events are handled in the process requiring it instead of requiring
+to launch a process them that proxy them. Also events can now be filtered
+before beeing sent. All modules are using it now.
+- new couch_hooks module hooking database and index events for now. Events
+  themselves are sent via registered hooks. 
+- view changes HTTP rendering have been revamped reusing the same code as the
+  database changes
+
 ## 2.0.0-rc1 / 2015/06/13
 
 - build is now using [rebar3](http://rebar3.org) instead of rebar
