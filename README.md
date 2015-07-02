@@ -1,4 +1,4 @@
-*** RCOUCH HAVE BEEN RENAMED IN [BARREL](https://barrel-db.org) ****
+# RCOUCH HAVE BEEN RENAMED IN [BARREL](https://barrel-db.org)
 
 New development will now happen here:
 https://github.com/benoitc/barrel
